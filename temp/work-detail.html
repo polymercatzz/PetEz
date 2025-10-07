@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@100..900&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body{
+            font-family: "Noto Sans Thai", sans-serif;
+        }
+    </style>
+</head>
+<body>
+    <div class="flex justify-between items-center bg-white h-20 px-10 py-4 shadow-[0_2px_4px_rgba(0,0,0,0.3)] z-50 transition-all duration-300">
+        <a href="work.html" class="flex justify-center items-center gap-4">
+            <i class="fa-solid fa-paw fa-3x"></i>
+            <h1 class="text-[2.2rem] font-bold">PetEz</h1>
+        </a>
+        <div class="flex justify-center items-center gap-5">
+            <a href="create-sitter.html" class="text-[1.2rem] underline-offset-4 hover:underline cursor-pointer">สร้างบริการ</a>
+            <a href="history-sitter.html" class="nav-link text-[1.2rem] underline-offset-4 hover:underline cursor-pointer flex items-center gap-2">
+               ประวัติการให้บริการ
+               <span class="flex items-center justify-center text-xs font-bold bg-red-500 text-white rounded-full w-5 h-5">1</span>
+            </a>
+            <label class="relative inline-block">
+                <input type="checkbox" class="hidden peer" />
+                <p class="w-full h-full flex items-center justify-center gap-2 text-gray-700 text-[1.4rem] font-semibold cursor-pointer">
+                    <img src="../staticuser.png" class="w-12 h-12 rounded-full cursor-pointer">
+                </p>
+                <nav class="absolute right-0 top-[60px] w-[200px] bg-white border border-none rounded-lg shadow-[0_4px_10px_rgba(0,0,0,0.25)] invisible opacity-0 transition-all duration-200 ease-in-out z-10 peer-checked:visible peer-checked:opacity-100">
+                    <ul class="list-none p-2 m-0">
+                        <li>
+                            <a href="profile-sitter.html" class="flex justify-start items-center gap-4 block w-full px-3 py-2 text-left text-[1rem] font-light rounded-md hover:bg-blue-200 hover:text-white cursor-pointer transition-colors duration-150">
+                                <i class="fa-solid fa-user"></i>
+                                โปรไฟล์
+                            </a>
+                        </li>
+                        <li>
+                            <a href="index.html" class="flex justify-start items-center gap-4 block w-full px-3 py-2 text-left text-[1rem] font-light rounded-md hover:bg-blue-200 hover:text-white cursor-pointer transition-colors duration-150">
+                                <i class="fa-solid fa-right-from-bracket"></i>
+                                Sign Out
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
+            </label>
+        </div>
+    </div>
+
+    <div class="flex flex-col justify-center items-start my-10 mx-auto px-10 py-7 w-[80%] border border-gray-200 rounded-xl shadow-sm">
+        <p class="px-3 py-1 bg-green-100 text-green-800 mb-3 rounded-xl">บริการดูแลสัตว์เลี้ยงตามบ้าน</p>
+        <div class="w-full flex justify-between">
+            <div class="w-full">
+                <p class="text-[1.8rem] font-bold">รับดูแลแมวตามคอนโดและบ้านพัก</p>
+                <h1 class="text-[1.2rem] text-gray-800">
+                    <span>Folkรักแมว</span>
+                    <span>(1 ซอย ฉลองกรุง 1 แขวงลาดกระบัง เขตลาดกระบัง กรุงเทพมหานคร 10520)</span>
+                </h1>
+            </div>
+            <div class="flex flex-col gap-3">
+                <div class="flex justify-start items-center gap-2 ml-5">
+                    <i class="fa-solid fa-phone fa-xl"></i>
+                    <p>Tel:087-716-0351</p>
+                </div>
+                <div class="flex justify-start items-center gap-2 ml-5">
+                    <img src="../static/line.png" class="w-6 h-6">
+                    <p>@0877160351</p>
+                </div>
+                <div class="flex justify-start items-center gap-2 ml-5">
+                    <i class="fa-solid fa-envelope fa-xl"></i>
+                    <p>ManSea@gmail.com</p>
+                </div>
+            </div>
+        </div>
+        <div class="w-full h-[1px] bg-gray-300 my-5"></div>
+        <div class="grid grid-cols-[70%_30%] gap-10 w-full mb-5">
+            <div class="flex flex-col justify-start items-start">
+                <p class="text-[1.2rem]">รายละเอียด</p>
+                <p>เรามีเนื้อเพลงหมดแล้วค่ะ และมีทำนองช่วงต้นเพลงให้ เราลองใช้ ai ช่วยแต่น้องเขาเจนมาให้แค่นิดเดียว เลยอยากช่วยให้ทำต่ออีกครึ่งเพลงให้หน่อยค่ะแล้วก็ช่วยดูเรื่องคอร์ดกับคีย์ให้ด้วยค่า</p>
+            </div>
+            <div class="grid grid-cols-2 gap-3">
+                <div class="flex flex-col">
+                    <p class="font-semibold">วันเริ่มงาน</p>
+                    <p>01/12/2025</p>
+                </div>
+                <div class="flex flex-col">
+                    <p class="font-semibold">เวลาเริ่มงาน</p>
+                    <p>10:00 น.</p>
+                </div>
+                <div class="flex flex-col">
+                    <p class="font-semibold">วันจบงาน</p>
+                    <p>04/12/2025</p>
+                </div>
+                <div class="flex flex-col">
+                    <p class="font-semibold">เวลาจบงาน</p>
+                    <p>10:00 น.</p>
+                </div>
+                <div class="flex flex-col">
+                    <p class="font-semibold">จำนวนวัน</p>
+                    <p>3 วัน</p>
+                </div>
+                <div class="flex flex-col">
+                    <p class="font-semibold">งบประมาณ</p>
+                    <p>4,500 บาท</p>
+                </div>
+            </div>
+        </div>
+        <div class="w-full h-[1px] bg-gray-300"></div>
+        <div class="mt-5 w-full">
+            <h1 class="text-[1.7rem] mb-5">รายละเอียดสัตว์เลี้ยง</h1>
+            <div class="flex flex-col p-5 border border-gray-300 rounded-xl shadow-sm">
+                <p class="text-[1.3rem] font-semibold mb-3">Max (หมา - โกลเด้น)</p>
+                <div class="grid grid-cols-5">
+                    <p class="flex flex-col">
+                        <span class="text-gray-600">อายุ</span>
+                        <span>5</span>
+                    </p>
+                    <p class="flex flex-col">
+                        <span class="text-gray-600">น้ำหนัก</span>
+                        <span>20</span>
+                    </p>
+                    <p class="flex flex-col">
+                        <span class="text-gray-600">ลักษณะนิสัย</span>
+                        <span>เฟรนลี่</span>
+                    </p>
+                    <p class="flex flex-col">
+                        <span class="text-gray-600">อาหารและยา</span>
+                        <span>ไม่มี</span>
+                    </p>
+                    <p class="flex flex-col">
+                        <span class="text-gray-600">สุขภาพ</span>
+                        <span>ปวกตามข้อเข่า ให้วิ่งมากไม่ได้ ห้ามกระโดดลงสระน้ำ พาเดินเล่นได้นิดหน่อย</span>
+                    </p>
+                </div>
+            </div>
+        </div>
+        <div class="flex justify-end items-end gap-5 w-full mt-5">
+            <a href="work.html"><button class="border border-vlue-600 bg-white px-10 py-2 text-blue-600 text-[1.2rem] rounded-xl cursor-pointer transition deration-200 ease-in-out hadow-[0_5px_15px_rgba(37,99,235,0.3)] hover:shadow-[0_8px_20px_rgba(37,99,235,0.4)]">ยกเลิก</button></a>
+            <button type="submit" class="bg-blue-600 px-10 py-2 text-white text-[1.2rem] rounded-xl shadow-sm cursor-pointer transition deration-200 ease-in-out hover:bg-blue-800">ยืนยัน</button>
+        </div>
+    </div>
+</body>
+</html>

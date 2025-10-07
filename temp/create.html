@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>สร้างงานใหม่ - PetEz</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@100..900&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body{
+            font-family: "Noto Sans Thai", sans-serif;
+        }
+        .pet-card{
+            background-color: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 12px 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            transition: all 0.2s ease;
+        }
+        .pet-card:hover{
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .remove-btn{
+            background-color: #ef4444;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 28px;
+            height: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.2s;
+        }
+        .remove-btn:hover{
+            background-color: #dc2626;
+        }
+        .selected-pets-container{
+            min-height: 60px;
+            padding: 12px;
+            border: 1px dashed #d1d5db;
+            border-radius: 12px;
+            background-color: #f9fafb;
+        }
+    </style>
+</head>
+<body>
+    <div class="flex justify-between items-center bg-white h-20 px-10 py-4 shadow-[0_2px_4px_rgba(0,0,0,0.3)] z-50 transition-all duration-300">
+        <a href="main.html" class="flex justify-center items-center gap-4">
+            <i class="fa-solid fa-paw fa-3x"></i>
+            <h1 class="text-[2.2rem] font-bold">PetEz</h1>
+        </a>
+        <div class="flex justify-center items-center gap-5">
+            <a href="regis.html"><button class="px-5 py-2 bg-blue-500 text-white text-[1.2rem] rounded-lg cursor-pointer hover:bg-blue-700">สมัครเป็นพี่เลี้ยงสัตว์</button></a>
+            <a href="create.html" class="text-[1.2rem] underline-offset-4 hover:underline cursor-pointer">สร้างคำขอ</a>
+            <a href="history.html" class="text-[1.2rem] underline-offset-4 hover:underline cursor-pointer">ประวัติการจอง</a>
+            <label class="relative inline-block">
+                <input type="checkbox" class="hidden peer" />
+                <p class="w-full h-full flex items-center justify-center gap-2 text-gray-700 text-[1.4rem] font-semibold cursor-pointer">
+                    <img src="../static/user.png" class="w-12 h-12 rounded-full cursor-pointer">
+                </p>
+                <nav class="absolute right-0 top-[60px] w-[200px] bg-white border border-none rounded-lg shadow-[0_4px_10px_rgba(0,0,0,0.25)] invisible opacity-0 transition-all duration-200 ease-in-out z-10 peer-checked:visible peer-checked:opacity-100">
+                    <ul class="list-none p-2 m-0">
+                        <li>
+                            <a href="profile.html" class="flex justify-start items-center gap-4 block w-full px-3 py-2 text-left text-[1rem] font-light rounded-md hover:bg-blue-200 hover:text-white cursor-pointer transition-colors duration-150">
+                                <i class="fa-solid fa-user"></i>
+                                โปรไฟล์
+                            </a>
+                        </li>
+                        <li>
+                            <a href="index.html" class="flex justify-start items-center gap-4 block w-full px-3 py-2 text-left text-[1rem] font-light rounded-md hover:bg-blue-200 hover:text-white cursor-pointer transition-colors duration-150">
+                                <i class="fa-solid fa-right-from-bracket"></i>
+                                Sign Out
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
+            </label>
+        </div>
+    </div>
+
+    <div class="flex flex-col justify-center items-start my-10 mx-auto px-10 py-10 w-[80%] border border-gray-200 rounded-xl shadow-sm">
+        <h1 class="text-[1.8rem] font-bold mb-5">สร้างงานใหม่</h1>
+        <div class="w-full mb-4">
+            <label for="" class="flex items-center gap-3 text-lg">ชื่องาน</label>
+            <input type="text" placeholder="ฉันกำลังหา" class="w-full border-2 border-[#e2e8f0] rounded-2xl text-[1rem] px-5 py-2 transition duration-300 ease-in-out focus:outline-none focus:border-[#3b5bdb] focus:shadow-[0_0_0_4px_rgba(59,91,219,0.1)]" />
+        </div>
+        <div class="w-full mb-4">
+            <label for="" class="flex items-center gap-3 text-lg">ชื่อพี่เลี้ยง (ถ้ามี)</label>
+            <input type="text" placeholder="ท่านสามารถกำหนดผู้รับงานได้ (ถ้ามี)" class="w-full border-2 border-[#e2e8f0] rounded-2xl text-[1rem] px-5 py-2 transition duration-300 ease-in-out focus:outline-none focus:border-[#3b5bdb] focus:shadow-[0_0_0_4px_rgba(59,91,219,0.1)]" />
+        </div>
+        <div class="mb-4 w-full">
+            <label class="block mb-1 text-gray-700 font-medium">รายละเอียดงาน</label>
+            <textarea placeholder="รายละเอียดของงาน" class="w-full border-2 border-[#e2e8f0] rounded-2xl text-[1rem] px-5 py-2 transition duration-300 ease-in-out focus:outline-none focus:border-[#3b5bdb] focus:shadow-[0_0_0_4px_rgba(59,91,219,0.1)]"></textarea>
+        </div>
+        <div class="mb-4 w-full">
+            <label class="block mb-1 text-gray-700 font-medium">ที่อยู่</label>
+            <textarea placeholder="สถานที่ที่ให้ไปบริการ" class="w-full border-2 border-[#e2e8f0] rounded-2xl text-[1rem] px-5 py-2 transition duration-300 ease-in-out focus:outline-none focus:border-[#3b5bdb] focus:shadow-[0_0_0_4px_rgba(59,91,219,0.1)]"></textarea>
+        </div>
+        <div class="w-full grid grid-cols-3 gap-5 mb-4">
+            <div class="w-full">
+                <label for="" class="flex items-center gap-3 text-lg">เขต/อำเภอ</label>
+                <input type="text" placeholder="กรุณาใส่เขต/อำเภอ" class="w-full border-2 border-[#e2e8f0] rounded-2xl text-[1rem] px-5 py-2 transition duration-300 ease-in-out focus:outline-none focus:border-[#3b5bdb] focus:shadow-[0_0_0_4px_rgba(59,91,219,0.1)]" />
+            </div>
+            <div class="w-full">
+                <label for="" class="flex items-center gap-3 text-lg">จังหวัด</label>
+                <input type="text" placeholder="กรุณาใส่จังหวัด" class="w-full border-2 border-[#e2e8f0] rounded-2xl text-[1rem] px-5 py-2 transition duration-300 ease-in-out focus:outline-none focus:border-[#3b5bdb] focus:shadow-[0_0_0_4px_rgba(59,91,219,0.1)]" />
+            </div>
+            <div class="w-full">
+                <label for="" class="flex items-center gap-3 text-lg">รหัสไปรษณีย์</label>
+                <input type="text" placeholder="กรุณาใส่รหัสไปรษณีย์" class="w-full border-2 border-[#e2e8f0] rounded-2xl text-[1rem] px-5 py-2 transition duration-300 ease-in-out focus:outline-none focus:border-[#3b5bdb] focus:shadow-[0_0_0_4px_rgba(59,91,219,0.1)]" />
+            </div>
+        </div>
+        <h1 class="text-[1.8rem] font-bold mb-5">ข้อมูลงาน</h1>
+        <div class="w-full grid grid-cols-3 gap-5 mb-4">
+            <div class="w-full">
+                <label for="" class="flex items-center gap-3 text-lg">ประเภทงาน</label>
+                <select name="" id="" class="w-full border-2 border-[#e2e8f0] rounded-2xl text-[1rem] px-5 py-2 transition duration-300 ease-in-out focus:outline-none focus:border-[#3b5bdb] focus:shadow-[0_0_0_4px_rgba(59,91,219,0.1)]">
+                    <option value="" disabled selected>เลือกประเภทงาน</option>
+                    <option value="">บริการดูแลสัตว์เลี้ยงตามบ้าน</option>
+                    <option value="">บริการดูแลสัตว์เลี้ยงข้ามคืน</option>
+                    <option value="">บริการฝากเลี้ยงระหว่างวัน</option>
+                    <option value="">บริการรับจ้างฝึกสอนสัตว์เลี้ยง</option>
+                    <option value="">บริการสัตวแพทย์นอกสถานที่</option>
+                    <option value="">บริการรับจ้างพาสุนัขเดินเล่น</option>
+                    <option value="">บริการอาบน้ำตัดขน</option>
+                    <option value="">อื่น ๆ</option>
+                </select>
+            </div>
+            <div class="w-full">
+                <label for="" class="flex items-center gap-3 text-lg">วันเริ่มงาน</label>
+                <input type="date" class="w-full border-2 border-[#e2e8f0] rounded-2xl text-[1rem] px-5 py-2 transition duration-300 ease-in-out focus:outline-none focus:border-[#3b5bdb] focus:shadow-[0_0_0_4px_rgba(59,91,219,0.1)]" />
+            </div>
+            <div class="w-full">
+                <label for="" class="flex items-center gap-3 text-lg">วันสิ้นสุด</label>
+                <input type="date" class="w-full border-2 border-[#e2e8f0] rounded-2xl text-[1rem] px-5 py-2 transition duration-300 ease-in-out focus:outline-none focus:border-[#3b5bdb] focus:shadow-[0_0_0_4px_rgba(59,91,219,0.1)]" />
+            </div>
+            <div class="w-full">
+                <label for="" class="flex items-center gap-3 text-lg">เวลาเริ่มงาน</label>
+                <input type="time" class="w-full border-2 border-[#e2e8f0] rounded-2xl text-[1rem] px-5 py-2 transition duration-300 ease-in-out focus:outline-none focus:border-[#3b5bdb] focus:shadow-[0_0_0_4px_rgba(59,91,219,0.1)]" />
+            </div>
+            <div class="w-full">
+                <label for="" class="flex items-center gap-3 text-lg">เวลาจบงาน</label>
+                <input type="time" class="w-full border-2 border-[#e2e8f0] rounded-2xl text-[1rem] px-5 py-2 transition duration-300 ease-in-out focus:outline-none focus:border-[#3b5bdb] focus:shadow-[0_0_0_4px_rgba(59,91,219,0.1)]" />
+            </div>
+            <div class="w-full">
+                <label for="" class="flex items-center gap-3 text-lg">งบประมาณ</label>
+                <input type="text" placeholder="หน่วยเป็นบาท" class="w-full border-2 border-[#e2e8f0] rounded-2xl text-[1rem] px-5 py-2 transition duration-300 ease-in-out focus:outline-none focus:border-[#3b5bdb] focus:shadow-[0_0_0_4px_rgba(59,91,219,0.1)]" />
+            </div>
+        </div>
+        <div class="mb-4 w-full">
+            <label class="flex items-center gap-3 text-lg">สัตว์เลี้ยงของคุณ</label>
+            <select id="petSelect" class="w-full border-2 border-[#e2e8f0] rounded-2xl text-[1rem] px-5 py-2 transition duration-300 ease-in-out focus:outline-none focus:border-[#3b5bdb] focus:shadow-[0_0_0_4px_rgba(59,91,219,0.1)]">
+                <option value="" disabled selected>เลือกสัตว์เลี้ยง</option>
+                <option value="Max">Max (หมา - โกลเด้น)</option>
+                <option value="Man">Man (หมา - แก่)</option>
+                <option value="Mean">Mean (หมา - ตำรวจ)</option>
+            </select>
+        </div>
+        <div class="w-full mb-4">
+            <label class="flex items-center gap-3 text-lg">สัตว์เลี้ยงที่เลือก</label>
+            <div id="selectedPets" class="selected-pets-container"></div>
+        </div>
+        <div class="flex justify-end items-end gap-5 w-full mt-5">
+            <a href="main.html"><button class="border border-vlue-600 bg-white px-10 py-2 text-blue-600 text-[1.2rem] rounded-xl cursor-pointer transition deration-200 ease-in-out hadow-[0_5px_15px_rgba(37,99,235,0.3)] hover:shadow-[0_8px_20px_rgba(37,99,235,0.4)]">ยกเลิก</button></a>
+            <button type="submit" class="bg-blue-600 px-10 py-2 text-white text-[1.2rem] rounded-xl shadow-sm cursor-pointer transition deration-200 ease-in-out hover:bg-blue-800">ยืนยัน</button>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const petSelect = document.getElementById('petSelect');
+            const selectedPetsContainer = document.getElementById('selectedPets');
+            let selectedPets = [];
+            function renderSelectedPets() {
+                selectedPetsContainer.innerHTML = '';
+                
+                if (selectedPets.length === 0) {
+                    selectedPetsContainer.innerHTML = '<p class="text-gray-500 text-center py-2">ยังไม่มีสัตว์เลี้ยงที่เลือก</p>';
+                    return;
+                }
+                
+                selectedPets.forEach((pet, index) => {
+                    const petCard = document.createElement('div');
+                    petCard.className = 'pet-card';
+                    
+                    petCard.innerHTML = `
+                        <div>
+                            <span class="font-medium">${pet.name}</span>
+                            <span class="text-gray-600 text-sm ml-2">${pet.type}</span>
+                        </div>
+                        <button class="remove-btn" data-index="${index}">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    `;
+                    
+                    selectedPetsContainer.appendChild(petCard);
+                });
+                
+                document.querySelectorAll('.remove-btn').forEach(button => {
+                    button.addEventListener('click', function() {
+                        const index = parseInt(this.getAttribute('data-index'));
+                        removePet(index);
+                    });
+                });
+            }
+
+            function addPet(petName) {
+                const option = Array.from(petSelect.options).find(opt => opt.value === petName);
+                if (option) {
+                    const text = option.textContent;
+                    const match = text.match(/(.+)\s+\((.+)\)/);
+                    
+                    if (match) {
+                        const name = match[1];
+                        const type = match[2];
+                        
+                        selectedPets.push({ name, type });
+                        renderSelectedPets();
+                        updatePetSelect();
+                    }
+                }
+            }
+
+            function removePet(index) {
+                selectedPets.splice(index, 1);
+                renderSelectedPets();
+                updatePetSelect();
+            }
+
+            function updatePetSelect() {
+                Array.from(petSelect.options).forEach((option, index) => {
+                    if (index > 0) {
+                        const petName = option.value;
+                        option.disabled = selectedPets.some(pet => pet.name === petName);
+                    }
+                });
+                
+                petSelect.value = "";
+            }
+            
+            petSelect.addEventListener('change', function() {
+                if (this.value) {
+                    addPet(this.value);
+                }
+            });
+            
+            renderSelectedPets();
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PetEz</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@100..900&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body{
+            font-family: "Noto Sans Thai", sans-serif;
+        }
+        .scroll-container {
+            overflow-x: auto;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+            cursor: grab;
+        }
+        .scroll-container::-webkit-scrollbar {
+            display: none;
+        }
+        
+        .scroll-container:active {
+            cursor: grabbing;
+        }
+    </style>
+</head>
+<body>
+    <div class="flex justify-between items-center bg-white h-20 px-10 py-4 shadow-[0_2px_4px_rgba(0,0,0,0.3)] z-50 transition-all duration-300">
+        <a href="work.html" class="flex justify-center items-center gap-4">
+            <i class="fa-solid fa-paw fa-3x"></i>
+            <h1 class="text-[2.2rem] font-bold">PetEz</h1>
+        </a>
+        <div class="flex justify-center items-center gap-5">
+            <a href="create-sitter.html" class="text-[1.2rem] underline-offset-4 hover:underline cursor-pointer">สร้างบริการ</a>
+            <a href="history-sitter.html" class="nav-link text-[1.2rem] underline-offset-4 hover:underline cursor-pointer flex items-center gap-2">
+               ประวัติการให้บริการ
+               <span class="flex items-center justify-center text-xs font-bold bg-red-500 text-white rounded-full w-5 h-5">1</span>
+            </a>
+            <label class="relative inline-block">
+                <input type="checkbox" class="hidden peer" />
+                <p class="w-full h-full flex items-center justify-center gap-2 text-gray-700 text-[1.4rem] font-semibold cursor-pointer">
+                    <img src="../static/user.png" class="w-12 h-12 rounded-full cursor-pointer">
+                </p>
+                <nav class="absolute right-0 top-[60px] w-[200px] bg-white border border-none rounded-lg shadow-[0_4px_10px_rgba(0,0,0,0.25)] invisible opacity-0 transition-all duration-200 ease-in-out z-10 peer-checked:visible peer-checked:opacity-100">
+                    <ul class="list-none p-2 m-0">
+                        <li>
+                            <a href="profile-sitter.html" class="flex justify-start items-center gap-4 block w-full px-3 py-2 text-left text-[1rem] font-light rounded-md hover:bg-blue-200 hover:text-white cursor-pointer transition-colors duration-150">
+                                <i class="fa-solid fa-user"></i>
+                                โปรไฟล์
+                            </a>
+                        </li>
+                        <li>
+                            <a href="index.html" class="flex justify-start items-center gap-4 block w-full px-3 py-2 text-left text-[1rem] font-light rounded-md hover:bg-blue-200 hover:text-white cursor-pointer transition-colors duration-150">
+                                <i class="fa-solid fa-right-from-bracket"></i>
+                                Sign Out
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
+            </label>
+        </div>
+    </div>
+
+    <div class="flex flex-col justify-center items-start my-10 mx-auto px-10 py-10 w-[80%] border border-gray-200 rounded-xl shadow-sm">
+        <div class="flex justify-center items-center gap-3 mb-5 text-red-500">
+            <i class="fa-solid fa-bell fa-2x"></i>
+            <p class="text-[1.8rem] font-bold">งานใหม่</p>
+        </div>
+        <div class="grid grid-cols-1 gap-5 w-full">
+            <div class="flex flex-col p-5 border border-gray-300 rounded-xl shadow-sm">
+                <div class="flex justify-between mb-3">
+                    <p class="text-[1.3rem] font-semibold">งาน #001</p>
+                    <p class="px-3 py-1 bg-yellow-100 text-yellow-800 rounded-full">รอดำเนินการ</p>
+                </div>
+                <div class="grid grid-cols-4">
+                    <p class="flex flex-col">
+                        <span class="text-gray-600">ลูกค้า</span>
+                        <span>Folkรักแมว</span>
+                    </p>
+                    <p class="flex flex-col">
+                        <span class="text-gray-600">บริการ</span>
+                        <span>บริการดูแลสัตว์เลี้ยงตามบ้าน</span>
+                    </p>
+                    <p class="flex flex-col">
+                        <span class="text-gray-600">วันที่</span>
+                        <span>01/12/2025 - 03/12/2025</span>
+                    </p>
+                    <p class="flex flex-col">
+                        <span class="text-gray-600">ราคา</span>
+                        <span>3,210 บาท</span>
+                    </p>
+                </div>
+                <div class="w-full flex justify-end items-end gap-5 mt-5">
+                    <button onclick="openpopup()" class="flex justify-center items-center px-7 py-2 bg-blue-600 text-white rounded-xl transition duration-200 ease-in-out cursor-pointer hover:bg-blue-800">
+                        <i class="fa-solid fa-eye mr-2"></i>
+                        ดูรายละเอียด
+                    </button>
+                    <button class="flex justify-center items-center px-7 py-2 bg-red-100 text-red-800 rounded-xl transition duration-200 ease-in-out cursor-pointer hover:bg-red-200">
+                        <i class="fa-solid fa-xmark mr-2"></i>
+                        ปฏิเสธ
+                    </button>
+                    <button class="flex justify-center items-center px-7 py-2 bg-green-100 text-green-800 rounded-xl transition duration-200 ease-in-out cursor-pointer hover:bg-green-200">
+                        <i class="fa-solid fa-check mr-2"></i>
+                        ยืนยันการจอง
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="flex flex-col justify-center items-start mb-10 mx-auto px-10 py-10 w-[80%] border border-gray-200 rounded-xl shadow-sm">
+        <div class="flex justify-center items-center gap-3 mb-5 text-blue-500">
+            <i class="fa-solid fa-clock-rotate-left fa-2x"></i>
+            <p class="text-[1.8rem] font-bold">ประวัติการทำงาน</p>
+        </div>
+        <div class="grid grid-cols-1 gap-5 w-full">
+            <div class="flex flex-col p-5 border border-gray-300 rounded-xl shadow-sm">
+                <div class="flex justify-between mb-3">
+                    <p class="text-[1.3rem] font-semibold">งาน #001</p>
+                    <p class="px-3 py-1 bg-green-100 text-green-800 rounded-full">สำเร็จ</p>
+                </div>
+                <div class="grid grid-cols-4">
+                    <p class="flex flex-col">
+                        <span class="text-gray-600">ลูกค้า</span>
+                        <span>Folkรักแมว</span>
+                    </p>
+                    <p class="flex flex-col">
+                        <span class="text-gray-600">บริการ</span>
+                        <span>บริการดูแลสัตว์เลี้ยงตามบ้าน</span>
+                    </p>
+                    <p class="flex flex-col">
+                        <span class="text-gray-600">วันที่</span>
+                        <span>01/12/2025 - 03/12/2025</span>
+                    </p>
+                    <p class="flex flex-col">
+                        <span class="text-gray-600">ราคา</span>
+                        <span>3,210 บาท</span>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="popup" class="hidden fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-100 bg-white py-5 rounded-xl flex flex-col justify-center items-start w-[50%] mx-auto shadow-[0_4px_12px_rgba(0,0,0,0.15)]">
+        <p class="px-3 py-1 bg-green-100 text-green-800 mb-3 rounded-xl mx-3">บริการดูแลสัตว์เลี้ยงตามบ้าน</p>
+        <div class="flex justify-between w-full px-5">
+            <div class="flex flex-col">
+                <h1 class="text-[1.7rem] font-bold">ดูแลสัตว์ที่บ้าน</h1>
+                <p class="text-[1rem] text-gray-600">รายละเอียดงาน</p>
+            </div>
+            <i class="fa-solid fa-xmark fa-2x" onclick="closepopup()"></i>
+        </div>
+        <div class="w-full h-[2px] bg-gray-300 mt-5 mb-2"></div>
+        <h1 class="text-[1.5rem] font-semibold px-5 py-3">รายละเอียดงาน</h1>
+        <div class="grid grid-cols-3 gap-3 w-full px-10">
+            <div>
+                <p class="text-gray-600">ที่อยู่</p>
+                <p class="text-[1.1rem]">1 ซอย ฉลองกรุง 1 แขวงลาดกระบัง เขตลาดกระบัง กรุงเทพมหานคร 10520</p>
+            </div>
+            <div>
+                <p class="text-gray-600">วันที่</p>
+                <p class="text-[1.1rem]">01/12/2025 - 04/12/2025</p>
+            </div>
+            <div>
+                <p class="text-gray-600">เวลา</p>
+                <p class="text-[1.1rem]">10:00 - 20:00</p>
+            </div>
+            <div>
+                <p class="text-gray-600">จำนวนวัน</p>
+                <p class="text-[1.1rem]">3 วัน</p>
+            </div>
+            <div>
+                <p class="text-gray-600">งบประมาณ</p>
+                <p class="text-[1.1rem]">4,500 บาท</p>
+            </div>
+        </div>
+        <h1 class="text-[1.5rem] font-semibold px-5 py-3">ข้อมูลสัตว์</h1>
+        <div class="grid grid-cols-3 gap-3 w-full px-10">
+            <div>
+                <p class="text-gray-600">ชื่อ (ชนิด - สายพันธุ์)</p>
+                <p class="text-[1.1rem]">Max (หมา - โกลเด้น)</p>
+            </div>
+            <div>
+                <p class="text-gray-600">อายุ</p>
+                <p class="text-[1.1rem]">5 ปี</p>
+            </div>
+            <div>
+                <p class="text-gray-600">น้ำหนัก</p>
+                <p class="text-[1.1rem]">20 กก.</p>
+            </div>
+            <div>
+                <p class="text-gray-600">ลักษณะนิสัย</p>
+                <p class="text-[1.1rem]">เฟรนลี่</p>
+            </div>
+            <div>
+                <p class="text-gray-600">อาหารและยา</p>
+                <p class="text-[1.1rem]">ไม่มี</p>
+            </div>
+            <div>
+                <p class="text-gray-600">สุขภาพ</p>
+                <p class="text-[1.1rem]">ปวดตามข้อเข่า ให้วิ่งมากไม่ได้ ห้ามกระโดดลงสระน้ำ พาเดินเล่นได้นิดหน่อย</p>
+            </div>
+        </div>
+        <div class="w-full h-[2px] bg-gray-300 my-5"></div>
+        <div class="w-full flex justify-end items-end gap-5 px-5">
+            <button onclick="closepopup()" class="px-7 py-2 bg-white text-blue-600 border border-blue-600 rounded-xl shadow-sm cursor-pointer transition duration-200 ease-in-out hover:bg-blue-50">ปฏิเสธ</button>
+            <button onclick="closepopup()" class="px-7 py-2 bg-blue-600 border border-blue-600 text-white rounded-xl shadow-sm cursor-pointer transition duration-200 ease-in-out hover:bg-blue-800">ยืนยัน</button>
+        </div>
+    </div>
+
+    <script>
+        function openpopup(){
+            document.getElementById("popup").classList.remove("hidden");
+        }
+        function closepopup(){
+            document.getElementById("popup").classList.add("hidden");
+        }
+    </script>
+</body>
+</html>
