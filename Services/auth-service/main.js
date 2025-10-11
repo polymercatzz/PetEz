@@ -1,0 +1,217 @@
+const express = require('express');
+const jwt = require('jsonwebtoken');
+const session = require('express-session');
+const { User, initDatabase } = require('./src/models/index');
+
+const app = express();
+const PORT = 3002;
+
+// Environment variables
+const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-this-in-production';
+const SESSION_SECRET = process.env.SESSION_SECRET || 'your-session-secret-change-this-in-production';
+
+// Session configuration
+app.use(session({
+    secret: SESSION_SECRET,
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+        secure: false, // Set to true if using HTTPS
+        maxAge: 24 * 60 * 60 * 1000 // 24 hours
+    }
+}));
+
+app.use(express.json());
+
+initDatabase();
+
+// JWT middleware
+const verifyToken = (req, res, next) => {
+    const token = req.headers['authorization']?.split(' ')[1];
+    if (!token) {
+        return res.status(401).json({ message: 'Access token is required' });
+    }
+    try {
+        const decoded = jwt.verify(token, JWT_SECRET);
+        req.user = decoded;
+        next();
+    } catch (error) {
+        return res.status(403).json({ message: 'Invalid or expired token' });
+    }
+};
+
+// Routes
+app.get('/health', (req, res) => {
+    res.status(200).send('OK');
+});
+
+app.post('/login', async (req, res) => {
+    const { email, password } = req.body;
+    if (!email || !password) {
+        return res.status(400).json({ message: 'Email and password are required' });
+    }
+    try {
+        const user = await User.findOne({ where: { email } });
+        if (!user) {
+            return res.status(401).json({ message: 'Invalid credentials' });
+        }
+        const isPasswordValid = await user.checkPassword(password);
+        if (!isPasswordValid) {
+            return res.status(401).json({ message: 'Invalid credentials' });
+        }
+        // Generate JWT token
+        const token = jwt.sign(
+            { 
+                id: user.user_id, 
+                email: user.email, 
+                username: user.username,
+                role: user.role 
+            },
+            JWT_SECRET,
+            { expiresIn: '24h' }
+        );
+        req.session.user = {
+            id: user.user_id,
+            email: user.email,
+            username: user.username,
+            full_name: user.full_name,
+            role: user.role,
+            loginTime: new Date()
+        };
+        return res.status(200).json({ 
+            message: 'Login successful',
+            token: token,
+            user: { 
+                id: user.user_id, 
+                email: user.email, 
+                username: user.username,
+                full_name: user.full_name,
+                role: user.role 
+            }
+        });
+    } catch (error) {
+        console.error('Error during login:', error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+});
+
+app.post('/register', async (req, res) => {
+    const { 
+        email, 
+        password, 
+        username, 
+        firstName, 
+        lastName, 
+        age, 
+        phone, 
+        address, 
+        district, 
+        province, 
+        postalCode 
+    } = req.body;
+    if (!email || !password || !username) {
+        return res.status(400).json({ message: 'Email, username and password are required' });
+    }
+    try {
+        // Check if user already exists
+        const existingUser = await User.findOne({ 
+            where: { 
+                [require('sequelize').Op.or]: [
+                    { email: email },
+                    { username: username }
+                ]
+            }
+        });
+        if (existingUser) {
+            return res.status(409).json({ message: 'User with this email or username already exists' });
+        }
+        const full_name = firstName && lastName ? `${firstName} ${lastName}` : (firstName || lastName || null);
+        const newUser = await User.create({
+            email,
+            username,
+            password,
+            full_name,
+            age: age ? parseInt(age) : null,
+            phone,
+            address,
+            district,
+            province,
+            postal_code: postalCode
+        });
+        return res.status(201).json({ 
+            message: 'User registered successfully',
+            user: {
+                id: newUser.user_id,
+                email: newUser.email,
+                username: newUser.username,
+                full_name: newUser.full_name,
+                age: newUser.age,
+                phone: newUser.phone,
+                role: newUser.role
+            }
+        });
+    } catch (error) {
+        console.error('Error during registration:', error);
+        if (error.name === 'SequelizeValidationError') {
+            return res.status(400).json({ 
+                message: 'Validation error', 
+                errors: error.errors.map(e => e.message) 
+            });
+        }
+        if (error.name === 'SequelizeUniqueConstraintError') {
+            return res.status(409).json({ message: 'Email or username already exists' });
+        }
+
+        res.status(500).json({ message: 'Internal server error' });
+    }
+});
+
+app.get('/session', (req, res) => {
+    if (req.session.user) {
+        return res.status(200).json({ 
+            message: 'Session active',
+            user: req.session.user
+        });
+    } else {
+        return res.status(401).json({ message: 'No active session' });
+    }
+});
+
+app.post('/logout', (req, res) => {
+    req.session.destroy((err) => {
+        if (err) {
+            return res.status(500).json({ message: 'Could not log out' });
+        }
+        res.clearCookie('connect.sid');
+        return res.status(200).json({ message: 'Logout successful' });
+    });
+});
+
+app.get('/verify', verifyToken, (req, res) => {
+    return res.status(200).json({ 
+        message: 'Token is valid',
+        user: req.user 
+    });
+});
+
+// Protected route example
+app.get('/profile', verifyToken, async (req, res) => {
+    try {
+        const user = await User.findByPk(req.user.id, {
+            attributes: ['user_id', 'username', 'email', 'role', 'createdAt']
+        });
+
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        return res.status(200).json({ user });
+    } catch (error) {
+        console.error('Error fetching profile:', error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+});
+
+app.listen(PORT, () => {
+    console.log(`Auth service is running on http://localhost:${PORT}`);
+});
