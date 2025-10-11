@@ -28,6 +28,18 @@ services:
     networks:
       - pet-ez-network
 
+  frontend:
+    build:
+      context: ./Frontend
+      dockerfile: Dockerfile
+    container_name: pet-ez-frontend
+    ports:
+      - "3001:3001"
+    depends_on:
+      - auth-service
+    networks:
+      - pet-ez-network
+
 volumes:
   mysql-auth-data:
 
