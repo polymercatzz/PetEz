@@ -30,7 +30,7 @@
 </head>
 <body class="bg-[#F9F9FB]">
     <div class="flex justify-between items-center bg-white h-20 px-10 py-4 shadow-[0_2px_4px_rgba(0,0,0,0.3)] z-50 transition-all duration-300">
-        <a href="main.html" class="flex justify-center items-center gap-4">
+        <a href="/user/" class="flex justify-center items-center gap-4">
             <i class="fa-solid fa-paw fa-3x"></i>
             <h1 class="text-[2.2rem] font-bold">PetEz</h1>
         </a>
@@ -46,13 +46,13 @@
                 <nav class="absolute right-0 top-[60px] w-[200px] bg-white border border-none rounded-lg shadow-[0_4px_10px_rgba(0,0,0,0.25)] invisible opacity-0 transition-all duration-200 ease-in-out z-10 peer-checked:visible peer-checked:opacity-100">
                     <ul class="list-none p-2 m-0">
                         <li>
-                            <a href="profile.html" class="flex justify-start items-center gap-4 block w-full px-3 py-2 text-left text-[1rem] font-light rounded-md hover:bg-blue-200 hover:text-white cursor-pointer transition-colors duration-150">
+                            <a href="/user/profile" class="flex justify-start items-center gap-4 block w-full px-3 py-2 text-left text-[1rem] font-light rounded-md hover:bg-blue-200 hover:text-white cursor-pointer transition-colors duration-150">
                                 <i class="fa-solid fa-user"></i>
                                 โปรไฟล์
                             </a>
                         </li>
                         <li>
-                            <a href="index.html" class="flex justify-start items-center gap-4 block w-full px-3 py-2 text-left text-[1rem] font-light rounded-md hover:bg-blue-200 hover:text-white cursor-pointer transition-colors duration-150">
+                            <a href="/logout" class="flex justify-start items-center gap-4 block w-full px-3 py-2 text-left text-[1rem] font-light rounded-md hover:bg-blue-200 hover:text-white cursor-pointer transition-colors duration-150">
                                 <i class="fa-solid fa-right-from-bracket"></i>
                                 Sign Out
                             </a>
@@ -64,54 +64,79 @@
     </div>
 
     <div class="grid grid-cols-2 gap-5 w-[80%] mx-auto mt-10 mb-5">
+        <form id="profileForm" class="flex flex-col justify-start items-start p-5 w-full border border-gray-200 rounded-xl transition duration-300 ease-in-out shadow-sm hover:border-[#3b5bdb] hover:shadow-[0_8px_20px_rgba(37,99,235,0.4)]">
         <div class="flex flex-col justify-start items-start p-5 w-full border border-gray-200 rounded-xl transition duration-300 ease-in-out shadow-sm hover:border-[#3b5bdb] hover:shadow-[0_8px_20px_rgba(37,99,235,0.4)]">
             <h1 class="flex justify-center items-center gap-3 text-[1.7rem] text-blue-800 font-bold py-2 mb-5">
                 <i class="fa-solid fa-user"></i>
                 <span>ข้อมูลส่วนตัว</span>
             </h1>
             <div class="w-full mb-4">
-                <label for="" class="flex items-center gap-3 text-lg">ชื่อ - นามสกุล</label>
-                <input type="text" class="w-full border-2 border-[#e2e8f0] rounded-2xl text-[1rem] px-5 py-2 transition duration-300 ease-in-out focus:outline-none focus:border-[#3b5bdb] focus:shadow-[0_0_0_4px_rgba(59,91,219,0.1)]" />
+                <label for="fullName" class="flex items-center gap-3 text-lg">ชื่อ - นามสกุล</label>
+                <input type="text" id="fullName" name="fullName" class="w-full border-2 border-[#e2e8f0] rounded-2xl text-[1rem] px-5 py-2 transition duration-300 ease-in-out focus:outline-none focus:border-[#3b5bdb] focus:shadow-[0_0_0_4px_rgba(59,91,219,0.1)]" value="<%= user.full_name || '' %>" />
             </div>
             <div class="w-full mb-4">
-                <label for="" class="flex items-center gap-3 text-lg">เบอร์โทร</label>
-                <input type="text" class="w-full border-2 border-[#e2e8f0] rounded-2xl text-[1rem] px-5 py-2 transition duration-300 ease-in-out focus:outline-none focus:border-[#3b5bdb] focus:shadow-[0_0_0_4px_rgba(59,91,219,0.1)]" />
+                <label for="username" class="flex items-center gap-3 text-lg">ชื่อผู้ใช้</label>
+                <input type="text" id="username" name="username" class="w-full border-2 border-[#e2e8f0] rounded-2xl text-[1rem] px-5 py-2 transition duration-300 ease-in-out focus:outline-none focus:border-[#3b5bdb] focus:shadow-[0_0_0_4px_rgba(59,91,219,0.1)]" value="<%= user.username || '' %>" />
             </div>
             <div class="w-full mb-4">
-                <label for="" class="flex items-center gap-3 text-lg">Email</label>
-                <input type="email" class="w-full border-2 border-[#e2e8f0] rounded-2xl text-[1rem] px-5 py-2 transition duration-300 ease-in-out focus:outline-none focus:border-[#3b5bdb] focus:shadow-[0_0_0_4px_rgba(59,91,219,0.1)]" />
+                <label for="age" class="flex items-center gap-3 text-lg">อายุ</label>
+                <input type="number" id="age" name="age" min="1" max="150" class="w-full border-2 border-[#e2e8f0] rounded-2xl text-[1rem] px-5 py-2 transition duration-300 ease-in-out focus:outline-none focus:border-[#3b5bdb] focus:shadow-[0_0_0_4px_rgba(59,91,219,0.1)]" value="<%= user.age || '' %>" />
             </div>
             <div class="w-full mb-4">
-                <label for="" class="flex items-center gap-3 text-lg">ที่อยู่</label>
-                <textarea class="w-full border-2 border-[#e2e8f0] rounded-2xl text-[1rem] px-5 py-2 transition duration-300 ease-in-out focus:outline-none focus:border-[#3b5bdb] focus:shadow-[0_0_0_4px_rgba(59,91,219,0.1)]"></textarea>
+                <label for="phone" class="flex items-center gap-3 text-lg">เบอร์โทร</label>
+                <input type="text" id="phone" name="phone" class="w-full border-2 border-[#e2e8f0] rounded-2xl text-[1rem] px-5 py-2 transition duration-300 ease-in-out focus:outline-none focus:border-[#3b5bdb] focus:shadow-[0_0_0_4px_rgba(59,91,219,0.1)]" value="<%= user.phone || '' %>" />
             </div>
-            <button class="text-[1.3rem] text-white rounded-xl px-10 py-2 shadow-sm bg-blue-600 transition duration-200 ease-in-out cursor-pointer hover:bg-blue-800">
+            <div class="w-full mb-4">
+                <label for="email" class="flex items-center gap-3 text-lg">Email</label>
+                <input type="email" id="email" name="email" readonly class="w-full border-2 border-gray-300 bg-gray-100 rounded-2xl text-[1rem] px-5 py-2 transition duration-300 ease-in-out focus:outline-none" value="<%= user.email || '' %>" />
+                <small class="text-gray-500 text-sm">อีเมลไม่สามารถแก้ไขได้</small>
+            </div>
+            <div class="w-full mb-4">
+                <label for="address" class="flex items-center gap-3 text-lg">ที่อยู่</label>
+                <textarea id="address" name="address" class="w-full border-2 border-[#e2e8f0] rounded-2xl text-[1rem] px-5 py-2 transition duration-300 ease-in-out focus:outline-none focus:border-[#3b5bdb] focus:shadow-[0_0_0_4px_rgba(59,91,219,0.1)]"><%= user.address || '' %></textarea>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 w-full mb-4">
+                <div>
+                    <label for="district" class="flex items-center gap-3 text-lg">เขต/อำเภอ</label>
+                    <input type="text" id="district" name="district" class="w-full border-2 border-[#e2e8f0] rounded-2xl text-[1rem] px-5 py-2 transition duration-300 ease-in-out focus:outline-none focus:border-[#3b5bdb] focus:shadow-[0_0_0_4px_rgba(59,91,219,0.1)]" value="<%= user.district || '' %>" />
+                </div>
+                <div>
+                    <label for="province" class="flex items-center gap-3 text-lg">จังหวัด</label>
+                    <input type="text" id="province" name="province" class="w-full border-2 border-[#e2e8f0] rounded-2xl text-[1rem] px-5 py-2 transition duration-300 ease-in-out focus:outline-none focus:border-[#3b5bdb] focus:shadow-[0_0_0_4px_rgba(59,91,219,0.1)]" value="<%= user.province || '' %>" />
+                </div>
+                <div>
+                    <label for="postalCode" class="flex items-center gap-3 text-lg">รหัสไปรษณีย์</label>
+                    <input type="text" id="postalCode" name="postalCode" class="w-full border-2 border-[#e2e8f0] rounded-2xl text-[1rem] px-5 py-2 transition duration-300 ease-in-out focus:outline-none focus:border-[#3b5bdb] focus:shadow-[0_0_0_4px_rgba(59,91,219,0.1)]" value="<%= user.postal_code || '' %>" />
+                </div>
+            </div>
+            <button type="submit" class="text-[1.3rem] text-white rounded-xl px-10 py-2 shadow-sm bg-blue-600 transition duration-200 ease-in-out cursor-pointer hover:bg-blue-800">
                 <i class="fa-solid fa-floppy-disk mr-2"></i>
                 บันทึกข้อมูล
             </button>
+        </form>
         </div>
-        <div class="flex flex-col justify-start items-start p-5 w-full border border-gray-200 rounded-xl transition duration-300 ease-in-out shadow-sm hover:border-[#3b5bdb] hover:shadow-[0_8px_20px_rgba(37,99,235,0.4)]">
+        <form id="passwordForm" class="flex flex-col justify-start items-start p-5 w-full border border-gray-200 rounded-xl transition duration-300 ease-in-out shadow-sm hover:border-[#3b5bdb] hover:shadow-[0_8px_20px_rgba(37,99,235,0.4)]">
             <h1 class="flex justify-center items-center gap-3 text-[1.7rem] text-blue-800 font-bold py-2 mb-5">
                 <i class="fa-solid fa-lock"></i>
                 <span>แก้ไขรหัสผ่าน</span>
             </h1>
             <div class="w-full mb-4">
-                <label for="" class="flex items-center gap-3 text-lg">รหัสผ่านปัจจุบัน</label>
-                <input type="password" class="w-full border-2 border-[#e2e8f0] rounded-2xl text-[1rem] px-5 py-2 transition duration-300 ease-in-out focus:outline-none focus:border-[#3b5bdb] focus:shadow-[0_0_0_4px_rgba(59,91,219,0.1)]" />
+                <label for="currentPassword" class="flex items-center gap-3 text-lg">รหัสผ่านปัจจุบัน</label>
+                <input type="password" id="currentPassword" name="currentPassword" required class="w-full border-2 border-[#e2e8f0] rounded-2xl text-[1rem] px-5 py-2 transition duration-300 ease-in-out focus:outline-none focus:border-[#3b5bdb] focus:shadow-[0_0_0_4px_rgba(59,91,219,0.1)]" />
             </div>
             <div class="w-full mb-4">
-                <label for="" class="flex items-center gap-3 text-lg">รหัสผ่านใหม่</label>
-                <input type="password" class="w-full border-2 border-[#e2e8f0] rounded-2xl text-[1rem] px-5 py-2 transition duration-300 ease-in-out focus:outline-none focus:border-[#3b5bdb] focus:shadow-[0_0_0_4px_rgba(59,91,219,0.1)]" />
+                <label for="newPassword" class="flex items-center gap-3 text-lg">รหัสผ่านใหม่</label>
+                <input type="password" id="newPassword" name="newPassword" required class="w-full border-2 border-[#e2e8f0] rounded-2xl text-[1rem] px-5 py-2 transition duration-300 ease-in-out focus:outline-none focus:border-[#3b5bdb] focus:shadow-[0_0_0_4px_rgba(59,91,219,0.1)]" />
             </div>
             <div class="w-full mb-4">
-                <label for="" class="flex items-center gap-3 text-lg">ยืนยันรหัสผ่านใหม่</label>
-                <input type="password" class="w-full border-2 border-[#e2e8f0] rounded-2xl text-[1rem] px-5 py-2 transition duration-300 ease-in-out focus:outline-none focus:border-[#3b5bdb] focus:shadow-[0_0_0_4px_rgba(59,91,219,0.1)]" />
+                <label for="confirmPassword" class="flex items-center gap-3 text-lg">ยืนยันรหัสผ่านใหม่</label>
+                <input type="password" id="confirmPassword" name="confirmPassword" required class="w-full border-2 border-[#e2e8f0] rounded-2xl text-[1rem] px-5 py-2 transition duration-300 ease-in-out focus:outline-none focus:border-[#3b5bdb] focus:shadow-[0_0_0_4px_rgba(59,91,219,0.1)]" />
             </div>
-            <button class="text-[1.3rem] text-white rounded-xl px-10 py-2 shadow-sm bg-blue-600 transition duration-200 ease-in-out cursor-pointer hover:bg-blue-800">
+            <button type="submit" class="text-[1.3rem] text-white rounded-xl px-10 py-2 shadow-sm bg-blue-600 transition duration-200 ease-in-out cursor-pointer hover:bg-blue-800">
                 <i class="fa-solid fa-key mr-2"></i>
                 เปลี่ยนรหัสผ่าน
             </button>
-        </div>
+        </form>
     </div>
     <div class="flex flex-col justify-start items-start p-5 mx-auto mb-10 w-[80%] border border-gray-200 rounded-xl transition duration-300 ease-in-out shadow-sm hover:border-[#3b5bdb] hover:shadow-[0_8px_20px_rgba(37,99,235,0.4)]">
         <div class="flex justify-between w-full h-[50px] mb-5">
@@ -124,104 +149,557 @@
                 เพิ่มสัตว์เลี้ยง
             </button>
         </div>
-        <div class="scroll-container flex gap-5 w-full">
-            <div class="bg-gray-100 border border-gray-200 rounded-xl shadow-lg p-5 w-[300px] flex-shrink-0">
-                <p class="flex flex-col mb-2">
-                    <span class="text-[1.3rem] font-semibold">Max</span>
-                    <span class="text-gray-500">หมา - โกลเด้น</span>
-                </p>
-                <div class="grid grid-cols-2 gap-5">
-                    <p class="flex flex-col gap-2">
-                        <span class="text-gray-500 text-[1rem]">อายุ</span>
-                        <span class="text-[1.2rem]">5 ปี</span>
-                    </p>
-                    <p class="flex flex-col gap-2">
-                        <span class="text-gray-500 text-[1rem]">น้ำหนัก</span>
-                        <span class="text-[1.2rem]">20 กก.</span>
-                    </p>
-                    <p class="flex flex-col gap-2">
-                        <span class="text-gray-500 text-[1rem]">นิสัย</span>
-                        <span class="text-[1.2rem]">เฟรนลี่</span>
-                    </p>
-                    <p class="flex flex-col gap-2">
-                        <span class="text-gray-500 text-[1rem]">โรคประจำตัว</span>
-                        <span class="text-[1.2rem]">ไม่มี</span>
-                    </p>
-                </div>
-            </div>
+        <div class="scroll-container flex gap-5 w-full" id="petsContainer">
+            <!-- Pets will be loaded here dynamically -->
         </div>
     </div>
 
     <div id="popup" class="hidden fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-100 bg-white py-5 rounded-xl flex flex-col justify-center items-start w-[50%] mx-auto shadow-[0_4px_12px_rgba(0,0,0,0.15)]">
         <div class="flex justify-between w-full px-5">
             <h1 class="text-[1.7rem] font-bold">เพิ่มสัตว์เลี้ยง</h1>
-            <i class="fa-solid fa-xmark fa-2x" onclick="closepopup()"></i>
+            <i class="fa-solid fa-xmark fa-2x cursor-pointer" onclick="closepopup()"></i>
         </div>
         <div class="w-full h-[2px] bg-gray-300 my-5"></div>
-        <div class="mb-4 px-10 w-full">
-            <label class="block mb-1 text-gray-700 font-medium">ชื่อสัตว์เลี้ยง</label>
-            <div class="flex items-center border border-gray-300 rounded-lg px-4 py-2 focus-within:ring-2 focus-within:ring-[#4e54c8]">
-                <i class="fa-solid fa-paw text-gray-400 mr-3"></i>
-                <input type="text" placeholder="กรุณากรอกชื่อสัตว์เลี้ยง" class="flex-1 outline-none text-gray-700" required>
-            </div>
-        </div>
-        <div class="grid grid-cols-2 gap-3 px-10 w-full">
-            <div class="mb-4">
-                <label class="block mb-1 text-gray-700 font-medium">ชนิดสัตว์</label>
+        <form id="addPetForm" class="w-full">
+            <div class="mb-4 px-10 w-full">
+                <label class="block mb-1 text-gray-700 font-medium">ชื่อสัตว์เลี้ยง</label>
                 <div class="flex items-center border border-gray-300 rounded-lg px-4 py-2 focus-within:ring-2 focus-within:ring-[#4e54c8]">
                     <i class="fa-solid fa-paw text-gray-400 mr-3"></i>
-                    <input type="text" placeholder="กรุณากรอกชนิดของสัตว์ เช่น หมา แมว" class="flex-1 outline-none text-gray-700" required>
+                    <input type="text" name="name" placeholder="กรุณากรอกชื่อสัตว์เลี้ยง" class="flex-1 outline-none text-gray-700" required>
                 </div>
             </div>
-            <div class="mb-4">
-                <label class="block mb-1 text-gray-700 font-medium">สายพันธุ์</label>
-                <div class="flex items-center border border-gray-300 rounded-lg px-4 py-2 focus-within:ring-2 focus-within:ring-[#4e54c8]">
-                    <i class="fa-solid fa-paw text-gray-400 mr-3"></i>
-                    <input type="text" placeholder="กรุณากรอกสายพันธุ์ของสัตว์" class="flex-1 outline-none text-gray-700" required>
+            <div class="grid grid-cols-2 gap-3 px-10 w-full">
+                <div class="mb-4">
+                    <label class="block mb-1 text-gray-700 font-medium">ชนิดสัตว์</label>
+                    <div class="flex items-center border border-gray-300 rounded-lg px-4 py-2 focus-within:ring-2 focus-within:ring-[#4e54c8]">
+                        <i class="fa-solid fa-paw text-gray-400 mr-3"></i>
+                        <input type="text" name="type" placeholder="กรุณากรอกชนิดของสัตว์ เช่น หมา แมว" class="flex-1 outline-none text-gray-700" required>
+                    </div>
+                </div>
+                <div class="mb-4">
+                    <label class="block mb-1 text-gray-700 font-medium">สายพันธุ์</label>
+                    <div class="flex items-center border border-gray-300 rounded-lg px-4 py-2 focus-within:ring-2 focus-within:ring-[#4e54c8]">
+                        <i class="fa-solid fa-paw text-gray-400 mr-3"></i>
+                        <input type="text" name="breed" placeholder="กรุณากรอกสายพันธุ์ของสัตว์" class="flex-1 outline-none text-gray-700">
+                    </div>
                 </div>
             </div>
-        </div>
-        <div class="grid grid-cols-2 gap-3 px-10 w-full">
-            <div class="mb-4">
-                <label class="block mb-1 text-gray-700 font-medium">อายุ</label>
-                <div class="flex items-center border border-gray-300 rounded-lg px-4 py-2 focus-within:ring-2 focus-within:ring-[#4e54c8]">
-                    <i class="fa-solid fa-paw text-gray-400 mr-3"></i>
-                    <input type="text" placeholder="กรุณากรอกอายุของสัตว์" class="flex-1 outline-none text-gray-700" required>
+            <div class="grid grid-cols-2 gap-3 px-10 w-full">
+                <div class="mb-4">
+                    <label class="block mb-1 text-gray-700 font-medium">อายุ</label>
+                    <div class="flex items-center border border-gray-300 rounded-lg px-4 py-2 focus-within:ring-2 focus-within:ring-[#4e54c8]">
+                        <i class="fa-solid fa-paw text-gray-400 mr-3"></i>
+                        <input type="text" name="age" placeholder="กรุณากรอกอายุของสัตว์" class="flex-1 outline-none text-gray-700">
+                    </div>
+                </div>
+                <div class="mb-4">
+                    <label class="block mb-1 text-gray-700 font-medium">น้ำหนัก</label>
+                    <div class="flex items-center border border-gray-300 rounded-lg px-4 py-2 focus-within:ring-2 focus-within:ring-[#4e54c8]">
+                        <i class="fa-solid fa-paw text-gray-400 mr-3"></i>
+                        <input type="text" name="weight" placeholder="กรุณากรอกน้ำหนักของสัตว์" class="flex-1 outline-none text-gray-700">
+                    </div>
                 </div>
             </div>
-            <div class="mb-4">
-                <label class="block mb-1 text-gray-700 font-medium">น้ำหนัก</label>
-                <div class="flex items-center border border-gray-300 rounded-lg px-4 py-2 focus-within:ring-2 focus-within:ring-[#4e54c8]">
-                    <i class="fa-solid fa-paw text-gray-400 mr-3"></i>
-                    <input type="text" placeholder="กรุณากรอกน้ำหนักของสัตว์" class="flex-1 outline-none text-gray-700" required>
-                </div>
+            <div class="mb-4 px-10 w-full">
+                <label class="block mb-1 text-gray-700 font-medium">ลักษณะนิสัย/พฤติกรรมพิเศษ</label>
+                <textarea name="behavior" placeholder="เช่น ขี้กลัว, ดุ, ชอบวิ่ง" class="w-full flex-1 outline-none border border-gray-300 rounded-md px-3 py-2 text-gray-700 text-base resize-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"></textarea>
             </div>
-        </div>
-        <div class="mb-4 px-10 w-full">
-            <label class="block mb-1 text-gray-700 font-medium">ลักษณะนิสัย/พฤติกรรมพิเศษ</label>
-            <textarea required placeholder="เช่น ขี้กลัว, ดุ, ชอบวิ่ง" class=" w-full flex-1 outline-none border border-gray-300 rounded-md px-3 py-2 text-gray-700 text-base resize-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"></textarea>
-        </div>
-        <div class="mb-4 px-10 w-full">
-            <label class="block mb-1 text-gray-700 font-medium">อาหารและยา</label>
-            <textarea placeholder="ช่วงเวลา, ปริมาณ, วิธีให้ (ถ้ามี)" class=" w-full flex-1 outline-none border border-gray-300 rounded-md px-3 py-2 text-gray-700 text-base resize-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"></textarea>
-        </div>
-        <div class="mb-4 px-10 w-full">
-            <label class="block mb-1 text-gray-700 font-medium">สุขภาพและประวัติการรักษา</label>
-            <textarea placeholder="โรคประจำตัว, การฉีดวัคซีนล่าสุด (ถ้ามี)" class=" w-full flex-1 outline-none border border-gray-300 rounded-md px-3 py-2 text-gray-700 text-base resize-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"></textarea>
-        </div>
+            <div class="mb-4 px-10 w-full">
+                <label class="block mb-1 text-gray-700 font-medium">อาหารและยา</label>
+                <textarea name="food_medicine" placeholder="ช่วงเวลา, ปริมาณ, วิธีให้ (ถ้ามี)" class="w-full flex-1 outline-none border border-gray-300 rounded-md px-3 py-2 text-gray-700 text-base resize-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"></textarea>
+            </div>
+            <div class="mb-4 px-10 w-full">
+                <label class="block mb-1 text-gray-700 font-medium">สุขภาพและประวัติการรักษา</label>
+                <textarea name="health_history" placeholder="โรคประจำตัว, การฉีดวัคซีนล่าสุด (ถ้ามี)" class="w-full flex-1 outline-none border border-gray-300 rounded-md px-3 py-2 text-gray-700 text-base resize-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"></textarea>
+            </div>
+        </form>
         <div class="w-full h-[2px] bg-gray-300 my-5"></div>
         <div class="w-full flex justify-end items-end gap-5 px-5">
             <button onclick="closepopup()" class="px-7 py-2 bg-white text-blue-600 border border-blue-600 rounded-xl shadow-sm cursor-pointer transition duration-200 ease-in-out hover:bg-blue-50">ปฏิเสธ</button>
-            <button onclick="closepopup()" class="px-7 py-2 bg-blue-600 border border-blue-600 text-white rounded-xl shadow-sm cursor-pointer transition duration-200 ease-in-out hover:bg-blue-800">ยืนยัน</button>
+            <button onclick="submitPetForm()" class="px-7 py-2 bg-blue-600 border border-blue-600 text-white rounded-xl shadow-sm cursor-pointer transition duration-200 ease-in-out hover:bg-blue-800">ยืนยัน</button>
         </div>
     </div>
+
+    <!-- Edit Pet Modal -->
+    <div id="editPopup" class="hidden fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-100 bg-white py-5 rounded-xl flex flex-col justify-center items-start w-[50%] mx-auto shadow-[0_4px_12px_rgba(0,0,0,0.15)]">
+        <div class="flex justify-between w-full px-5">
+            <h1 class="text-[1.7rem] font-bold">แก้ไขข้อมูลสัตว์เลี้ยง</h1>
+            <i class="fa-solid fa-xmark fa-2x cursor-pointer" onclick="closeEditPopup()"></i>
+        </div>
+        <div class="w-full h-[2px] bg-gray-300 my-5"></div>
+        <form id="editPetForm" class="w-full">
+            <input type="hidden" id="editPetId" name="petId">
+            <div class="mb-4 px-10 w-full">
+                <label class="block mb-1 text-gray-700 font-medium">ชื่อสัตว์เลี้ยง</label>
+                <div class="flex items-center border border-gray-300 rounded-lg px-4 py-2 focus-within:ring-2 focus-within:ring-[#4e54c8]">
+                    <i class="fa-solid fa-paw text-gray-400 mr-3"></i>
+                    <input type="text" id="editName" name="name" placeholder="กรุณากรอกชื่อสัตว์เลี้ยง" class="flex-1 outline-none text-gray-700" required>
+                </div>
+            </div>
+            <div class="grid grid-cols-2 gap-3 px-10 w-full">
+                <div class="mb-4">
+                    <label class="block mb-1 text-gray-700 font-medium">ชนิดสัตว์</label>
+                    <div class="flex items-center border border-gray-300 rounded-lg px-4 py-2 focus-within:ring-2 focus-within:ring-[#4e54c8]">
+                        <i class="fa-solid fa-paw text-gray-400 mr-3"></i>
+                        <input type="text" id="editType" name="type" placeholder="กรุณากรอกชนิดของสัตว์ เช่น หมา แมว" class="flex-1 outline-none text-gray-700" required>
+                    </div>
+                </div>
+                <div class="mb-4">
+                    <label class="block mb-1 text-gray-700 font-medium">สายพันธุ์</label>
+                    <div class="flex items-center border border-gray-300 rounded-lg px-4 py-2 focus-within:ring-2 focus-within:ring-[#4e54c8]">
+                        <i class="fa-solid fa-paw text-gray-400 mr-3"></i>
+                        <input type="text" id="editBreed" name="breed" placeholder="กรุณากรอกสายพันธุ์ของสัตว์" class="flex-1 outline-none text-gray-700">
+                    </div>
+                </div>
+            </div>
+            <div class="grid grid-cols-2 gap-3 px-10 w-full">
+                <div class="mb-4">
+                    <label class="block mb-1 text-gray-700 font-medium">อายุ</label>
+                    <div class="flex items-center border border-gray-300 rounded-lg px-4 py-2 focus-within:ring-2 focus-within:ring-[#4e54c8]">
+                        <i class="fa-solid fa-paw text-gray-400 mr-3"></i>
+                        <input type="text" id="editAge" name="age" placeholder="กรุณากรอกอายุของสัตว์" class="flex-1 outline-none text-gray-700">
+                    </div>
+                </div>
+                <div class="mb-4">
+                    <label class="block mb-1 text-gray-700 font-medium">น้ำหนัก</label>
+                    <div class="flex items-center border border-gray-300 rounded-lg px-4 py-2 focus-within:ring-2 focus-within:ring-[#4e54c8]">
+                        <i class="fa-solid fa-paw text-gray-400 mr-3"></i>
+                        <input type="text" id="editWeight" name="weight" placeholder="กรุณากรอกน้ำหนักของสัตว์" class="flex-1 outline-none text-gray-700">
+                    </div>
+                </div>
+            </div>
+            <div class="mb-4 px-10 w-full">
+                <label class="block mb-1 text-gray-700 font-medium">ลักษณะนิสัย/พฤติกรรมพิเศษ</label>
+                <textarea id="editBehavior" name="behavior" placeholder="เช่น ขี้กลัว, ดุ, ชอบวิ่ง" class="w-full flex-1 outline-none border border-gray-300 rounded-md px-3 py-2 text-gray-700 text-base resize-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"></textarea>
+            </div>
+            <div class="mb-4 px-10 w-full">
+                <label class="block mb-1 text-gray-700 font-medium">อาหารและยา</label>
+                <textarea id="editFoodMedicine" name="food_medicine" placeholder="ช่วงเวลา, ปริมาณ, วิธีให้ (ถ้ามี)" class="w-full flex-1 outline-none border border-gray-300 rounded-md px-3 py-2 text-gray-700 text-base resize-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"></textarea>
+            </div>
+            <div class="mb-4 px-10 w-full">
+                <label class="block mb-1 text-gray-700 font-medium">สุขภาพและประวัติการรักษา</label>
+                <textarea id="editHealthHistory" name="health_history" placeholder="โรคประจำตัว, การฉีดวัคซีนล่าสุด (ถ้ามี)" class="w-full flex-1 outline-none border border-gray-300 rounded-md px-3 py-2 text-gray-700 text-base resize-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"></textarea>
+            </div>
+        </form>
+        <div class="w-full h-[2px] bg-gray-300 my-5"></div>
+        <div class="w-full flex justify-end items-end gap-5 px-5">
+            <button onclick="closeEditPopup()" class="px-7 py-2 bg-white text-blue-600 border border-blue-600 rounded-xl shadow-sm cursor-pointer transition duration-200 ease-in-out hover:bg-blue-50">ยกเลิก</button>
+            <button onclick="submitEditPetForm()" class="px-7 py-2 bg-blue-600 border border-blue-600 text-white rounded-xl shadow-sm cursor-pointer transition duration-200 ease-in-out hover:bg-blue-800">บันทึกการแก้ไข</button>
+        </div>
+    </div>
+
+    <!-- Success/Error Messages -->
+    <div id="alertContainer" class="fixed top-4 right-4 z-50"></div>
 
     <script>
         function openpopup(){
             document.getElementById("popup").classList.remove("hidden");
         }
+        
         function closepopup(){
             document.getElementById("popup").classList.add("hidden");
+            document.getElementById("addPetForm").reset();
+        }
+
+        // Load pets when page loads
+        window.addEventListener('DOMContentLoaded', async () => {
+            await loadPets();
+        });
+
+        // Load pets from server
+        async function loadPets() {
+            try {
+                const response = await fetch('/user/pets');
+                if (response.ok) {
+                    const data = await response.json();
+                    displayPets(data.pets);
+                } else {
+                    console.error('Failed to load pets');
+                }
+            } catch (error) {
+                console.error('Error loading pets:', error);
+            }
+        }
+
+        // Display pets in the container
+        function displayPets(pets) {
+            const container = document.getElementById('petsContainer');
+            container.innerHTML = '';
+
+            if (pets.length === 0) {
+                container.innerHTML = '<p class="text-gray-500 text-center w-full">ยังไม่มีสัตว์เลี้ยง</p>';
+                return;
+            }
+
+            pets.forEach(pet => {
+                const petCard = document.createElement('div');
+                petCard.className = 'bg-gray-100 border border-gray-200 rounded-xl shadow-lg p-5 w-[300px] flex-shrink-0 relative';
+                petCard.innerHTML = `
+                    <div class="absolute top-3 right-3 flex gap-2">
+                        <button onclick="editPet(${pet.pet_id})" class="text-blue-500 hover:text-blue-700">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button onclick="deletePet(${pet.pet_id})" class="text-red-500 hover:text-red-700">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                    <p class="flex flex-col mb-2">
+                        <span class="text-[1.3rem] font-semibold">${pet.name}</span>
+                        <span class="text-gray-500">${pet.type}${pet.breed ? ' - ' + pet.breed : ''}</span>
+                    </p>
+                    <div class="grid grid-cols-2 gap-5">
+                        <p class="flex flex-col gap-2">
+                            <span class="text-gray-500 text-[1rem]">อายุ</span>
+                            <span class="text-[1.2rem]">${pet.age || '-'}</span>
+                        </p>
+                        <p class="flex flex-col gap-2">
+                            <span class="text-gray-500 text-[1rem]">น้ำหนัก</span>
+                            <span class="text-[1.2rem]">${pet.weight || '-'}</span>
+                        </p>
+                        <p class="flex flex-col gap-2">
+                            <span class="text-gray-500 text-[1rem]">นิสัย</span>
+                            <span class="text-[1.2rem]">${pet.behavior ? pet.behavior.substring(0, 20) + (pet.behavior.length > 20 ? '...' : '') : '-'}</span>
+                        </p>
+                        <p class="flex flex-col gap-2">
+                            <span class="text-gray-500 text-[1rem]">สุขภาพ</span>
+                            <span class="text-[1.2rem]">${pet.health_history ? pet.health_history.substring(0, 20) + (pet.health_history.length > 20 ? '...' : '') : '-'}</span>
+                        </p>
+                    </div>
+                `;
+                container.appendChild(petCard);
+            });
+        }
+
+        // Submit pet form
+        async function submitPetForm() {
+            const form = document.getElementById('addPetForm');
+            const formData = new FormData(form);
+            
+            const petData = {
+                name: formData.get('name'),
+                type: formData.get('type'),
+                breed: formData.get('breed'),
+                age: formData.get('age'),
+                weight: formData.get('weight'),
+                behavior: formData.get('behavior'),
+                food_medicine: formData.get('food_medicine'),
+                health_history: formData.get('health_history')
+            };
+
+            try {
+                const response = await fetch('/user/pets', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(petData)
+                });
+
+                if (response.ok) {
+                    showAlert('เพิ่มสัตว์เลี้ยงเรียบร้อยแล้ว!', 'success');
+                    closepopup();
+                    await loadPets(); // Reload pets
+                } else {
+                    const data = await response.json();
+                    showAlert(data.message || 'เกิดข้อผิดพลาดในการเพิ่มสัตว์เลี้ยง', 'error');
+                }
+            } catch (error) {
+                console.error('Error adding pet:', error);
+                showAlert('เกิดข้อผิดพลาดในการเพิ่มสัตว์เลี้ยง', 'error');
+            }
+        }
+
+        // Delete pet
+        async function deletePet(petId) {
+            if (!confirm('คุณแน่ใจหรือไม่ที่จะลบสัตว์เลี้ยงนี้?')) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`/user/pets/${petId}`, {
+                    method: 'DELETE'
+                });
+
+                if (response.ok) {
+                    showAlert('ลบสัตว์เลี้ยงเรียบร้อยแล้ว!', 'success');
+                    await loadPets(); // Reload pets
+                } else {
+                    const data = await response.json();
+                    showAlert(data.message || 'เกิดข้อผิดพลาดในการลบสัตว์เลี้ยง', 'error');
+                }
+            } catch (error) {
+                console.error('Error deleting pet:', error);
+                showAlert('เกิดข้อผิดพลาดในการลบสัตว์เลี้ยง', 'error');
+            }
+        }
+
+        // Edit pet functionality
+        async function editPet(petId) {
+            try {
+                // Fetch pet data
+                const response = await fetch('/user/pets');
+                if (response.ok) {
+                    const data = await response.json();
+                    const pet = data.pets.find(p => p.pet_id === petId);
+                    
+                    if (pet) {
+                        // Populate edit form
+                        document.getElementById('editPetId').value = pet.pet_id;
+                        document.getElementById('editName').value = pet.name || '';
+                        document.getElementById('editType').value = pet.type || '';
+                        document.getElementById('editBreed').value = pet.breed || '';
+                        document.getElementById('editAge').value = pet.age || '';
+                        document.getElementById('editWeight').value = pet.weight || '';
+                        document.getElementById('editBehavior').value = pet.behavior || '';
+                        document.getElementById('editFoodMedicine').value = pet.food_medicine || '';
+                        document.getElementById('editHealthHistory').value = pet.health_history || '';
+                        
+                        // Show edit modal
+                        document.getElementById('editPopup').classList.remove('hidden');
+                    } else {
+                        showAlert('ไม่พบข้อมูลสัตว์เลี้ยง', 'error');
+                    }
+                } else {
+                    showAlert('เกิดข้อผิดพลาดในการโหลดข้อมูลสัตว์เลี้ยง', 'error');
+                }
+            } catch (error) {
+                console.error('Error loading pet for edit:', error);
+                showAlert('เกิดข้อผิดพลาดในการโหลดข้อมูลสัตว์เลี้ยง', 'error');
+            }
+        }
+
+        // Close edit popup
+        function closeEditPopup() {
+            document.getElementById('editPopup').classList.add('hidden');
+            document.getElementById('editPetForm').reset();
+        }
+
+        // Submit edit pet form
+        async function submitEditPetForm() {
+            const form = document.getElementById('editPetForm');
+            const formData = new FormData(form);
+            
+            const petId = formData.get('petId');
+            const petData = {
+                name: formData.get('name'),
+                type: formData.get('type'),
+                breed: formData.get('breed'),
+                age: formData.get('age'),
+                weight: formData.get('weight'),
+                behavior: formData.get('behavior'),
+                food_medicine: formData.get('food_medicine'),
+                health_history: formData.get('health_history')
+            };
+
+            try {
+                const response = await fetch(`/user/pets/${petId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(petData)
+                });
+
+                if (response.ok) {
+                    showAlert('แก้ไขข้อมูลสัตว์เลี้ยงเรียบร้อยแล้ว!', 'success');
+                    closeEditPopup();
+                    await loadPets(); // Reload pets
+                } else {
+                    const data = await response.json();
+                    showAlert(data.message || 'เกิดข้อผิดพลาดในการแก้ไขข้อมูลสัตว์เลี้ยง', 'error');
+                }
+            } catch (error) {
+                console.error('Error updating pet:', error);
+                showAlert('เกิดข้อผิดพลาดในการแก้ไขข้อมูลสัตว์เลี้ยง', 'error');
+            }
+        }
+
+        // Handle profile update
+        document.getElementById('profileForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const formData = new FormData(e.target);
+            
+            // Split full name into first and last name
+            const fullName = formData.get('fullName');
+            const names = fullName ? fullName.split(' ') : ['', ''];
+            const firstName = names[0] || '';
+            const lastName = names.slice(1).join(' ') || '';
+            
+            const profileData = {
+                username: formData.get('username'),
+                firstName: firstName,
+                lastName: lastName,
+                age: formData.get('age'),
+                phone: formData.get('phone'),
+                address: formData.get('address'),
+                district: formData.get('district'),
+                province: formData.get('province'),
+                postalCode: formData.get('postalCode')
+            };
+            
+            console.log('Sending profile data:', profileData);
+            
+            try {
+                const response = await fetch('/user/profile/update', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(profileData)
+                });
+                
+                console.log('Response status:', response.status);
+                console.log('Response headers:', response.headers);
+                
+                // Check if response is JSON
+                const contentType = response.headers.get('content-type');
+                let data;
+                
+                if (contentType && contentType.includes('application/json')) {
+                    data = await response.json();
+                } else {
+                    // If not JSON, it might be an HTML error page
+                    const text = await response.text();
+                    console.error('Non-JSON response:', text);
+                    
+                    if (response.status === 401) {
+                        showAlert('กรุณาเข้าสู่ระบบใหม่', 'error');
+                        setTimeout(() => {
+                            window.location.href = '/login';
+                        }, 2000);
+                        return;
+                    } else {
+                        showAlert('เกิดข้อผิดพลาดในการเชื่อมต่อเซิร์ฟเวอร์', 'error');
+                        return;
+                    }
+                }
+                
+                if (response.ok) {
+                    showAlert('บันทึกข้อมูลเรียบร้อยแล้ว!', 'success');
+                    // Update the form with the latest data
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 1500);
+                } else {
+                    showAlert(data.message || 'เกิดข้อผิดพลาดในการบันทึกข้อมูล', 'error');
+                }
+            } catch (error) {
+                console.error('Error updating profile:', error);
+                showAlert('เกิดข้อผิดพลาดในการบันทึกข้อมูล', 'error');
+            }
+        });
+
+        // Handle password change
+        document.getElementById('passwordForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const formData = new FormData(e.target);
+            const currentPassword = formData.get('currentPassword');
+            const newPassword = formData.get('newPassword');
+            const confirmPassword = formData.get('confirmPassword');
+            
+            // Debug logging
+            console.log('Password values:');
+            console.log('currentPassword:', currentPassword);
+            console.log('newPassword:', newPassword);
+            console.log('confirmPassword:', confirmPassword);
+            console.log('newPassword === confirmPassword:', newPassword === confirmPassword);
+            console.log('newPassword length:', newPassword ? newPassword.length : 'null');
+            console.log('confirmPassword length:', confirmPassword ? confirmPassword.length : 'null');
+            
+            // Trim whitespace and compare
+            const trimmedNewPassword = newPassword ? newPassword.trim() : '';
+            const trimmedConfirmPassword = confirmPassword ? confirmPassword.trim() : '';
+            
+            if (trimmedNewPassword !== trimmedConfirmPassword) {
+                console.log('Password mismatch - trimmed values:');
+                console.log('trimmedNewPassword:', trimmedNewPassword);
+                console.log('trimmedConfirmPassword:', trimmedConfirmPassword);
+                showAlert('รหัสผ่านใหม่ไม่ตรงกัน', 'error');
+                return;
+            }
+            
+            if (trimmedNewPassword.length < 6) {
+                showAlert('รหัสผ่านใหม่ต้องมีอย่างน้อย 6 ตัวอักษร', 'error');
+                return;
+            }
+            
+            try {
+                const response = await fetch('/user/profile/change-password', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        currentPassword: currentPassword ? currentPassword.trim() : '',
+                        newPassword: trimmedNewPassword
+                    })
+                });
+                
+                // Check if response is JSON
+                const contentType = response.headers.get('content-type');
+                let data;
+                
+                if (contentType && contentType.includes('application/json')) {
+                    data = await response.json();
+                } else {
+                    // If not JSON, it might be an HTML error page
+                    const text = await response.text();
+                    console.error('Non-JSON response:', text);
+                    
+                    if (response.status === 401) {
+                        showAlert('กรุณาเข้าสู่ระบบใหม่', 'error');
+                        setTimeout(() => {
+                            window.location.href = '/login';
+                        }, 2000);
+                        return;
+                    } else {
+                        showAlert('เกิดข้อผิดพลาดในการเชื่อมต่อเซิร์ฟเวอร์', 'error');
+                        return;
+                    }
+                }
+                
+                if (response.ok) {
+                    showAlert('เปลี่ยนรหัสผ่านเรียบร้อยแล้ว!', 'success');
+                    document.getElementById('passwordForm').reset();
+                } else {
+                    showAlert(data.message || 'เกิดข้อผิดพลาดในการเปลี่ยนรหัสผ่าน', 'error');
+                }
+            } catch (error) {
+                console.error('Error changing password:', error);
+                showAlert('เกิดข้อผิดพลาดในการเปลี่ยนรหัสผ่าน', 'error');
+            }
+        });
+
+        // Show alert messages
+        function showAlert(message, type) {
+            const alertContainer = document.getElementById('alertContainer');
+            const alertDiv = document.createElement('div');
+            
+            let bgColor = 'bg-gray-500';
+            if (type === 'success') bgColor = 'bg-green-500';
+            else if (type === 'error') bgColor = 'bg-red-500';
+            else if (type === 'info') bgColor = 'bg-blue-500';
+            
+            alertDiv.className = `${bgColor} text-white px-6 py-3 rounded-lg shadow-lg mb-2`;
+            alertDiv.innerHTML = `
+                <div class="flex items-center justify-between">
+                    <span>${message}</span>
+                    <button onclick="this.parentElement.parentElement.remove()" class="ml-4 text-white hover:text-gray-200">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            `;
+            
+            alertContainer.appendChild(alertDiv);
+            
+            // Auto remove after 5 seconds
+            setTimeout(() => {
+                if (alertDiv.parentNode) {
+                    alertDiv.remove();
+                }
+            }, 5000);
         }
 
         document.addEventListener('DOMContentLoaded', function() {

@@ -1,7 +1,7 @@
 const express = require('express');
 const jwt = require('jsonwebtoken');
 const session = require('express-session');
-const { User, initDatabase } = require('./src/models/index');
+const { User, Pet, initDatabase } = require('./src/models/index');
 
 const app = express();
 const PORT = 3002;
@@ -75,6 +75,12 @@ app.post('/login', async (req, res) => {
             email: user.email,
             username: user.username,
             full_name: user.full_name,
+            age: user.age,
+            phone: user.phone,
+            address: user.address,
+            district: user.district,
+            province: user.province,
+            postal_code: user.postal_code,
             role: user.role,
             loginTime: new Date()
         };
@@ -86,6 +92,12 @@ app.post('/login', async (req, res) => {
                 email: user.email, 
                 username: user.username,
                 full_name: user.full_name,
+                age: user.age,
+                phone: user.phone,
+                address: user.address,
+                district: user.district,
+                province: user.province,
+                postal_code: user.postal_code,
                 role: user.role 
             }
         });
@@ -198,7 +210,7 @@ app.get('/verify', verifyToken, (req, res) => {
 app.get('/profile', verifyToken, async (req, res) => {
     try {
         const user = await User.findByPk(req.user.id, {
-            attributes: ['user_id', 'username', 'email', 'role', 'createdAt']
+            attributes: ['user_id', 'username', 'email', 'full_name', 'age', 'phone', 'address', 'district', 'province', 'postal_code', 'role', 'createdAt']
         });
 
         if (!user) {
@@ -208,6 +220,252 @@ app.get('/profile', verifyToken, async (req, res) => {
         return res.status(200).json({ user });
     } catch (error) {
         console.error('Error fetching profile:', error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+});
+
+// Update profile endpoint
+app.put('/profile/update', verifyToken, async (req, res) => {
+    try {
+        const { username, firstName, lastName, age, phone, address, district, province, postalCode } = req.body;
+        
+        const user = await User.findByPk(req.user.id);
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        // Check if username is being changed and if it's already taken
+        if (username && username !== user.username) {
+            const existingUser = await User.findOne({ where: { username } });
+            if (existingUser) {
+                return res.status(409).json({ message: 'Username already exists' });
+            }
+        }
+
+        const full_name = firstName && lastName ? `${firstName} ${lastName}` : (firstName || lastName || null);
+
+        const updateData = {};
+        if (username) updateData.username = username;
+        if (full_name !== undefined) updateData.full_name = full_name;
+        if (age) updateData.age = parseInt(age);
+        if (phone) updateData.phone = phone;
+        if (address) updateData.address = address;
+        if (district) updateData.district = district;
+        if (province) updateData.province = province;
+        if (postalCode) updateData.postal_code = postalCode;
+
+        await user.update(updateData);
+
+        // Update session data
+        if (req.session.user) {
+            req.session.user = {
+                ...req.session.user,
+                username: user.username,
+                full_name: user.full_name
+            };
+        }
+
+        return res.status(200).json({ 
+            message: 'Profile updated successfully',
+            user: {
+                id: user.user_id,
+                email: user.email,
+                username: user.username,
+                full_name: user.full_name,
+                age: user.age,
+                phone: user.phone,
+                address: user.address,
+                district: user.district,
+                province: user.province,
+                postal_code: user.postal_code,
+                role: user.role
+            }
+        });
+    } catch (error) {
+        console.error('Error updating profile:', error);
+        if (error.name === 'SequelizeValidationError') {
+            return res.status(400).json({ 
+                message: 'Validation error', 
+                errors: error.errors.map(e => e.message) 
+            });
+        }
+        res.status(500).json({ message: 'Internal server error' });
+    }
+});
+
+// Change password endpoint
+app.put('/profile/change-password', verifyToken, async (req, res) => {
+    try {
+        const { currentPassword, newPassword } = req.body;
+        
+        if (!currentPassword || !newPassword) {
+            return res.status(400).json({ message: 'Current password and new password are required' });
+        }
+
+        const user = await User.findByPk(req.user.id);
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        // Verify current password
+        const isCurrentPasswordValid = await user.checkPassword(currentPassword);
+        if (!isCurrentPasswordValid) {
+            return res.status(401).json({ message: 'Current password is incorrect' });
+        }
+
+        // Update password (will be hashed by the beforeUpdate hook)
+        await user.update({ password: newPassword });
+
+        return res.status(200).json({ message: 'Password changed successfully' });
+    } catch (error) {
+        console.error('Error changing password:', error);
+        if (error.name === 'SequelizeValidationError') {
+            return res.status(400).json({ 
+                message: 'Validation error', 
+                errors: error.errors.map(e => e.message) 
+            });
+        }
+        res.status(500).json({ message: 'Internal server error' });
+    }
+});
+
+// Pet management endpoints
+
+// Get user's pets
+app.get('/pets', verifyToken, async (req, res) => {
+    try {
+        const pets = await Pet.findAll({
+            where: { user_id: req.user.id },
+            order: [['createdAt', 'DESC']]
+        });
+
+        return res.status(200).json({ pets });
+    } catch (error) {
+        console.error('Error fetching pets:', error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+});
+
+// Add new pet
+app.post('/pets', verifyToken, async (req, res) => {
+    try {
+        const {
+            name,
+            type,
+            breed,
+            age,
+            weight,
+            behavior,
+            food_medicine,
+            health_history
+        } = req.body;
+
+        if (!name || !type) {
+            return res.status(400).json({ message: 'Pet name and type are required' });
+        }
+
+        const newPet = await Pet.create({
+            user_id: req.user.id,
+            name,
+            type,
+            breed,
+            age,
+            weight,
+            behavior,
+            food_medicine,
+            health_history
+        });
+
+        return res.status(201).json({
+            message: 'Pet added successfully',
+            pet: newPet
+        });
+    } catch (error) {
+        console.error('Error adding pet:', error);
+        if (error.name === 'SequelizeValidationError') {
+            return res.status(400).json({
+                message: 'Validation error',
+                errors: error.errors.map(e => e.message)
+            });
+        }
+        res.status(500).json({ message: 'Internal server error' });
+    }
+});
+
+// Update pet
+app.put('/pets/:id', verifyToken, async (req, res) => {
+    try {
+        const petId = req.params.id;
+        const {
+            name,
+            type,
+            breed,
+            age,
+            weight,
+            behavior,
+            food_medicine,
+            health_history
+        } = req.body;
+
+        const pet = await Pet.findOne({
+            where: {
+                pet_id: petId,
+                user_id: req.user.id
+            }
+        });
+
+        if (!pet) {
+            return res.status(404).json({ message: 'Pet not found' });
+        }
+
+        await pet.update({
+            name,
+            type,
+            breed,
+            age,
+            weight,
+            behavior,
+            food_medicine,
+            health_history
+        });
+
+        return res.status(200).json({
+            message: 'Pet updated successfully',
+            pet: pet
+        });
+    } catch (error) {
+        console.error('Error updating pet:', error);
+        if (error.name === 'SequelizeValidationError') {
+            return res.status(400).json({
+                message: 'Validation error',
+                errors: error.errors.map(e => e.message)
+            });
+        }
+        res.status(500).json({ message: 'Internal server error' });
+    }
+});
+
+// Delete pet
+app.delete('/pets/:id', verifyToken, async (req, res) => {
+    try {
+        const petId = req.params.id;
+
+        const pet = await Pet.findOne({
+            where: {
+                pet_id: petId,
+                user_id: req.user.id
+            }
+        });
+
+        if (!pet) {
+            return res.status(404).json({ message: 'Pet not found' });
+        }
+
+        await pet.destroy();
+
+        return res.status(200).json({ message: 'Pet deleted successfully' });
+    } catch (error) {
+        console.error('Error deleting pet:', error);
         res.status(500).json({ message: 'Internal server error' });
     }
 });

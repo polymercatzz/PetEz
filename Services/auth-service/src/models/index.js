@@ -3,9 +3,15 @@ const { DataTypes } = require('sequelize');
 
 // Import model definitions
 const UserModel = require('./users');
+const PetModel = require('./pets');
 
 // Initialize models
 const User = UserModel(sequelize, DataTypes);
+const Pet = PetModel(sequelize, DataTypes);
+
+// Define associations
+User.hasMany(Pet, { foreignKey: 'user_id', as: 'pets' });
+Pet.belongsTo(User, { foreignKey: 'user_id', as: 'user' });
 
 // Sync database (create tables if they don't exist)
 const initDatabase = async () => {
@@ -34,5 +40,6 @@ const initDatabase = async () => {
 module.exports = {
   sequelize,
   User,
+  Pet,
   initDatabase
 };
