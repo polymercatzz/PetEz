@@ -1,5 +1,6 @@
 const express = require('express');
 const session = require('express-session');
+const axios = require('axios');
 const app = express();
 const PORT = 3001;
 
@@ -53,22 +54,15 @@ app.post('/login', async (req, res) => {
     if (!email || !password) {
         return res.status(400).send('Email and password are required.');
     }
-    const authApiUrl = 'http://localhost:3002/login';
+    const authApiUrl = 'http://auth-service:3002/login';
     try {
-        const response = await fetch(authApiUrl, {
-            method: 'POST',
+        const response = await axios.post(authApiUrl, { email, password }, {
             headers: {
                 'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ email, password }),
+            }
         });
-        if (!response.ok) {
-            const errorData = await response.json().catch(() => ({ message: 'Authentication failed' }));
-            
-            console.error('External API authentication failed:', response.status, errorData.message);
-            return res.status(401).send(errorData.message || 'Invalid credentials');
-        }
-        const data = await response.json();
+        
+        const data = response.data;
         console.log('Login successful:', data);
 
         req.session.user = data.user;
@@ -77,8 +71,15 @@ app.post('/login', async (req, res) => {
         
         res.redirect('/user/');
     } catch (error) {
-        console.error('Network or server error during login:', error);
-        res.status(500).send('Internal server error during authentication check.');
+        if (error.response) {
+            // Server responded with error status
+            console.error('External API authentication failed:', error.response.status, error.response.data?.message);
+            return res.status(401).send(error.response.data?.message || 'Invalid credentials');
+        } else {
+            // Network or other error
+            console.error('Network or server error during login:', error);
+            res.status(500).send('Internal server error during authentication check.');
+        }
     }
 });
 
@@ -107,40 +108,37 @@ app.post('/register', async (req, res) => {
         return res.status(400).send('Passwords do not match.');
     }
     
-    const authApiUrl = 'http://localhost:3002/register';
+    const authApiUrl = 'http://auth-service:3002/register';
     try {
-        const response = await fetch(authApiUrl, {
-            method: 'POST',
+        const response = await axios.post(authApiUrl, { 
+            email, 
+            password, 
+            username, 
+            firstName, 
+            lastName, 
+            age, 
+            phone, 
+            address, 
+            district, 
+            province, 
+            postalCode 
+        }, {
             headers: {
                 'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ 
-                email, 
-                password, 
-                username, 
-                firstName, 
-                lastName, 
-                age, 
-                phone, 
-                address, 
-                district, 
-                province, 
-                postalCode 
-            }),
+            }
         });
         
-        if (!response.ok) {
-            const errorData = await response.json().catch(() => ({ message: 'Registration failed' }));
-            console.error('External API registration failed:', response.status, errorData.message);
-            return res.status(400).send(errorData.message || 'Registration failed');
-        }
-        
-        const data = await response.json();
+        const data = response.data;
         console.log('Registration successful:', data);
         res.redirect('/');
     } catch (error) {
-        console.error('Network or server error during registration:', error);
-        res.status(500).send('Internal server error during registration.');
+        if (error.response) {
+            console.error('External API registration failed:', error.response.status, error.response.data?.message);
+            return res.status(400).send(error.response.data?.message || 'Registration failed');
+        } else {
+            console.error('Network or server error during registration:', error);
+            res.status(500).send('Internal server error during registration.');
+        }
     }
 });
 

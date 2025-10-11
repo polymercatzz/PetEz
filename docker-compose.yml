@@ -23,6 +23,22 @@ services:
       - "3002:3002"
     environment:
       DATABASE_URL: mysql://root:root@mysql-auth:3306/auth_db
+      JWT_SECRET: petez-super-secret-jwt-key-2024
+    depends_on:
+      - mysql-auth
+    networks:
+      - pet-ez-network
+
+  booking-service:
+    build:
+      context: ./Services/booking-service
+      dockerfile: Dockerfile
+    container_name: pet-ez-booking-service
+    ports:
+      - "3006:3006"
+    environment:
+      DATABASE_URL: mysql://root:root@mysql-auth:3306/auth_db
+      JWT_SECRET: petez-super-secret-jwt-key-2024
     depends_on:
       - mysql-auth
     networks:

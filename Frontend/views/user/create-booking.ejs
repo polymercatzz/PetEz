@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>สร้างการจอง - PetEz</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@100..900&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body{
+            font-family: "Noto Sans Thai", sans-serif;
+        }
+    </style>
+</head>
+<body class="bg-[#F9F9FB]">
+    <%- include('../partials/user-nav') %>
+
+    <div class="max-w-4xl mx-auto mt-10 px-6">
+        <div class="mb-8">
+            <h1 class="text-3xl font-bold text-gray-800">
+                <i class="fa-solid fa-calendar-plus mr-3 text-blue-600"></i>
+                สร้างการจองใหม่
+            </h1>
+            <p class="text-gray-600 mt-2">กรอกข้อมูลเพื่อสร้างการจองดูแลสัตว์เลี้ยงของคุณ</p>
+        </div>
+
+        <form id="bookingForm" class="bg-white rounded-xl shadow-lg p-8">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                <!-- Pet Selection -->
+                <div class="col-span-full">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        <i class="fa-solid fa-paw mr-2 text-blue-600"></i>
+                        เลือกสัตว์เลี้ยง <span class="text-red-500">*</span>
+                    </label>
+                    <select name="pet_id" required class="w-full border-2 border-gray-200 rounded-lg px-4 py-3 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200">
+                        <option value="">-- เลือกสัตว์เลี้ยง --</option>
+                        <% if (pets && pets.length > 0) { %>
+                            <% pets.forEach(function(pet) { %>
+                                <option value="<%= pet.pet_id %>"><%= pet.name %> - <%= pet.type %></option>
+                            <% }); %>
+                        <% } %>
+                    </select>
+                    <% if (!pets || pets.length === 0) { %>
+                        <p class="text-sm text-red-500 mt-1">
+                            คุณยังไม่มีสัตว์เลี้ยงในระบบ 
+                            <a href="/user/profile" class="text-blue-600 hover:underline">เพิ่มสัตว์เลี้ยงก่อน</a>
+                        </p>
+                    <% } %>
+                </div>
+
+                <!-- Service Type -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        <i class="fa-solid fa-hands-helping mr-2 text-blue-600"></i>
+                        ประเภทบริการ <span class="text-red-500">*</span>
+                    </label>
+                    <select name="service_type" required class="w-full border-2 border-gray-200 rounded-lg px-4 py-3 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200">
+                        <option value="sitting">ดูแลสัตว์เลี้ยง</option>
+                        <option value="walking">พาเดิน</option>
+                        <option value="boarding">ฝากเลี้ยง</option>
+                        <option value="grooming">ตัดแต่งขน</option>
+                    </select>
+                </div>
+
+                <!-- Price per Hour -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        <i class="fa-solid fa-dollar-sign mr-2 text-blue-600"></i>
+                        ราคาต่อชั่วโมง (บาท) <span class="text-red-500">*</span>
+                    </label>
+                    <input type="number" name="price_per_hour" min="1" step="0.01" value="50" required 
+                           class="w-full border-2 border-gray-200 rounded-lg px-4 py-3 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
+                           placeholder="50.00">
+                </div>
+
+                <!-- Start Date -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        <i class="fa-solid fa-calendar-day mr-2 text-blue-600"></i>
+                        วันที่เริ่ม <span class="text-red-500">*</span>
+                    </label>
+                    <input type="datetime-local" name="start_date" required 
+                           class="w-full border-2 border-gray-200 rounded-lg px-4 py-3 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200">
+                </div>
+
+                <!-- End Date -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        <i class="fa-solid fa-calendar-check mr-2 text-blue-600"></i>
+                        วันที่สิ้นสุด <span class="text-red-500">*</span>
+                    </label>
+                    <input type="datetime-local" name="end_date" required 
+                           class="w-full border-2 border-gray-200 rounded-lg px-4 py-3 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200">
+                </div>
+
+                <!-- Location -->
+                <div class="col-span-full">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        <i class="fa-solid fa-location-dot mr-2 text-blue-600"></i>
+                        สถานที่
+                    </label>
+                    <input type="text" name="location" 
+                           class="w-full border-2 border-gray-200 rounded-lg px-4 py-3 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
+                           placeholder="ที่อยู่หรือสถานที่ให้บริการ">
+                </div>
+
+                <!-- Emergency Contact -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        <i class="fa-solid fa-phone mr-2 text-blue-600"></i>
+                        เบอร์ติดต่อฉุกเฉิน
+                    </label>
+                    <input type="tel" name="emergency_contact" 
+                           class="w-full border-2 border-gray-200 rounded-lg px-4 py-3 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
+                           placeholder="เบอร์โทรศัพท์ฉุกเฉิน">
+                </div>
+
+                <!-- Total Calculation -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        <i class="fa-solid fa-calculator mr-2 text-blue-600"></i>
+                        ราคารวม (บาท)
+                    </label>
+                    <div class="w-full border-2 border-gray-200 rounded-lg px-4 py-3 bg-gray-50">
+                        <span id="totalPrice" class="text-lg font-semibold text-green-600">฿0.00</span>
+                        <span id="totalHours" class="text-sm text-gray-500 ml-2">(0 ชั่วโมง)</span>
+                    </div>
+                </div>
+
+                <!-- Special Instructions -->
+                <div class="col-span-full">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        <i class="fa-solid fa-sticky-note mr-2 text-blue-600"></i>
+                        คำแนะนำพิเศษ
+                    </label>
+                    <textarea name="special_instructions" rows="4" 
+                              class="w-full border-2 border-gray-200 rounded-lg px-4 py-3 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
+                              placeholder="ข้อมูลเพิ่มเติมเกี่ยวกับการดูแลสัตว์เลี้ยงของคุณ เช่น อาหารที่ชอบ พฤติกรรมพิเศษ หรือข้อควรระวัง"></textarea>
+                </div>
+            </div>
+
+            <div class="flex justify-end gap-4 mt-8">
+                <a href="/user/bookings" class="px-6 py-3 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition duration-200">
+                    <i class="fa-solid fa-arrow-left mr-2"></i>
+                    ยกเลิก
+                </a>
+                <button type="submit" class="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition duration-200">
+                    <i class="fa-solid fa-check mr-2"></i>
+                    สร้างการจอง
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Success/Error Messages -->
+    <div id="alertContainer" class="fixed top-4 right-4 z-50"></div>
+
+    <script>
+        // Calculate total price
+        function calculateTotal() {
+            const startDate = document.querySelector('input[name="start_date"]').value;
+            const endDate = document.querySelector('input[name="end_date"]').value;
+            const pricePerHour = parseFloat(document.querySelector('input[name="price_per_hour"]').value) || 50;
+
+            if (startDate && endDate) {
+                const start = new Date(startDate);
+                const end = new Date(endDate);
+                const diffMs = end - start;
+                const diffHours = Math.ceil(diffMs / (1000 * 60 * 60));
+
+                if (diffHours > 0) {
+                    const totalPrice = diffHours * pricePerHour;
+                    document.getElementById('totalPrice').textContent = `฿${totalPrice.toFixed(2)}`;
+                    document.getElementById('totalHours').textContent = `(${diffHours} ชั่วโมง)`;
+                } else {
+                    document.getElementById('totalPrice').textContent = '฿0.00';
+                    document.getElementById('totalHours').textContent = '(0 ชั่วโมง)';
+                }
+            }
+        }
+
+        // Add event listeners for calculation
+        document.querySelector('input[name="start_date"]').addEventListener('change', calculateTotal);
+        document.querySelector('input[name="end_date"]').addEventListener('change', calculateTotal);
+        document.querySelector('input[name="price_per_hour"]').addEventListener('input', calculateTotal);
+
+        // Handle form submission
+        document.getElementById('bookingForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const formData = new FormData(e.target);
+            const bookingData = Object.fromEntries(formData.entries());
+
+            // Validate dates
+            const startDate = new Date(bookingData.start_date);
+            const endDate = new Date(bookingData.end_date);
+            const now = new Date();
+
+            if (startDate < now) {
+                showAlert('วันที่เริ่มต้องไม่เป็นอดีต', 'error');
+                return;
+            }
+
+            if (endDate <= startDate) {
+                showAlert('วันที่สิ้นสุดต้องหลังจากวันที่เริ่ม', 'error');
+                return;
+            }
+
+            try {
+                const response = await fetch('/user/api/bookings', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(bookingData)
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    showAlert('สร้างการจองเรียบร้อยแล้ว!', 'success');
+                    
+                    // Show success modal with options
+                    setTimeout(() => {
+                        showSuccessModal(data.booking);
+                    }, 1000);
+                } else {
+                    const errorData = await response.json();
+                    showAlert(errorData.message || 'เกิดข้อผิดพลาดในการสร้างการจอง', 'error');
+                }
+            } catch (error) {
+                console.error('Error creating booking:', error);
+                showAlert('เกิดข้อผิดพลาดในการเชื่อมต่อเซิร์ฟเวอร์', 'error');
+            }
+        });
+
+        // Show alert messages
+        function showAlert(message, type) {
+            const alertContainer = document.getElementById('alertContainer');
+            const alertDiv = document.createElement('div');
+            
+            let bgColor = 'bg-gray-500';
+            if (type === 'success') bgColor = 'bg-green-500';
+            else if (type === 'error') bgColor = 'bg-red-500';
+            else if (type === 'info') bgColor = 'bg-blue-500';
+            
+            alertDiv.className = `${bgColor} text-white px-6 py-3 rounded-lg shadow-lg mb-2`;
+            alertDiv.innerHTML = `
+                <div class="flex items-center justify-between">
+                    <span>${message}</span>
+                    <button onclick="this.parentElement.parentElement.remove()" class="ml-4 text-white hover:text-gray-200">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            `;
+            
+            alertContainer.appendChild(alertDiv);
+            
+            // Auto remove after 5 seconds
+            setTimeout(() => {
+                if (alertDiv.parentNode) {
+                    alertDiv.remove();
+                }
+            }, 5000);
+        }
+
+        // Set minimum date to today
+        document.addEventListener('DOMContentLoaded', function() {
+            const now = new Date();
+            const localDateTime = new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+            document.querySelector('input[name="start_date"]').min = localDateTime;
+            document.querySelector('input[name="end_date"]').min = localDateTime;
+        });
+
+        function showSuccessModal(booking) {
+            const modal = document.createElement('div');
+            modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50';
+            modal.innerHTML = `
+                <div class="bg-white rounded-xl p-8 max-w-md w-full mx-4 text-center">
+                    <div class="text-green-500 text-6xl mb-4">
+                        <i class="fa-solid fa-check-circle"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold mb-4 text-gray-800">สร้างการจองสำเร็จ!</h3>
+                    <p class="text-gray-600 mb-6">การจองของคุณได้ถูกสร้างเรียบร้อยแล้ว<br>รหัสการจอง: #${booking?.booking_id || '---'}</p>
+                    <div class="flex gap-3 justify-center">
+                        <button onclick="window.location.href='/user/bookings'" class="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition duration-300">
+                            <i class="fa-solid fa-list mr-2"></i>ดูการจองของฉัน
+                        </button>
+                        <button onclick="window.location.href='/user/history'" class="px-6 py-3 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition duration-300">
+                            <i class="fa-solid fa-history mr-2"></i>ดูประวัติ
+                        </button>
+                    </div>
+                    <button onclick="window.location.href='/user/create-booking'" class="w-full mt-3 px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition duration-300">
+                        <i class="fa-solid fa-plus mr-2"></i>สร้างการจองใหม่
+                    </button>
+                </div>
+            `;
+            document.body.appendChild(modal);
+        }
+    </script>
+</body>
+</html>

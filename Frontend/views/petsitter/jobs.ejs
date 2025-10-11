@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %> - PetEz</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@100..900&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: "Noto Sans Thai", sans-serif;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <%- include('../partials/petsitter-nav') %>
+
+    <div class="max-w-6xl mx-auto mt-10 px-6">
+        <div class="flex justify-between items-center mb-8">
+            <h1 class="text-3xl font-bold text-gray-800">
+                <i class="fa-solid fa-briefcase mr-3 text-blue-600"></i>
+                งานที่พร้อมรับ
+            </h1>
+            <div class="flex gap-3">
+                <button id="refreshJobs" class="bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition duration-200">
+                    <i class="fa-solid fa-refresh mr-2"></i>
+                    รีเฟรช
+                </button>
+            </div>
+        </div>
+
+        <!-- Filter Section -->
+        <div class="bg-white rounded-lg shadow p-6 mb-6">
+            <h3 class="text-lg font-semibold mb-4">ตัวกรองงาน</h3>
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">ประเภทบริการ</label>
+                    <select id="serviceFilter" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                        <option value="">ทั้งหมด</option>
+                        <option value="sitting">ดูแลสัตว์ที่บ้าน</option>
+                        <option value="walking">พาสัตว์เดิน</option>
+                        <option value="boarding">ฝากเลี้ยงสัตว์</option>
+                        <option value="grooming">บริการตัดขน</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">ระยะเวลา</label>
+                    <select id="durationFilter" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                        <option value="">ทั้งหมด</option>
+                        <option value="short">น้อยกว่า 4 ชั่วโมง</option>
+                        <option value="medium">4-8 ชั่วโมง</option>
+                        <option value="long">มากกว่า 8 ชั่วโมง</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">ราคาขั้นต่ำ</label>
+                    <input type="number" id="minPriceFilter" placeholder="0" min="0" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">วันที่</label>
+                    <input type="date" id="dateFilter" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                </div>
+            </div>
+        </div>
+
+        <!-- Jobs Loading State -->
+        <div id="loadingState" class="flex justify-center items-center py-20">
+            <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+        </div>
+
+        <!-- Empty State -->
+        <div id="emptyState" class="hidden bg-white rounded-lg shadow p-12 text-center">
+            <i class="fa-solid fa-briefcase fa-4x text-gray-300 mb-4"></i>
+            <h3 class="text-xl font-semibold text-gray-600 mb-2">ไม่มีงานใหม่ในขณะนี้</h3>
+            <p class="text-gray-400">กลับมาดูใหม่ภายหลัง หรือแก้ไขตัวกรองการค้นหา</p>
+        </div>
+
+        <!-- Jobs List -->
+        <div id="jobsList" class="hidden space-y-6">
+            <!-- Jobs will be loaded here -->
+        </div>
+    </div>
+
+    <!-- Job Detail Modal -->
+    <div id="jobModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+        <div class="bg-white rounded-xl p-8 max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-xl font-bold">รายละเอียดงาน</h3>
+                <button id="closeModal" class="text-gray-400 hover:text-gray-600 text-2xl">
+                    <i class="fa-solid fa-times"></i>
+                </button>
+            </div>
+            <div id="modalContent">
+                <!-- Modal content will be loaded here -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let allJobs = [];
+        let filteredJobs = [];
+
+        // Service type mapping
+        const serviceMapping = {
+            'sitting': 'ดูแลสัตว์ที่บ้าน',
+            'walking': 'พาสัตว์เดิน',
+            'boarding': 'ฝากเลี้ยงสัตว์',
+            'grooming': 'บริการตัดขน'
+        };
+
+        document.addEventListener('DOMContentLoaded', function() {
+            loadJobs();
+            
+            // Event listeners for filters
+            document.getElementById('serviceFilter').addEventListener('change', filterJobs);
+            document.getElementById('durationFilter').addEventListener('change', filterJobs);
+            document.getElementById('minPriceFilter').addEventListener('input', filterJobs);
+            document.getElementById('dateFilter').addEventListener('change', filterJobs);
+            document.getElementById('refreshJobs').addEventListener('click', loadJobs);
+            
+            // Modal event listeners
+            document.getElementById('closeModal').addEventListener('click', closeModal);
+            document.getElementById('jobModal').addEventListener('click', function(e) {
+                if (e.target === this) closeModal();
+            });
+        });
+
+        async function loadJobs() {
+            try {
+                document.getElementById('loadingState').classList.remove('hidden');
+                document.getElementById('emptyState').classList.add('hidden');
+                document.getElementById('jobsList').classList.add('hidden');
+
+                const response = await fetch('/petsitter/api/jobs');
+                
+                if (!response.ok) {
+                    throw new Error('Failed to fetch jobs');
+                }
+
+                const data = await response.json();
+                allJobs = data.jobs || [];
+                
+                // Sort by date (newest first)
+                allJobs.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+                
+                filteredJobs = [...allJobs];
+                
+                document.getElementById('loadingState').classList.add('hidden');
+                
+                if (allJobs.length === 0) {
+                    document.getElementById('emptyState').classList.remove('hidden');
+                } else {
+                    document.getElementById('jobsList').classList.remove('hidden');
+                    renderJobs();
+                }
+            } catch (error) {
+                console.error('Error loading jobs:', error);
+                document.getElementById('loadingState').classList.add('hidden');
+                document.getElementById('jobsList').innerHTML = `
+                    <div class="bg-white rounded-lg shadow p-8 text-center text-red-500">
+                        <i class="fa-solid fa-exclamation-triangle fa-3x mb-4"></i>
+                        <p class="text-xl">ไม่สามารถโหลดข้อมูลงานได้</p>
+                        <button onclick="loadJobs()" class="mt-4 px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+                            ลองใหม่
+                        </button>
+                    </div>
+                `;
+                document.getElementById('jobsList').classList.remove('hidden');
+            }
+        }
+
+        function filterJobs() {
+            const serviceFilter = document.getElementById('serviceFilter').value;
+            const durationFilter = document.getElementById('durationFilter').value;
+            const minPrice = parseFloat(document.getElementById('minPriceFilter').value) || 0;
+            const dateFilter = document.getElementById('dateFilter').value;
+
+            filteredJobs = allJobs.filter(job => {
+                const matchesService = !serviceFilter || job.service_type === serviceFilter;
+                const matchesPrice = job.total_price >= minPrice;
+                
+                let matchesDuration = true;
+                if (durationFilter) {
+                    const hours = job.total_hours;
+                    if (durationFilter === 'short') matchesDuration = hours < 4;
+                    else if (durationFilter === 'medium') matchesDuration = hours >= 4 && hours <= 8;
+                    else if (durationFilter === 'long') matchesDuration = hours > 8;
+                }
+                
+                let matchesDate = true;
+                if (dateFilter) {
+                    const jobDate = new Date(job.start_date).toDateString();
+                    const filterDate = new Date(dateFilter).toDateString();
+                    matchesDate = jobDate === filterDate;
+                }
+
+                return matchesService && matchesPrice && matchesDuration && matchesDate;
+            });
+
+            renderJobs();
+        }
+
+        function renderJobs() {
+            const jobsList = document.getElementById('jobsList');
+            
+            if (filteredJobs.length === 0) {
+                jobsList.innerHTML = `
+                    <div class="bg-white rounded-lg shadow p-12 text-center">
+                        <i class="fa-solid fa-search fa-4x text-gray-300 mb-4"></i>
+                        <h3 class="text-xl font-semibold text-gray-600 mb-2">ไม่พบงานที่ตรงกับเงื่อนไข</h3>
+                        <p class="text-gray-400">ลองปรับตัวกรองการค้นหาใหม่</p>
+                    </div>
+                `;
+                return;
+            }
+
+            jobsList.innerHTML = filteredJobs.map(job => `
+                <div class="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300 p-6 cursor-pointer job-card" data-job-id="${job.booking_id}">
+                    <div class="flex justify-between items-start mb-4">
+                        <div>
+                            <h3 class="text-xl font-semibold text-gray-800 mb-2">
+                                ${serviceMapping[job.service_type] || job.service_type}
+                            </h3>
+                            <p class="text-gray-600">งาน #${job.booking_id.toString().padStart(3, '0')}</p>
+                        </div>
+                        <div class="text-right">
+                            <p class="text-2xl font-bold text-green-600">${formatPrice(job.total_price)} บาท</p>
+                            <p class="text-sm text-gray-500">${job.total_hours} ชั่วโมง</p>
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                        <div>
+                            <p class="text-sm text-gray-500">วันที่ให้บริการ</p>
+                            <p class="font-medium">${formatDateRange(job.start_date, job.end_date)}</p>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-500">เวลา</p>
+                            <p class="font-medium">${formatTime(job.start_date)} - ${formatTime(job.end_date)}</p>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-500">สถานที่</p>
+                            <p class="font-medium">${job.location || 'ไม่ระบุ'}</p>
+                        </div>
+                    </div>
+                    
+                    ${job.special_instructions ? `
+                        <div class="mb-4">
+                            <p class="text-sm text-gray-500 mb-1">คำแนะนำพิเศษ</p>
+                            <p class="text-gray-700 text-sm bg-gray-50 p-2 rounded">${job.special_instructions}</p>
+                        </div>
+                    ` : ''}
+                    
+                    <div class="flex justify-between items-center">
+                        <div class="flex items-center gap-2">
+                            <i class="fa-solid fa-clock text-gray-400"></i>
+                            <span class="text-sm text-gray-500">โพสต์เมื่อ ${formatDate(job.createdAt)}</span>
+                        </div>
+                        <button onclick="acceptJob(${job.booking_id})" class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition duration-200">
+                            <i class="fa-solid fa-check mr-2"></i>รับงาน
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+
+            // Add click event listeners
+            document.querySelectorAll('.job-card').forEach(card => {
+                card.addEventListener('click', function(e) {
+                    if (!e.target.closest('button')) {
+                        const jobId = this.dataset.jobId;
+                        showJobDetails(jobId);
+                    }
+                });
+            });
+        }
+
+        function showJobDetails(jobId) {
+            const job = allJobs.find(j => j.booking_id == jobId);
+            if (!job) return;
+
+            const modalContent = document.getElementById('modalContent');
+            modalContent.innerHTML = `
+                <div class="space-y-6">
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">รหัสงาน</label>
+                            <p class="text-lg font-semibold">#${job.booking_id.toString().padStart(3, '0')}</p>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">ประเภทบริการ</label>
+                            <p>${serviceMapping[job.service_type] || job.service_type}</p>
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">วันที่เริ่มบริการ</label>
+                            <p>${formatDateTime(job.start_date)}</p>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">วันที่สิ้นสุดบริการ</label>
+                            <p>${formatDateTime(job.end_date)}</p>
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">จำนวนชั่วโมง</label>
+                            <p>${job.total_hours} ชั่วโมง</p>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">ราคาต่อชั่วโมง</label>
+                            <p>${formatPrice(job.price_per_hour)} บาท</p>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">ราคารวม</label>
+                            <p class="text-xl font-bold text-green-600">${formatPrice(job.total_price)} บาท</p>
+                        </div>
+                    </div>
+                    
+                    ${job.location ? `
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">สถานที่ให้บริการ</label>
+                            <p class="bg-gray-50 p-3 rounded-lg">${job.location}</p>
+                        </div>
+                    ` : ''}
+                    
+                    ${job.special_instructions ? `
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">คำแนะนำพิเศษ</label>
+                            <p class="bg-gray-50 p-3 rounded-lg">${job.special_instructions}</p>
+                        </div>
+                    ` : ''}
+                    
+                    ${job.emergency_contact ? `
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">เบอร์ติดต่อฉุกเฉิน</label>
+                            <p>${job.emergency_contact}</p>
+                        </div>
+                    ` : ''}
+                    
+                    <div class="flex justify-end gap-3 pt-4 border-t">
+                        <button onclick="closeModal()" class="px-6 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition duration-200">
+                            ปิด
+                        </button>
+                        <button onclick="acceptJob(${job.booking_id})" class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition duration-200">
+                            <i class="fa-solid fa-check mr-2"></i>รับงานนี้
+                        </button>
+                    </div>
+                </div>
+            `;
+
+            document.getElementById('jobModal').classList.remove('hidden');
+        }
+
+        function closeModal() {
+            document.getElementById('jobModal').classList.add('hidden');
+        }
+
+        async function acceptJob(jobId) {
+            if (!confirm('คุณแน่ใจหรือไม่ว่าต้องการรับงานนี้?')) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`/petsitter/api/jobs/${jobId}/accept`, {
+                    method: 'POST'
+                });
+
+                if (response.ok) {
+                    alert('รับงานเรียบร้อยแล้ว!');
+                    closeModal();
+                    loadJobs(); // Reload jobs list
+                } else {
+                    const error = await response.json();
+                    alert(`ไม่สามารถรับงานได้: ${error.message}`);
+                }
+            } catch (error) {
+                console.error('Error accepting job:', error);
+                alert('เกิดข้อผิดพลาดในการรับงาน');
+            }
+        }
+
+        // Utility functions
+        function formatDate(dateString) {
+            return new Date(dateString).toLocaleDateString('th-TH', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
+        }
+
+        function formatDateTime(dateString) {
+            return new Date(dateString).toLocaleDateString('th-TH', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        }
+
+        function formatTime(dateString) {
+            return new Date(dateString).toLocaleTimeString('th-TH', {
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        }
+
+        function formatDateRange(startDate, endDate) {
+            const start = new Date(startDate);
+            const end = new Date(endDate);
+            
+            if (start.toDateString() === end.toDateString()) {
+                return formatDate(startDate);
+            } else {
+                return `${formatDate(startDate)} - ${formatDate(endDate)}`;
+            }
+        }
+
+        function formatPrice(price) {
+            return new Intl.NumberFormat('th-TH').format(price);
+        }
+    </script>
+</body>
+</html>
