@@ -2,12 +2,15 @@
 
 const userController = {
     // View controllers
+    getUserMain: (req, res) => {
+        res.render('user/main', { title: 'Welcome to PetEz', activeMenu: 'home' });
+    },
     getUserProfile: (req, res) => {
         res.render('user/profile', { title: 'User Profile', activeMenu: 'profile' });
     },
 
     getUserBookings: (req, res) => {
-        res.render('user/bookings', { title: 'My Bookings', activeMenu: 'bookings' });
+        res.render('user/booking', { title: 'My Bookings', activeMenu: 'bookings' });
     },
 
     getUserHistory: (req, res) => {

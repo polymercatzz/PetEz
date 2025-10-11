@@ -41,7 +41,7 @@
       </div>
     </form>
 
-    <form action="" id="Register" class="hidden">
+    <form action="/register" method="POST" id="Register" class="hidden">
       <div class="bg-white px-10 py-8 rounded-2xl shadow-lg flex flex-col justify-center">
         <h1 class="text-center text-[2rem] text-blue-400 font-bold mb-2">สร้างบัญชี</h1>
         <p class="text-center text-[1rem] text-gray-500 mb-6">กรอกข้อมูลเพื่อสร้างบัญชีผู้ใช้ใหม่</p>
@@ -58,7 +58,7 @@
             <div
               class="flex items-center border border-gray-300 rounded-lg px-4 py-2 focus-within:ring-2 focus-within:ring-[#4e54c8]">
               <i class="fa-solid fa-user text-gray-400 mr-3"></i>
-              <input type="text" placeholder="กรอกชื่อของคุณ" class="flex-1 outline-none text-gray-700">
+              <input type="text" placeholder="กรอกชื่อของคุณ" class="flex-1 outline-none text-gray-700" name="firstName">
             </div>
           </div>
           <div class="mb-4">
@@ -66,7 +66,7 @@
             <div
               class="flex items-center border border-gray-300 rounded-lg px-4 py-2 focus-within:ring-2 focus-within:ring-[#4e54c8]">
               <i class="fa-solid fa-user text-gray-400 mr-3"></i>
-              <input type="text" placeholder="กรอกนามสกุลของคุณ" class="flex-1 outline-none text-gray-700">
+              <input type="text" placeholder="กรอกนามสกุลของคุณ" class="flex-1 outline-none text-gray-700" name="lastName">
             </div>
           </div>
         </div>
@@ -74,20 +74,20 @@
           <div class="mb-4">
             <label class="block mb-1 text-gray-700 font-medium">อายุ</label>
             <div class="flex items-center border border-gray-300 rounded-lg px-4 py-2 focus-within:ring-2 focus-within:ring-[#4e54c8]">
-              <input type="text" placeholder="กรอกอายุ" class="flex-1 outline-none text-gray-700">
+              <input type="text" placeholder="กรอกอายุ" class="flex-1 outline-none text-gray-700" name="age">
             </div>
           </div>
           <div class="mb-4">
             <label class="block mb-1 text-gray-700 font-medium">เบอร์โทรศัพท์</label>
             <div class="flex items-center border border-gray-300 rounded-lg px-4 py-2 focus-within:ring-2 focus-within:ring-[#4e54c8]">
               <i class="fa-solid fa-phone text-gray-400 mr-3"></i>
-              <input type="tel" placeholder="กรอกเบอร์โทรศัพท์" class="flex-1 outline-none text-gray-700">
+              <input type="tel" placeholder="กรอกเบอร์โทรศัพท์" class="flex-1 outline-none text-gray-700" name="phone">
             </div>
           </div>
         </div>
         <div class="mb-2 w-full">
           <label class="block mb-1 text-gray-700 font-medium">ที่อยู่</label>
-          <textarea placeholder="กรอกที่อยู่" class="w-full flex-1 outline-none border border-gray-300 rounded-md px-3 py-2 text-gray-700 text-base resize-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"></textarea>
+          <textarea placeholder="กรอกที่อยู่" class="w-full flex-1 outline-none border border-gray-300 rounded-md px-3 py-2 text-gray-700 text-base resize-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500" name="address"></textarea>
         </div>
         <div class="grid grid-cols-2 gap-5 mb-4">
           <div>
@@ -95,7 +95,7 @@
             <div
               class="flex items-center border border-gray-300 rounded-lg px-4 py-2 focus-within:ring-2 focus-within:ring-[#4e54c8]">
               <i class="fa-solid fa-city text-gray-400 mr-3"></i>
-              <input type="text" placeholder="กรอกเขต/อำเภอของคุณ" class="flex-1 outline-none text-gray-700">
+              <input type="text" placeholder="กรอกเขต/อำเภอของคุณ" class="flex-1 outline-none text-gray-700" name="district">
             </div>
           </div>
           <div>
@@ -103,7 +103,7 @@
             <div
               class="flex items-center border border-gray-300 rounded-lg px-4 py-2 focus-within:ring-2 focus-within:ring-[#4e54c8]">
               <i class="fa-solid fa-city text-gray-400 mr-3"></i>
-              <input type="text" placeholder="กรอกจังหวัดของคุณ" class="flex-1 outline-none text-gray-700">
+              <input type="text" placeholder="กรอกจังหวัดของคุณ" class="flex-1 outline-none text-gray-700" name="province">
             </div>
           </div>
           <div>
@@ -111,7 +111,7 @@
             <div
               class="flex items-center border border-gray-300 rounded-lg px-4 py-2 focus-within:ring-2 focus-within:ring-[#4e54c8]">
               <i class="fa-solid fa-city text-gray-400 mr-3"></i>
-              <input type="text" placeholder="กรอกรหัสไปรษณีย์ของคุณ" class="flex-1 outline-none text-gray-700">
+              <input type="text" placeholder="กรอกรหัสไปรษณีย์ของคุณ" class="flex-1 outline-none text-gray-700" name="postalCode">
             </div>
           </div>
         </div>
@@ -120,7 +120,7 @@
           <label class="block mb-1 text-gray-700 font-medium">Email</label>
           <div class="flex items-center border border-gray-300 rounded-lg px-4 py-2 focus-within:ring-2 focus-within:ring-[#4e54c8]">
             <i class="fa-solid fa-envelope text-gray-400 mr-3"></i>
-            <input type="email" placeholder="กรอกอีเมลของคุณ" class="flex-1 outline-none text-gray-700">
+            <input type="email" placeholder="กรอกอีเมลของคุณ" class="flex-1 outline-none text-gray-700" name="email">
           </div>
         </div>
 
@@ -128,7 +128,7 @@
           <label class="block mb-1 text-gray-700 font-medium">Password</label>
           <div class="flex items-center border border-gray-300 rounded-lg px-4 py-2 focus-within:ring-2 focus-within:ring-[#4e54c8]">
             <i class="fa-solid fa-lock text-gray-400 mr-3"></i>
-            <input type="password" placeholder="สร้างรหัสผ่าน" class="flex-1 outline-none text-gray-700">
+            <input type="password" placeholder="สร้างรหัสผ่าน" class="flex-1 outline-none text-gray-700" name="password">
           </div>
         </div>
 
@@ -136,13 +136,13 @@
           <label class="block mb-1 text-gray-700 font-medium">Confirm Password</label>
           <div class="flex items-center border border-gray-300 rounded-lg px-4 py-2 focus-within:ring-2 focus-within:ring-[#4e54c8]">
             <i class="fa-solid fa-lock text-gray-400 mr-3"></i>
-            <input type="password" placeholder="ยืนยันรหัสผ่าน" class="flex-1 outline-none text-gray-700">
+            <input type="password" placeholder="ยืนยันรหัสผ่าน" class="flex-1 outline-none text-gray-700" name="confirmPassword">
           </div>
         </div>
-        <button type="button" class="w-full bg-gradient-to-br from-blue-400 to-sky-300 text-white text-[1rem] py-3 rounded-lg font-semibold hover:bg-[#3e44a5] transition-all duration-300 cursor-pointer">สร้างบัญชี</button>
+        <button type="submit" class="w-full bg-gradient-to-br from-blue-400 to-sky-300 text-white text-[1rem] py-3 rounded-lg font-semibold hover:bg-[#3e44a5] transition-all duration-300 cursor-pointer">สร้างบัญชี</button>
         <p class="flex justify-center items-center mt-6 text-gray-600">
           <span>มีบัญชีอยู่แล้ว?</span>
-          <a href="#" class="ml-2 text-blue-400 font-medium hover:underline" onclick="SwitchToLogin()">เข้าสู่ระบบ</a>
+          <a class="ml-2 text-blue-400 font-medium hover:underline" onclick="SwitchToLogin()">เข้าสู่ระบบ</a>
         </p>
       </div>
     </form>

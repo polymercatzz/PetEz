@@ -1,7 +1,7 @@
 require('dotenv').config();
 
 const express = require('express');
-const { sequelize } = require('./models/sequelize');
+const { sequelize } = require('./models/index');
 const app = express();
 const PORT = 3000;
 
@@ -35,7 +35,13 @@ app.get('/', (req, res) => {
 app.post('/', (req, res) => {
     const { email, password } = req.body;
     console.log(`Received contact form submission: Email=${email}, Password=${password}`);
-    res.redirect('/');
+    res.redirect('/user/');
+});
+
+app.post('/register', (req, res) => {
+    const { firstName, lastName, email, password, confirmPassword, age, phoneNumber, district, province, postalCode, address } = req.body;
+    console.log(`Received registration: Name=${firstName} ${lastName}, Email=${email}, Password=${password} ConfirmPassword=${confirmPassword}, Age=${age}, Phone=${phoneNumber}, District=${district}, Province=${province}, PostalCode=${postalCode}, Address=${address}`);
+    res.redirect('/user/');
 });
 
 sequelize.sync({ alter: true })
