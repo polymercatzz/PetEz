@@ -11,7 +11,7 @@
 <body class="font-sans bg-gradient-to-br from-cyan-100 to-sky-100 flex justify-center items-center min-h-screen">
 
   <div class="w-[40%] p-6">
-    <form action="/" method="POST" id="Login" class="">
+    <form action="/login" method="POST" id="Login" class="">
       <div class="bg-white px-10 py-8 rounded-2xl shadow-lg flex flex-col justify-center">
         <h1 class="text-center text-[2rem] text-blue-400 font-bold mb-2">เข้าสู่ระบบ</h1>
         <p class="text-center text-[1rem] text-gray-500 mb-6">กรุณากรอกข้อมูลเพื่อเข้าสู่ระบบบัญชีของคุณ</p>
@@ -117,10 +117,17 @@
         </div>
         <h1 class="text-[1.5rem] text-blue-400 font-semibold mb-2">ข้อมูลลงทะเบียน</h1>
         <div class="mb-4">
+          <label class="block mb-1 text-gray-700 font-medium">Username</label>
+          <div class="flex items-center border border-gray-300 rounded-lg px-4 py-2 focus-within:ring-2 focus-within:ring-[#4e54c8]">
+            <i class="fa-solid fa-user text-gray-400 mr-3"></i>
+            <input type="text" placeholder="กรอกชื่อผู้ใช้ของคุณ" class="flex-1 outline-none text-gray-700" name="username" required>
+          </div>
+        </div>
+        <div class="mb-4">
           <label class="block mb-1 text-gray-700 font-medium">Email</label>
           <div class="flex items-center border border-gray-300 rounded-lg px-4 py-2 focus-within:ring-2 focus-within:ring-[#4e54c8]">
             <i class="fa-solid fa-envelope text-gray-400 mr-3"></i>
-            <input type="email" placeholder="กรอกอีเมลของคุณ" class="flex-1 outline-none text-gray-700" name="email">
+            <input type="email" placeholder="กรอกอีเมลของคุณ" class="flex-1 outline-none text-gray-700" name="email" required>
           </div>
         </div>
 
@@ -128,7 +135,7 @@
           <label class="block mb-1 text-gray-700 font-medium">Password</label>
           <div class="flex items-center border border-gray-300 rounded-lg px-4 py-2 focus-within:ring-2 focus-within:ring-[#4e54c8]">
             <i class="fa-solid fa-lock text-gray-400 mr-3"></i>
-            <input type="password" placeholder="สร้างรหัสผ่าน" class="flex-1 outline-none text-gray-700" name="password">
+            <input type="password" placeholder="สร้างรหัสผ่าน" class="flex-1 outline-none text-gray-700" name="password" required>
           </div>
         </div>
 
@@ -136,7 +143,7 @@
           <label class="block mb-1 text-gray-700 font-medium">Confirm Password</label>
           <div class="flex items-center border border-gray-300 rounded-lg px-4 py-2 focus-within:ring-2 focus-within:ring-[#4e54c8]">
             <i class="fa-solid fa-lock text-gray-400 mr-3"></i>
-            <input type="password" placeholder="ยืนยันรหัสผ่าน" class="flex-1 outline-none text-gray-700" name="confirmPassword">
+            <input type="password" placeholder="ยืนยันรหัสผ่าน" class="flex-1 outline-none text-gray-700" name="confirmPassword" required>
           </div>
         </div>
         <button type="submit" class="w-full bg-gradient-to-br from-blue-400 to-sky-300 text-white text-[1rem] py-3 rounded-lg font-semibold hover:bg-[#3e44a5] transition-all duration-300 cursor-pointer">สร้างบัญชี</button>

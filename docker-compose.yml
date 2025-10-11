@@ -1,0 +1,36 @@
+version: '3.8'
+
+services:
+  mysql-auth:
+    image: mysql:8.0
+    container_name: pet-ez-mysql-auth
+    environment:
+      MYSQL_DATABASE: auth_db
+      MYSQL_ROOT_PASSWORD: root
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql-auth-data:/var/lib/mysql
+    networks:
+      - pet-ez-network
+
+  auth-service:
+    build:
+      context: ./Services/auth-service
+      dockerfile: Dockerfile
+    container_name: pet-ez-auth-service
+    ports:
+      - "3002:3002"
+    environment:
+      DATABASE_URL: mysql://root:root@mysql-auth:3306/auth_db
+    depends_on:
+      - mysql-auth
+    networks:
+      - pet-ez-network
+
+volumes:
+  mysql-auth-data:
+
+networks:
+  pet-ez-network:
+    driver: bridge
