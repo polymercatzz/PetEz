@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= title %></title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Kanit:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css">
+</head>
+
+<body class="font-[kanit]">
+  <%- include('../partials/admin-sidebar', { activeMenu: 'approval' }) %>
+
+  <div class="ml-0 lg:ml-[300px] px-4 py-6 bg-gray-50 min-h-screen">
+    <div class="bg-white rounded-lg shadow-md p-6">
+      <div class="flex justify-between items-center mb-6">
+        <h1 class="text-3xl font-bold text-gray-800">Approval Management</h1>
+        <div class="flex space-x-2">
+          <select id="filterStatus" class="px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <option value="">All Status</option>
+            <option value="pending">Pending</option>
+            <option value="approved">Approved</option>
+            <option value="rejected">Rejected</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Approvals Table -->
+      <div class="overflow-x-auto">
+        <table class="min-w-full bg-white border border-gray-200">
+          <thead class="bg-gray-50">
+            <tr>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Pet Sitter</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Experience</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Rate/Hour</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Applied Date</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="approvalsTableBody" class="bg-white divide-y divide-gray-200">
+            <!-- Approvals will be loaded here -->
+            <tr>
+              <td colspan="6" class="px-6 py-4 text-center text-gray-500">
+                <div class="flex items-center justify-center">
+                  <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+                  <span class="ml-2">Loading approvals...</span>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Approval Details Modal -->
+  <div id="approvalModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden">
+    <div class="relative top-10 mx-auto p-5 border w-11/12 max-w-2xl shadow-lg rounded-md bg-white">
+      <div class="mt-3">
+        <h3 class="text-lg font-medium text-gray-900 mb-4" id="modalTitle">Pet Sitter Application</h3>
+        <div id="modalContent" class="text-sm text-gray-700">
+          <!-- Pet sitter details will be loaded here -->
+        </div>
+        <div class="flex justify-end space-x-3 mt-6">
+          <button id="rejectBtn" class="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600">Reject</button>
+          <button id="approveBtn" class="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600">Approve</button>
+          <button id="closeModal" class="px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let currentApprovalId = null;
+
+    // Load approvals data
+    async function loadApprovals(status = '') {
+      try {
+        const params = status ? `?status=${status}` : '';
+        const response = await fetch(`/admin/api/approvals${params}`);
+        
+        if (response.ok) {
+          const approvals = await response.json();
+          displayApprovals(approvals);
+        } else {
+          throw new Error('Failed to load approvals');
+        }
+      } catch (error) {
+        console.error('Error loading approvals:', error);
+        document.getElementById('approvalsTableBody').innerHTML = `
+          <tr>
+            <td colspan="6" class="px-6 py-4 text-center text-red-500">
+              Error loading approvals. Please try again.
+            </td>
+          </tr>
+        `;
+      }
+    }
+
+    // Display approvals in table
+    function displayApprovals(approvals) {
+      const tbody = document.getElementById('approvalsTableBody');
+      
+      if (approvals.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="6" class="px-6 py-4 text-center text-gray-500">
+              No approvals found.
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      tbody.innerHTML = approvals.map(approval => `
+        <tr class="hover:bg-gray-50">
+          <td class="px-6 py-4 whitespace-nowrap">
+            <div class="flex items-center">
+              <div class="flex-shrink-0 h-10 w-10">
+                <img class="h-10 w-10 rounded-full" src="${approval.user?.profileImage || '/static/default-avatar.png'}" alt="">
+              </div>
+              <div class="ml-4">
+                <div class="text-sm font-medium text-gray-900">${approval.user?.firstName} ${approval.user?.lastName}</div>
+                <div class="text-sm text-gray-500">${approval.user?.email}</div>
+              </div>
+            </div>
+          </td>
+          <td class="px-6 py-4 text-sm text-gray-900">
+            <div class="max-w-xs truncate" title="${approval.experience || 'No experience provided'}">
+              ${approval.experience || 'No experience provided'}
+            </div>
+          </td>
+          <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+            ฿${approval.hourlyRate}/hour
+          </td>
+          <td class="px-6 py-4 whitespace-nowrap">
+            <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full 
+              ${approval.isApproved === null ? 'bg-yellow-100 text-yellow-800' : 
+                approval.isApproved ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}">
+              ${approval.isApproved === null ? 'Pending' : approval.isApproved ? 'Approved' : 'Rejected'}
+            </span>
+          </td>
+          <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+            ${new Date(approval.createdAt).toLocaleDateString()}
+          </td>
+          <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+            <button onclick="viewApproval(${approval.id})" class="text-indigo-600 hover:text-indigo-900">
+              View Details
+            </button>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    // View approval details
+    async function viewApproval(approvalId) {
+      try {
+        const response = await fetch(`/admin/api/approvals/${approvalId}`);
+        if (response.ok) {
+          const approval = await response.json();
+          currentApprovalId = approvalId;
+          
+          document.getElementById('modalTitle').textContent = `${approval.user.firstName} ${approval.user.lastName} - Pet Sitter Application`;
+          document.getElementById('modalContent').innerHTML = `
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <h4 class="font-medium text-gray-900 mb-3">Personal Information</h4>
+                <div class="space-y-2 text-sm">
+                  <p><strong>Name:</strong> ${approval.user.firstName} ${approval.user.lastName}</p>
+                  <p><strong>Email:</strong> ${approval.user.email}</p>
+                  <p><strong>Phone:</strong> ${approval.user.phoneNumber || 'Not provided'}</p>
+                  <p><strong>Address:</strong> ${approval.user.address || 'Not provided'}</p>
+                </div>
+              </div>
+              
+              <div>
+                <h4 class="font-medium text-gray-900 mb-3">Pet Sitter Information</h4>
+                <div class="space-y-2 text-sm">
+                  <p><strong>Hourly Rate:</strong> ฿${approval.hourlyRate}</p>
+                  <p><strong>Services:</strong> ${approval.services?.join(', ') || 'Not specified'}</p>
+                  <p><strong>Current Status:</strong> 
+                    <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full 
+                      ${approval.isApproved === null ? 'bg-yellow-100 text-yellow-800' : 
+                        approval.isApproved ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}">
+                      ${approval.isApproved === null ? 'Pending' : approval.isApproved ? 'Approved' : 'Rejected'}
+                    </span>
+                  </p>
+                </div>
+              </div>
+              
+              <div class="md:col-span-2">
+                <h4 class="font-medium text-gray-900 mb-3">Bio & Experience</h4>
+                <div class="space-y-3">
+                  <div>
+                    <p class="text-sm"><strong>Bio:</strong></p>
+                    <p class="text-sm text-gray-600 mt-1">${approval.bio || 'No bio provided'}</p>
+                  </div>
+                  <div>
+                    <p class="text-sm"><strong>Experience:</strong></p>
+                    <p class="text-sm text-gray-600 mt-1">${approval.experience || 'No experience provided'}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          `;
+          
+          // Show/hide action buttons based on status
+          const approveBtn = document.getElementById('approveBtn');
+          const rejectBtn = document.getElementById('rejectBtn');
+          
+          if (approval.isApproved === null) {
+            approveBtn.style.display = 'inline-block';
+            rejectBtn.style.display = 'inline-block';
+          } else {
+            approveBtn.style.display = 'none';
+            rejectBtn.style.display = 'none';
+          }
+          
+          document.getElementById('approvalModal').classList.remove('hidden');
+        }
+      } catch (error) {
+        console.error('Error loading approval details:', error);
+      }
+    }
+
+    // Approve pet sitter
+    async function approvePetSitter(approvalId) {
+      try {
+        const response = await fetch(`/admin/api/approvals/${approvalId}/approve`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        });
+
+        if (response.ok) {
+          document.getElementById('approvalModal').classList.add('hidden');
+          loadApprovals(document.getElementById('filterStatus').value);
+          alert('Pet sitter approved successfully!');
+        } else {
+          throw new Error('Failed to approve pet sitter');
+        }
+      } catch (error) {
+        console.error('Error approving pet sitter:', error);
+        alert('Error approving pet sitter');
+      }
+    }
+
+    // Reject pet sitter
+    async function rejectPetSitter(approvalId) {
+      try {
+        const response = await fetch(`/admin/api/approvals/${approvalId}/reject`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        });
+
+        if (response.ok) {
+          document.getElementById('approvalModal').classList.add('hidden');
+          loadApprovals(document.getElementById('filterStatus').value);
+          alert('Pet sitter application rejected.');
+        } else {
+          throw new Error('Failed to reject pet sitter');
+        }
+      } catch (error) {
+        console.error('Error rejecting pet sitter:', error);
+        alert('Error rejecting pet sitter');
+      }
+    }
+
+    // Event listeners
+    document.getElementById('filterStatus').addEventListener('change', (e) => {
+      loadApprovals(e.target.value);
+    });
+
+    document.getElementById('approveBtn').addEventListener('click', () => {
+      if (currentApprovalId && confirm('Are you sure you want to approve this pet sitter?')) {
+        approvePetSitter(currentApprovalId);
+      }
+    });
+
+    document.getElementById('rejectBtn').addEventListener('click', () => {
+      if (currentApprovalId && confirm('Are you sure you want to reject this pet sitter application?')) {
+        rejectPetSitter(currentApprovalId);
+      }
+    });
+
+    document.getElementById('closeModal').addEventListener('click', () => {
+      document.getElementById('approvalModal').classList.add('hidden');
+    });
+
+    // Load approvals on page load
+    document.addEventListener('DOMContentLoaded', () => {
+      loadApprovals();
+    });
+  </script>
+</body>
+</html>

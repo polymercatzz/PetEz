@@ -1,0 +1,50 @@
+<span class="fixed z-[9999] text-white text-4xl top-5 left-4 cursor-pointer lg:hidden" onclick="Openbar()">
+  <i class="bi bi-filter-left px-2 bg-gray-900 rounded-md "></i>
+</span>
+
+<div class="sidebar fixed top-0 bottom-0 lg:left-0 left-[-300px] duration-1000
+p-2 max-w-[300px] w-full overflow-y-auto text-center bg-[#1B1D36] shadow h-screen flex flex-col justify-between z-50">
+
+  <div class="text-white p-2">
+    <div class="p-2.5 mt-1 flex items-center rounded-md mb-4">
+      <img src="/static/pets.png" alt="" class="w-[4vh]">
+      <h1 class="text-[3vh] ml-3 text-white font-bold i">PetEz</h1>
+      <i class="bi bi-x mr-2 cursor-pointer lg:hidden mx-auto text-[4.5vh]" onclick="Openbar()"></i>
+    </div>
+    <hr class="my-4 text-gray-600">
+
+    <div>
+      <a href="/admin" class="p-2.5 mt-2 flex items-center rounded-sm px-4 duration-300 cursor-pointer <%= activeMenu === 'home' ? 'bg-[#2b2f4b] border-l-4 border-l-orange-600' : 'hover:bg-[#2b2f4b]' %>">
+        <i class="bi bi-house-door-fill text-[3vh]"></i>
+        <span class="text-[2.2vh] ml-4 text-gray-200">Home</span>
+      </a>
+      <a href="/admin/users" class="p-2.5 mt-2 flex items-center rounded-sm px-4 duration-300 cursor-pointer <%= activeMenu === 'users' ? 'bg-[#2b2f4b] border-l-4 border-l-orange-600' : 'hover:bg-[#2b2f4b]' %>">
+        <i class="bi bi-people-fill text-[3vh]"></i>
+        <span class="text-[2.2vh] ml-4 text-gray-200">Users</span>
+      </a>
+      <a href="/admin/approval" class="p-2.5 mt-2 flex items-center rounded-sm px-4 duration-300 cursor-pointer <%= activeMenu === 'approval' ? 'bg-[#2b2f4b] border-l-4 border-l-orange-600' : 'hover:bg-[#2b2f4b]' %>">
+        <i class="bi bi-envelope-check-fill text-[3vh]"></i>
+        <span class="text-[2.2vh] ml-4 text-gray-200">Approvals</span>
+      </a>
+      <a href="/admin/bookings" class="p-2.5 mt-2 flex items-center rounded-sm px-4 duration-300 cursor-pointer <%= activeMenu === 'bookings' ? 'bg-[#2b2f4b] border-l-4 border-l-orange-600' : 'hover:bg-[#2b2f4b]' %>">
+        <i class="bi bi-calendar-check text-[3vh]"></i>
+        <span class="text-[2.2vh] ml-4 text-gray-200">Bookings</span>
+      </a>
+    </div>
+  </div>
+
+  <div class="text-white p-2">
+    <a href="/" class="p-2.5 mt-2 flex items-center rounded-sm px-4 duration-300 cursor-pointer hover:bg-red-600">
+      <i class="bi bi-box-arrow-right text-[3vh]"></i>
+      <span class="text-[2.2vh] ml-4 text-gray-200">Logout</span>
+    </a>
+  </div>
+</div>
+
+<script>
+  function Openbar() {
+    const sidebar = document.querySelector('.sidebar');
+    sidebar.classList.toggle('left-[-300px]');
+    sidebar.classList.toggle('left-0');
+  }
+</script>

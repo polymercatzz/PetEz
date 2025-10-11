@@ -19,8 +19,11 @@
   },
   "homepage": "https://github.com/polymercatzz/PetEz#readme",
   "dependencies": {
+    "dotenv": "^17.2.3",
     "ejs": "^3.1.10",
     "express": "^5.1.0",
-    "nodemon": "^3.1.10"
+    "mysql2": "^3.15.2",
+    "nodemon": "^3.1.10",
+    "sequelize": "^6.37.7"
   }
 }
