@@ -19,4 +19,14 @@ router.post('/api/jobs/:id/accept', petsitterController.acceptJob);
 router.get('/api/bookings', petsitterController.getPetsitterBookings);
 router.put('/api/bookings/:id/status', petsitterController.updateBookingStatus);
 
+// Service management routes
+router.get('/api/services', petsitterController.getSitterServices);
+router.post('/api/services', petsitterController.addSitterService);
+router.put('/api/services/:id', petsitterController.updateSitterService);
+router.delete('/api/services/:id', petsitterController.deleteSitterService);
+
+// Analytics routes
+router.get('/api/earnings', petsitterController.getSitterEarnings);
+router.get('/api/statistics', petsitterController.getSitterStatistics);
+
 module.exports = router;

@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %> - PetEz</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@100..900&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: "Noto Sans Thai", sans-serif;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- Navigation -->
+    <div class="flex justify-between items-center bg-white h-20 px-10 py-4 shadow-[0_2px_4px_rgba(0,0,0,0.3)] z-50">
+        <a href="/petsitter" class="flex justify-center items-center gap-4">
+            <i class="fa-solid fa-paw fa-3x text-blue-600"></i>
+            <h1 class="text-[2.2rem] font-bold">PetEz</h1>
+        </a>
+        <div class="flex justify-center items-center gap-5">
+            <a href="/petsitter/jobs" class="text-[1.2rem] underline-offset-4 hover:underline cursor-pointer">งานที่มี</a>
+            <a href="/petsitter/history" class="nav-link text-[1.2rem] underline-offset-4 hover:underline cursor-pointer">ประวัติการให้บริการ</a>
+            <div class="relative group">
+                <img src="/static/user.png" class="w-12 h-12 rounded-full cursor-pointer">
+                <div class="absolute right-0 top-[60px] w-[200px] bg-white border rounded-lg shadow-lg invisible opacity-0 group-hover:visible group-hover:opacity-100 transition-all duration-200 z-10">
+                    <ul class="list-none p-2 m-0">
+                        <li>
+                            <a href="/petsitter/profile" class="flex items-center gap-4 w-full px-3 py-2 text-[1rem] rounded-md hover:bg-blue-100 transition-colors">
+                                <i class="fa-solid fa-user"></i>
+                                โปรไฟล์
+                            </a>
+                        </li>
+                        <li>
+                            <a href="/logout" class="flex items-center gap-4 w-full px-3 py-2 text-[1rem] rounded-md hover:bg-red-100 transition-colors">
+                                <i class="fa-solid fa-right-from-bracket"></i>
+                                ออกจากระบบ
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="container mx-auto px-4 py-8">
+        <div class="max-w-4xl mx-auto">
+            <h1 class="text-3xl font-bold text-gray-800 mb-8 text-center">สมัครเป็น Pet Sitter</h1>
+            
+            <div class="bg-white rounded-lg shadow-lg p-8">
+                <form id="sitterRegistrationForm" class="space-y-6">
+                    <!-- Personal Information -->
+                    <div class="border-b pb-6">
+                        <h2 class="text-xl font-semibold text-gray-700 mb-4">ข้อมูลส่วนตัว</h2>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">ชื่อผู้ใช้</label>
+                                <input type="text" value="<%= user.username %>" readonly class="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-100 cursor-not-allowed">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">อีเมล</label>
+                                <input type="email" value="<%= user.email %>" readonly class="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-100 cursor-not-allowed">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Sitter Information -->
+                    <div class="border-b pb-6">
+                        <h2 class="text-xl font-semibold text-gray-700 mb-4">ข้อมูล Pet Sitter</h2>
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">แนะนำตัวเอง</label>
+                                <textarea name="bio" rows="4" placeholder="เล่าเกี่ยวกับตัวคุณ ประสบการณ์ในการดูแลสัตว์เลี้ยง และเหตุผลที่อยากเป็น Pet Sitter..." 
+                                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required></textarea>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">ประสบการณ์ (ปี)</label>
+                                <input type="number" name="experience" min="0" max="50" placeholder="จำนวนปีประสบการณ์ในการดูแลสัตว์เลี้ยง" 
+                                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Services -->
+                    <div class="border-b pb-6">
+                        <h2 class="text-xl font-semibold text-gray-700 mb-4">บริการที่ให้</h2>
+                        <div id="servicesContainer" class="space-y-4">
+                            <!-- Service 1 -->
+                            <div class="service-item border border-gray-200 rounded-lg p-4">
+                                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">ประเภทบริการ</label>
+                                        <select name="services[0][type]" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                                            <option value="">เลือกประเภทบริการ</option>
+                                            <option value="walking">เดินเล่น</option>
+                                            <option value="sitting">ดูแลที่บ้าน</option>
+                                            <option value="boarding">ฝากเลี้ยงที่บ้าน</option>
+                                            <option value="grooming">อาบน้ำตัดขน</option>
+                                            <option value="training">ฝึกสัตว์</option>
+                                            <option value="veterinary_visit">พาหาหมอ</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">ราคาต่อชั่วโมง (บาท)</label>
+                                        <input type="number" name="services[0][price]" min="50" max="2000" placeholder="200" 
+                                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">รายละเอียด</label>
+                                        <input type="text" name="services[0][description]" placeholder="รายละเอียดเพิ่มเติม" 
+                                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <button type="button" id="addServiceBtn" class="mt-4 px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 transition-colors">
+                            <i class="fa-solid fa-plus mr-2"></i>เพิ่มบริการ
+                        </button>
+                    </div>
+
+                    <!-- Terms -->
+                    <div class="flex items-center">
+                        <input type="checkbox" id="agreeTerms" required class="mr-2">
+                        <label for="agreeTerms" class="text-sm text-gray-700">
+                            ฉันยอมรับ <a href="#" class="text-blue-600 hover:underline">ข้อกำหนดและเงื่อนไข</a> ของการเป็น Pet Sitter
+                        </label>
+                    </div>
+
+                    <!-- Submit Button -->
+                    <div class="text-center">
+                        <button type="submit" class="w-full md:w-auto px-8 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <i class="fa-solid fa-paper-plane mr-2"></i>สมัครเป็น Pet Sitter
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Modal -->
+    <div id="loadingModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-lg p-6">
+            <div class="flex items-center space-x-3">
+                <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
+                <span>กำลังสมัคร...</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let serviceIndex = 1;
+
+        // Add service functionality
+        document.getElementById('addServiceBtn').addEventListener('click', function() {
+            if (serviceIndex >= 5) {
+                alert('สามารถเพิ่มบริการได้สูงสุด 5 บริการ');
+                return;
+            }
+
+            const servicesContainer = document.getElementById('servicesContainer');
+            const serviceHTML = `
+                <div class="service-item border border-gray-200 rounded-lg p-4">
+                    <div class="flex justify-between items-center mb-4">
+                        <h4 class="font-medium text-gray-700">บริการที่ ${serviceIndex + 1}</h4>
+                        <button type="button" class="remove-service-btn text-red-500 hover:text-red-700">
+                            <i class="fa-solid fa-trash"></i>
+                        </button>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">ประเภทบริการ</label>
+                            <select name="services[${serviceIndex}][type]" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                                <option value="">เลือกประเภทบริการ</option>
+                                <option value="walking">เดินเล่น</option>
+                                <option value="sitting">ดูแลที่บ้าน</option>
+                                <option value="boarding">ฝากเลี้ยงที่บ้าน</option>
+                                <option value="grooming">อาบน้ำตัดขน</option>
+                                <option value="training">ฝึกสัตว์</option>
+                                <option value="veterinary_visit">พาหาหมอ</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">ราคาต่อชั่วโมง (บาท)</label>
+                            <input type="number" name="services[${serviceIndex}][price]" min="50" max="2000" placeholder="200" 
+                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">รายละเอียด</label>
+                            <input type="text" name="services[${serviceIndex}][description]" placeholder="รายละเอียดเพิ่มเติม" 
+                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            servicesContainer.insertAdjacentHTML('beforeend', serviceHTML);
+            serviceIndex++;
+            
+            // Add remove functionality
+            attachRemoveListeners();
+        });
+
+        // Remove service functionality
+        function attachRemoveListeners() {
+            document.querySelectorAll('.remove-service-btn').forEach(btn => {
+                btn.removeEventListener('click', removeService);
+                btn.addEventListener('click', removeService);
+            });
+        }
+
+        function removeService(e) {
+            e.target.closest('.service-item').remove();
+            reindexServices();
+        }
+
+        function reindexServices() {
+            const serviceItems = document.querySelectorAll('.service-item');
+            serviceItems.forEach((item, index) => {
+                const inputs = item.querySelectorAll('input, select');
+                inputs.forEach(input => {
+                    if (input.name) {
+                        input.name = input.name.replace(/\[\d+\]/, `[${index}]`);
+                    }
+                });
+                const title = item.querySelector('h4');
+                if (title) {
+                    title.textContent = `บริการที่ ${index + 1}`;
+                }
+            });
+            serviceIndex = serviceItems.length;
+        }
+
+        // Form submission
+        document.getElementById('sitterRegistrationForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const loadingModal = document.getElementById('loadingModal');
+            loadingModal.classList.remove('hidden');
+            
+            try {
+                // Collect form data
+                const formData = new FormData(this);
+                const data = {
+                    bio: formData.get('bio'),
+                    experience: parseInt(formData.get('experience')),
+                    services: []
+                };
+
+                // Collect services data
+                const serviceItems = document.querySelectorAll('.service-item');
+                serviceItems.forEach((item, index) => {
+                    const type = formData.get(`services[${index}][type]`);
+                    const price = formData.get(`services[${index}][price]`);
+                    const description = formData.get(`services[${index}][description]`);
+                    
+                    if (type && price) {
+                        data.services.push({
+                            type,
+                            price: parseInt(price),
+                            description: description || ''
+                        });
+                    }
+                });
+
+                // Submit to API
+                const response = await fetch('/petsitter/api/register', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await response.json();
+                
+                if (response.ok) {
+                    alert('สมัครเป็น Pet Sitter สำเร็จ! รอการอนุมัติจากระบบ');
+                    window.location.href = '/petsitter/profile';
+                } else {
+                    alert(result.message || 'เกิดข้อผิดพลาดในการสมัคร');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('เกิดข้อผิดพลาดในการเชื่อมต่อ');
+            } finally {
+                loadingModal.classList.add('hidden');
+            }
+        });
+
+        // Initialize remove listeners
+        attachRemoveListeners();
+    </script>
+</body>
+</html>

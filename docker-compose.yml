@@ -44,6 +44,25 @@ services:
     networks:
       - pet-ez-network
 
+  sitter-service:
+    build:
+      context: ./Services/sitter-service
+      dockerfile: Dockerfile
+    container_name: pet-ez-sitter-service
+    ports:
+      - "3004:3004"
+    environment:
+      DB_HOST: mysql-auth
+      DB_NAME: auth_db
+      DB_USER: root
+      DB_PASSWORD: root
+      JWT_SECRET: petez-super-secret-jwt-key-2024
+      SESSION_SECRET: petez-super-secret-session-key-2024
+    depends_on:
+      - mysql-auth
+    networks:
+      - pet-ez-network
+
   frontend:
     build:
       context: ./Frontend

@@ -1,0 +1,23 @@
+{
+  "name": "sitter-service",
+  "version": "1.0.0",
+  "description": "Pet sitter service API",
+  "main": "main.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "nodemon main.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^5.1.0",
+    "sequelize": "^6.35.0",
+    "mysql2": "^3.6.5",
+    "dotenv": "^16.3.1",
+    "cors": "^2.8.5",
+    "jsonwebtoken": "^9.0.2",
+    "express-session": "^1.18.2",
+    "nodemon": "^3.1.10"
+  }
+}

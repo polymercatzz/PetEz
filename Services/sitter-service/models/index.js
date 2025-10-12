@@ -74,4 +74,30 @@ db.Request.belongsTo(db.Sitter, { foreignKey: 'sitter_id' });
 db.Pet.hasMany(db.Request, { foreignKey: 'pet_id', onDelete: 'CASCADE' });
 db.Request.belongsTo(db.Pet, { foreignKey: 'pet_id' });
 
+// Sync database (create tables if they don't exist)
+const initDatabase = async () => {
+  let retries = 5;
+  while (retries) {
+    try {
+      await sequelize.authenticate();
+      console.log('Sitter Service: Database connection established successfully.');
+      
+      // Sync all models - force false will not drop existing tables
+      await sequelize.sync({ force: false, alter: true });
+      console.log('Sitter Service: Database synced successfully.');
+      break;
+    } catch (error) {
+      console.error('Sitter Service: Unable to connect to the database. Retrying...', error.message);
+      retries--;
+      if (retries === 0) {
+        console.error('Sitter Service: Failed to connect to database after multiple attempts');
+        process.exit(1);
+      }
+      await new Promise(resolve => setTimeout(resolve, 5000)); // Wait 5 seconds before retry
+    }
+  }
+};
+
+db.initDatabase = initDatabase;
+
 module.exports = db;
