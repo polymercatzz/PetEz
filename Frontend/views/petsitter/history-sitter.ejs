@@ -27,89 +27,16 @@
             cursor: grabbing;
         }
     </style>
-</head>
+    </head>
 <body>
-    <div class="flex justify-between items-center bg-white h-20 px-10 py-4 shadow-[0_2px_4px_rgba(0,0,0,0.3)] z-50 transition-all duration-300">
-        <a href="work.html" class="flex justify-center items-center gap-4">
-            <i class="fa-solid fa-paw fa-3x"></i>
-            <h1 class="text-[2.2rem] font-bold">PetEz</h1>
-        </a>
-        <div class="flex justify-center items-center gap-5">
-            <a href="create-sitter.html" class="text-[1.2rem] underline-offset-4 hover:underline cursor-pointer">สร้างบริการ</a>
-            <a href="history-sitter.html" class="nav-link text-[1.2rem] underline-offset-4 hover:underline cursor-pointer flex items-center gap-2">
-               ประวัติการให้บริการ
-               <span class="flex items-center justify-center text-xs font-bold bg-red-500 text-white rounded-full w-5 h-5">1</span>
-            </a>
-            <label class="relative inline-block">
-                <input type="checkbox" class="hidden peer" />
-                <p class="w-full h-full flex items-center justify-center gap-2 text-gray-700 text-[1.4rem] font-semibold cursor-pointer">
-                    <img src="../static/user.png" class="w-12 h-12 rounded-full cursor-pointer">
-                </p>
-                <nav class="absolute right-0 top-[60px] w-[200px] bg-white border border-none rounded-lg shadow-[0_4px_10px_rgba(0,0,0,0.25)] invisible opacity-0 transition-all duration-200 ease-in-out z-10 peer-checked:visible peer-checked:opacity-100">
-                    <ul class="list-none p-2 m-0">
-                        <li>
-                            <a href="profile-sitter.html" class="flex justify-start items-center gap-4 block w-full px-3 py-2 text-left text-[1rem] font-light rounded-md hover:bg-blue-200 hover:text-white cursor-pointer transition-colors duration-150">
-                                <i class="fa-solid fa-user"></i>
-                                โปรไฟล์
-                            </a>
-                        </li>
-                        <li>
-                            <a href="index.html" class="flex justify-start items-center gap-4 block w-full px-3 py-2 text-left text-[1rem] font-light rounded-md hover:bg-blue-200 hover:text-white cursor-pointer transition-colors duration-150">
-                                <i class="fa-solid fa-right-from-bracket"></i>
-                                Sign Out
-                            </a>
-                        </li>
-                    </ul>
-                </nav>
-            </label>
-        </div>
-    </div>
+    <%- include('../partials/petsitter-nav') %>
 
     <div class="flex flex-col justify-center items-start my-10 mx-auto px-10 py-10 w-[80%] border border-gray-200 rounded-xl shadow-sm">
         <div class="flex justify-center items-center gap-3 mb-5 text-red-500">
             <i class="fa-solid fa-bell fa-2x"></i>
             <p class="text-[1.8rem] font-bold">งานใหม่</p>
         </div>
-        <div class="grid grid-cols-1 gap-5 w-full">
-            <div class="flex flex-col p-5 border border-gray-300 rounded-xl shadow-sm">
-                <div class="flex justify-between mb-3">
-                    <p class="text-[1.3rem] font-semibold">งาน #001</p>
-                    <p class="px-3 py-1 bg-yellow-100 text-yellow-800 rounded-full">รอดำเนินการ</p>
-                </div>
-                <div class="grid grid-cols-4">
-                    <p class="flex flex-col">
-                        <span class="text-gray-600">ลูกค้า</span>
-                        <span>Folkรักแมว</span>
-                    </p>
-                    <p class="flex flex-col">
-                        <span class="text-gray-600">บริการ</span>
-                        <span>บริการดูแลสัตว์เลี้ยงตามบ้าน</span>
-                    </p>
-                    <p class="flex flex-col">
-                        <span class="text-gray-600">วันที่</span>
-                        <span>01/12/2025 - 03/12/2025</span>
-                    </p>
-                    <p class="flex flex-col">
-                        <span class="text-gray-600">ราคา</span>
-                        <span>3,210 บาท</span>
-                    </p>
-                </div>
-                <div class="w-full flex justify-end items-end gap-5 mt-5">
-                    <button onclick="openpopup()" class="flex justify-center items-center px-7 py-2 bg-blue-600 text-white rounded-xl transition duration-200 ease-in-out cursor-pointer hover:bg-blue-800">
-                        <i class="fa-solid fa-eye mr-2"></i>
-                        ดูรายละเอียด
-                    </button>
-                    <button class="flex justify-center items-center px-7 py-2 bg-red-100 text-red-800 rounded-xl transition duration-200 ease-in-out cursor-pointer hover:bg-red-200">
-                        <i class="fa-solid fa-xmark mr-2"></i>
-                        ปฏิเสธ
-                    </button>
-                    <button class="flex justify-center items-center px-7 py-2 bg-green-100 text-green-800 rounded-xl transition duration-200 ease-in-out cursor-pointer hover:bg-green-200">
-                        <i class="fa-solid fa-check mr-2"></i>
-                        ยืนยันการจอง
-                    </button>
-                </div>
-            </div>
-        </div>
+        <div id="new-jobs" class="grid grid-cols-1 gap-5 w-full"></div>
     </div>
 
     <div class="flex flex-col justify-center items-start mb-10 mx-auto px-10 py-10 w-[80%] border border-gray-200 rounded-xl shadow-sm">
@@ -117,32 +44,7 @@
             <i class="fa-solid fa-clock-rotate-left fa-2x"></i>
             <p class="text-[1.8rem] font-bold">ประวัติการทำงาน</p>
         </div>
-        <div class="grid grid-cols-1 gap-5 w-full">
-            <div class="flex flex-col p-5 border border-gray-300 rounded-xl shadow-sm">
-                <div class="flex justify-between mb-3">
-                    <p class="text-[1.3rem] font-semibold">งาน #001</p>
-                    <p class="px-3 py-1 bg-green-100 text-green-800 rounded-full">สำเร็จ</p>
-                </div>
-                <div class="grid grid-cols-4">
-                    <p class="flex flex-col">
-                        <span class="text-gray-600">ลูกค้า</span>
-                        <span>Folkรักแมว</span>
-                    </p>
-                    <p class="flex flex-col">
-                        <span class="text-gray-600">บริการ</span>
-                        <span>บริการดูแลสัตว์เลี้ยงตามบ้าน</span>
-                    </p>
-                    <p class="flex flex-col">
-                        <span class="text-gray-600">วันที่</span>
-                        <span>01/12/2025 - 03/12/2025</span>
-                    </p>
-                    <p class="flex flex-col">
-                        <span class="text-gray-600">ราคา</span>
-                        <span>3,210 บาท</span>
-                    </p>
-                </div>
-            </div>
-        </div>
+        <div id="history" class="grid grid-cols-1 gap-5 w-full"></div>
     </div>
 
     <div id="popup" class="hidden fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-100 bg-white py-5 rounded-xl flex flex-col justify-center items-start w-[50%] mx-auto shadow-[0_4px_12px_rgba(0,0,0,0.15)]">
@@ -212,13 +114,62 @@
         </div>
     </div>
 
-    <script>
-        function openpopup(){
-            document.getElementById("popup").classList.remove("hidden");
-        }
-        function closepopup(){
-            document.getElementById("popup").classList.add("hidden");
-        }
-    </script>
+        <script>
+            function card(job) {
+                const id = job.booking_id || job.id;
+                const customer = job.User?.full_name || `ผู้ใช้ #${job.user_id || ''}`;
+                const svc = job.Service?.service_type || job.service_type || '-';
+                const s = job.start_date ? new Date(job.start_date) : null;
+                const e = job.end_date ? new Date(job.end_date) : null;
+                const period = s && e ? `${s.toLocaleDateString()} - ${e.toLocaleDateString()}` : '-';
+                const price = Number(job.total_price || job.Service?.price_per_hour || 0).toLocaleString();
+                const status = job.status;
+                return `
+                    <div class="flex flex-col p-5 border border-gray-300 rounded-xl shadow-sm">
+                        <div class="flex justify-between mb-3">
+                            <p class="text-[1.3rem] font-semibold">งาน #${id}</p>
+                            <p class="px-3 py-1 ${status==='completed'?'bg-green-100 text-green-800':status==='accepted'?'bg-yellow-100 text-yellow-800':'bg-blue-100 text-blue-800'} rounded-full">${status}</p>
+                        </div>
+                        <div class="grid grid-cols-4">
+                            <p class="flex flex-col"><span class="text-gray-600">ลูกค้า</span><span>${customer}</span></p>
+                            <p class="flex flex-col"><span class="text-gray-600">บริการ</span><span>${svc}</span></p>
+                            <p class="flex flex-col"><span class="text-gray-600">วันที่</span><span>${period}</span></p>
+                            <p class="flex flex-col"><span class="text-gray-600">ราคา</span><span>${price} บาท</span></p>
+                        </div>
+                        <div class="w-full flex justify-end items-end gap-3 mt-5">
+                            <a class="px-5 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-800" href="/petsitter/work/${id}">ดูรายละเอียด</a>
+                            ${status==='accepted'?`<button data-complete="${id}" class="px-5 py-2 bg-green-100 text-green-800 rounded-xl hover:bg-green-200">ทำงานเสร็จ</button>`:''}
+                        </div>
+                    </div>`;
+            }
+            async function loadMyJobs() {
+                const newJobsEl = document.getElementById('new-jobs');
+                const historyEl = document.getElementById('history');
+                newJobsEl.innerHTML = '<p class="text-gray-500">กำลังโหลด...</p>';
+                historyEl.innerHTML = '<p class="text-gray-500">กำลังโหลด...</p>';
+                try {
+                      const resp = await fetch('/petsitter/api/my-jobs?status=accepted');
+                      const completedResp = await fetch('/petsitter/api/my-jobs?status=completed');
+                    const [accData, compData] = await Promise.all([resp.json(), completedResp.json()]);
+                    const acc = accData.jobs || accData.bookings || [];
+                    const comp = compData.jobs || compData.bookings || [];
+                    newJobsEl.innerHTML = acc.length ? acc.map(card).join('') : '<p class="text-gray-500">ไม่มีงานใหม่</p>';
+                    historyEl.innerHTML = comp.length ? comp.map(card).join('') : '<p class="text-gray-500">ยังไม่มีประวัติงาน</p>';
+                    // wire complete buttons
+                    document.querySelectorAll('[data-complete]').forEach(btn => {
+                        btn.addEventListener('click', async (e) => {
+                            const id = e.currentTarget.getAttribute('data-complete');
+                            const resp = await fetch(`/petsitter/api/jobs/${id}/status`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ status: 'completed' }) });
+                            if (resp.ok) loadMyJobs();
+                            else alert('อัปเดตสถานะไม่สำเร็จ');
+                        });
+                    });
+                } catch (e) {
+                    newJobsEl.innerHTML = '<p class="text-red-500">โหลดไม่สำเร็จ</p>';
+                    historyEl.innerHTML = '<p class="text-red-500">โหลดไม่สำเร็จ</p>';
+                }
+            }
+            loadMyJobs();
+        </script>
 </body>
 </html>

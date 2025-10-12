@@ -3,12 +3,27 @@ const axios = require('axios');
 
 const petsitterController = {
     // View controllers
-    getPetsitterProfile: (req, res) => {
+    getPetsitterProfile: async (req, res) => {
         const user = req.session.user;
         if (!user) {
             return res.redirect('/');
         }
-        res.render('petsitter/profile', { title: 'Pet Sitter Profile', user: user });
+        try {
+            // Fetch sitter profile SSR so we can render documents/details
+            const sitterApiUrl = 'http://sitter-service:3004/profile';
+            const response = await axios.get(sitterApiUrl, {
+                headers: { 'Authorization': `Bearer ${req.session.token}` }
+            });
+            const sitter = response.data?.sitter || null;
+            res.render('petsitter/profile-sitter', { title: 'โปรไฟล์พี่เลี้ยงสัตว์', user, sitter });
+        } catch (error) {
+            // If profile doesn't exist yet (404) or any error, render with null sitter
+            if (error.response && error.response.status === 404) {
+                return res.render('petsitter/profile-sitter', { title: 'โปรไฟล์พี่เลี้ยงสัตว์', user, sitter: null });
+            }
+            console.error('SSR sitter profile load failed:', error.response?.status, error.response?.data || error.message);
+            return res.render('petsitter/profile-sitter', { title: 'โปรไฟล์พี่เลี้ยงสัตว์', user, sitter: null });
+        }
     },
 
     getPetsitterRegister: (req, res) => {
@@ -16,32 +31,130 @@ const petsitterController = {
         if (!user) {
             return res.redirect('/');
         }
-        res.render('petsitter/register', { title: 'Become a Pet Sitter', user: user });
+        // Use existing create-sitter.ejs
+        res.render('petsitter/create-sitter', { title: 'สร้างบริการของพี่เลี้ยง', user: user });
     },
 
-    getAvailableJobs: (req, res) => {
+    getAvailableJobs: async (req, res) => {
         const user = req.session.user;
         if (!user) {
             return res.redirect('/');
         }
-        res.render('petsitter/jobs', { title: 'Available Jobs', user: user });
+        try {
+            // Pull open customer requests for sitters
+            const sitterApiUrl = 'http://sitter-service:3004/requests';
+            const response = await axios.get(sitterApiUrl, {
+                headers: { 'Authorization': `Bearer ${req.session.token}` },
+                params: { status: 'open', ...(req.query || {}) }
+            });
+            const requests = response.data?.requests || [];
+            res.render('petsitter/work', { title: 'คำขอที่เปิดอยู่', user, jobs: requests });
+        } catch (error) {
+            console.error('SSR jobs load failed:', error.response?.status, error.response?.data || error.message);
+            res.render('petsitter/work', { title: 'คำขอที่เปิดอยู่', user, jobs: [] });
+        }
     },
 
-    getJobHistory: (req, res) => {
+    getJobHistory: async (req, res) => {
         const user = req.session.user;
         if (!user) {
             return res.redirect('/');
         }
-        res.render('petsitter/history', { title: 'Job History', user: user });
+        try {
+            const sitterApiUrl = 'http://sitter-service:3004/my-jobs';
+            const [accResp, compResp] = await Promise.all([
+                axios.get(sitterApiUrl, { headers: { 'Authorization': `Bearer ${req.session.token}` }, params: { status: 'accepted' } }),
+                axios.get(sitterApiUrl, { headers: { 'Authorization': `Bearer ${req.session.token}` }, params: { status: 'completed' } })
+            ]);
+            const acceptedJobs = accResp.data?.jobs || accResp.data?.bookings || [];
+            const completedJobs = compResp.data?.jobs || compResp.data?.bookings || [];
+            res.render('petsitter/history-sitter', { title: 'ประวัติการทำงาน', user, acceptedJobs, completedJobs });
+        } catch (error) {
+            console.error('SSR history load failed:', error.response?.status, error.response?.data || error.message);
+            res.render('petsitter/history-sitter', { title: 'ประวัติการทำงาน', user, acceptedJobs: [], completedJobs: [] });
+        }
     },
 
-    getWorkDetail: (req, res) => {
+    getWorkDetail: async (req, res) => {
         const user = req.session.user;
         if (!user) {
             return res.redirect('/');
         }
         const jobId = req.params.id;
-        res.render('petsitter/work_detail', { title: 'Job Details', jobId, user: user });
+        try {
+            // Try to find job in my accepted/completed jobs first
+            const sitterMyUrl = 'http://sitter-service:3004/my-jobs';
+            const [accResp, compResp] = await Promise.all([
+                axios.get(sitterMyUrl, { headers: { 'Authorization': `Bearer ${req.session.token}` }, params: { status: 'accepted' } }),
+                axios.get(sitterMyUrl, { headers: { 'Authorization': `Bearer ${req.session.token}` }, params: { status: 'completed' } })
+            ]);
+            const pool = [ ...(accResp.data?.jobs || []), ...(compResp.data?.jobs || []) ];
+            let finalJob = pool.find(j => String(j.booking_id || j.id) === String(jobId));
+            // If not found, check available jobs
+            if (!finalJob) {
+                const availResp = await axios.get('http://sitter-service:3004/jobs', { headers: { 'Authorization': `Bearer ${req.session.token}` } });
+                const jobs = availResp.data?.jobs || [];
+                finalJob = jobs.find(j => String(j.booking_id || j.id) === String(jobId));
+            }
+            // First try: treat id as booking id (legacy job flow)
+            let job = finalJob;
+                try {
+                    const sitterMyUrl = 'http://sitter-service:3004/my-jobs';
+                    const [accResp, compResp] = await Promise.all([
+                        axios.get(sitterMyUrl, { headers: { 'Authorization': `Bearer ${req.session.token}` }, params: { status: 'accepted' } }),
+                        axios.get(sitterMyUrl, { headers: { 'Authorization': `Bearer ${req.session.token}` }, params: { status: 'completed' } })
+                    ]);
+                    const pool = [ ...(accResp.data?.jobs || []), ...(compResp.data?.jobs || []) ];
+                    job = pool.find(j => String(j.booking_id || j.id) === String(jobId));
+                } catch (e) {}
+
+                // If not found, check request detail (new request flow)
+                if (!job) {
+                    const reqResp = await axios.get(`http://sitter-service:3004/requests/${jobId}`, {
+                        headers: { 'Authorization': `Bearer ${req.session.token}` }
+                    });
+                    // Map request fields into a job-like object for the view
+                    const r = reqResp.data?.request || null;
+                    if (r) {
+                        job = {
+                            id: r.request_id,
+                            user_id: r.user_id,
+                            status: r.status,
+                            description: r.description,
+                            service_type: r.service_type || null,
+                            start_date: r.preferred_date || null,
+                            end_date: null,
+                            total_price: null,
+                            User: null,
+                            Pet: null
+                        };
+                        // Enrich User contact info from auth-service if possible
+                        try {
+                            const usersResp = await axios.get('http://auth-service:3002/api/users/all');
+                            const users = usersResp.data?.users || [];
+                            const u = users.find(u => String(u.user_id) === String(r.user_id));
+                            if (u) {
+                                job.User = {
+                                    username: u.username,
+                                    full_name: u.full_name,
+                                    email: u.email,
+                                    phone: u.phone,
+                                    address: u.address,
+                                    district: u.district,
+                                    province: u.province,
+                                    postal_code: u.postal_code
+                                };
+                            }
+                        } catch (e) {
+                            // best-effort enrichment; ignore errors
+                        }
+                    }
+                }
+                res.render('petsitter/work-detail', { title: 'รายละเอียดงาน', user, job, jobId });
+        } catch (error) {
+            console.error('SSR work-detail load failed:', error.response?.status, error.response?.data || error.message);
+            res.render('petsitter/work-detail', { title: 'รายละเอียดงาน', user, job: null, jobId });
+        }
     },
 
     // API controllers
@@ -173,8 +286,24 @@ const petsitterController = {
         } catch (error) {
             if (error.response) {
                 res.status(error.response.status).json(error.response.data);
-            } else {
-                console.error('Error accepting job:', error);
+                        // Try accept booking job first; if fails as 404, try accept request
+                        const tryAccept = async () => {
+                            // Accept job (booking)
+                            const urlJob = `http://sitter-service:3004/jobs/${jobId}/accept`;
+                            try {
+                                return await axios.post(urlJob, {}, { headers: { 'Authorization': `Bearer ${req.session.token}` } });
+                            } catch (err) {
+                                if (err.response && err.response.status === 404) {
+                                    // Accept request
+                                    const urlReq = `http://sitter-service:3004/requests/${jobId}/accept`;
+                                    return await axios.post(urlReq, {}, { headers: { 'Authorization': `Bearer ${req.session.token}` } });
+                                }
+                                throw err;
+                            }
+                        };
+
+                        const response = await tryAccept();
+
                 res.status(500).json({ error: 'Internal server error' });
             }
         }
@@ -394,71 +523,7 @@ const petsitterController = {
         }
     },
 
-    getPetsitterBookings: async (req, res) => {
-        try {
-            // Get petsitter's accepted bookings
-            const user = req.session.user;
-            if (!user) {
-                return res.status(401).json({ message: 'Authentication required' });
-            }
-
-            const bookingApiUrl = `http://booking-service:3006/sitter/${user.id}/bookings`;
-            const response = await fetch(bookingApiUrl, {
-                method: 'GET',
-                headers: {
-                    'Authorization': `Bearer ${req.session.token}`
-                }
-            });
-
-            if (response.ok) {
-                const data = await response.json();
-                res.json(data);
-            } else {
-                console.error('Failed to fetch petsitter bookings:', response.status);
-                res.json({ bookings: [] });
-            }
-        } catch (error) {
-            console.error('Error fetching petsitter bookings:', error);
-            res.status(500).json({ error: error.message });
-        }
-    },
-
-    updateBookingStatus: async (req, res) => {
-        try {
-            const bookingId = req.params.id;
-            const { status } = req.body;
-            const user = req.session.user;
-            
-            if (!user) {
-                return res.status(401).json({ message: 'Authentication required' });
-            }
-
-            // Update booking status in booking service
-            const bookingApiUrl = `http://booking-service:3006/bookings/${bookingId}/status`;
-            const response = await fetch(bookingApiUrl, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${req.session.token}`
-                },
-                body: JSON.stringify({
-                    status: status,
-                    sitter_id: user.id
-                })
-            });
-
-            if (response.ok) {
-                const data = await response.json();
-                res.json({ message: 'Booking status updated successfully', booking: data.booking });
-            } else {
-                const errorData = await response.json();
-                res.status(response.status).json({ message: errorData.message || 'Failed to update booking status' });
-            }
-        } catch (error) {
-            console.error('Error updating booking status:', error);
-            res.status(500).json({ error: error.message });
-        }
-    }
+    // Note: sitter-service APIs are used for sitter jobs and status updates.
 };
 
 module.exports = petsitterController;

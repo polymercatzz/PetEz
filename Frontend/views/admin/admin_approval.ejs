@@ -42,11 +42,11 @@
                 <span class="bg-[#334DCC] text-white p-1 rounded-md text-[1.6vh] ml-auto">ดูเอกสาร</span>
               </a>
               <div class="grid grid-cols-2 gap-3 mt-2">
-                <button data-ssr-reject data-id="<%= s.sitter_id %>" class="flex items-center justify-center py-1 px-4 border border-red-300 rounded-xl bg-red-200 text-red-600 hover:shadow-lg" onclick="updateStatus(<%= s.sitter_id %>, 'rejected')">
+                <button data-ssr-reject data-id="<%= s.sitter_id %>" class="flex items-center justify-center py-1 px-4 border border-red-300 rounded-xl bg-red-200 text-red-600 hover:shadow-lg">
                   <i class="bi bi-x text-[3vh]"></i>
                   <span>ปฏิเสธ</span>
                 </button>
-                <button data-ssr-approve data-id="<%= s.sitter_id %>" class="flex items-center justify-center py-1 px-4 border border-green-300 rounded-xl bg-green-200 text-green-600 hover:shadow-lg"  onclick="updateStatus(<%= s.sitter_id %>, 'approved')">
+                <button data-ssr-approve data-id="<%= s.sitter_id %>" class="flex items-center justify-center py-1 px-4 border border-green-300 rounded-xl bg-green-200 text-green-600 hover:shadow-lg">
                   <i class="bi bi-check2 text-[3vh]"></i>
                   <span>ยืนยัน</span>
                 </button>
@@ -85,7 +85,18 @@
     }
 
     // Wire SSR buttons
-  // No client-side re-render; rely on EJS SSR. Only wire existing SSR buttons.
+    document.querySelectorAll('[data-ssr-reject]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const id = btn.getAttribute('data-id');
+        updateStatus(id, 'rejected');
+      });
+    });
+    document.querySelectorAll('[data-ssr-approve]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const id = btn.getAttribute('data-id');
+        updateStatus(id, 'approved');
+      });
+    });
   </script>
 </body>
 

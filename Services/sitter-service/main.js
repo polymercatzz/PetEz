@@ -322,27 +322,66 @@ app.delete('/services/:id', verifyToken, async (req, res) => {
 // JOB/BOOKING MANAGEMENT ENDPOINTS
 // ========================================
 
-// Create a request to contact/engage a sitter (user inquiry)
-app.post('/requests', verifyToken, async (req, res) => {
+// Removed: Creating customer requests is disabled.
+
+// List customer requests for sitters (default: open)
+app.get('/requests', verifyToken, async (req, res) => {
     try {
-        const { sitter_id, pet_id, description, preferred_date } = req.body || {};
+        const { status } = req.query; // open | accepted | completed | cancelled
+        const where = {};
+        if (status) where.status = status;
+        else where.status = 'open';
 
-        if (!pet_id) {
-            return res.status(400).json({ message: 'pet_id is required' });
-        }
-
-        const request = await Request.create({
-            user_id: req.user.id,
-            sitter_id: sitter_id || null,
-            pet_id: pet_id || null,
-            description: description || '',
-            preferred_date: preferred_date ? new Date(preferred_date) : null,
-            status: 'open'
+        const requests = await Request.findAll({
+            where,
+            order: [['createdAt', 'DESC']]
         });
 
-        return res.status(201).json({ message: 'Request created successfully', request });
+        return res.status(200).json({ requests, total: requests.length });
     } catch (error) {
-        console.error('Error creating request:', error);
+        console.error('Error fetching requests:', error);
+        return res.status(500).json({ message: 'Internal server error' });
+    }
+});
+
+// Get a single request detail
+app.get('/requests/:id', verifyToken, async (req, res) => {
+    try {
+        const id = req.params.id;
+        const request = await Request.findOne({ where: { request_id: id } });
+        if (!request) {
+            return res.status(404).json({ message: 'Request not found' });
+        }
+        return res.status(200).json({ request });
+    } catch (error) {
+        console.error('Error fetching request by id:', error);
+        return res.status(500).json({ message: 'Internal server error' });
+    }
+});
+
+// Accept a customer request (assign to current sitter)
+app.post('/requests/:id/accept', verifyToken, async (req, res) => {
+    try {
+        const id = req.params.id;
+        // Verify sitter exists and approved
+        const sitter = await Sitter.findOne({ where: { sitter_id: req.user.id } });
+        if (!sitter) {
+            return res.status(404).json({ message: 'Sitter profile not found' });
+        }
+        if (sitter.approval_status !== 'approved') {
+            return res.status(403).json({ message: 'Sitter account not approved yet' });
+        }
+        const request = await Request.findOne({ where: { request_id: id } });
+        if (!request) {
+            return res.status(404).json({ message: 'Request not found' });
+        }
+        if (request.status !== 'open') {
+            return res.status(400).json({ message: 'Request is no longer open' });
+        }
+        await request.update({ sitter_id: req.user.id, status: 'accepted' });
+        return res.status(200).json({ message: 'Request accepted successfully', request });
+    } catch (error) {
+        console.error('Error accepting request:', error);
         return res.status(500).json({ message: 'Internal server error' });
     }
 });

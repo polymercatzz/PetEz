@@ -92,16 +92,12 @@
         <div class="w-full grid grid-cols-3 gap-5 mb-4">
             <div class="w-full">
                 <label for="" class="flex items-center gap-3 text-lg">ประเภทงาน</label>
-                <select name="" id="" class="w-full border-2 border-[#e2e8f0] rounded-2xl text-[1rem] px-5 py-2 transition duration-300 ease-in-out focus:outline-none focus:border-[#3b5bdb] focus:shadow-[0_0_0_4px_rgba(59,91,219,0.1)]">
+                <select id="serviceType" class="w-full border-2 border-[#e2e8f0] rounded-2xl text-[1rem] px-5 py-2 transition duration-300 ease-in-out focus:outline-none focus:border-[#3b5bdb] focus:shadow-[0_0_0_4px_rgba(59,91,219,0.1)]" required>
                     <option value="" disabled selected>เลือกประเภทงาน</option>
-                    <option value="">บริการดูแลสัตว์เลี้ยงตามบ้าน</option>
-                    <option value="">บริการดูแลสัตว์เลี้ยงข้ามคืน</option>
-                    <option value="">บริการฝากเลี้ยงระหว่างวัน</option>
-                    <option value="">บริการรับจ้างฝึกสอนสัตว์เลี้ยง</option>
-                    <option value="">บริการสัตวแพทย์นอกสถานที่</option>
-                    <option value="">บริการรับจ้างพาสุนัขเดินเล่น</option>
-                    <option value="">บริการอาบน้ำตัดขน</option>
-                    <option value="">อื่น ๆ</option>
+                    <option value="boarding">ฝากเลี้ยง</option>
+                    <option value="walking">พาเดิน</option>
+                    <option value="home_visit">ไปดูแลที่บ้าน</option>
+                    <option value="bath">อาบน้ำ</option>
                 </select>
             </div>
             <div class="w-full">
@@ -147,25 +143,69 @@
     </div>
 
     <script>
-        // Submit request to backend
+        // Pet selection state lives outside DOMContentLoaded so submit handler can access
+        let selectedPets = [];
+
+        // Submit request to backend with enriched payload
         document.getElementById('requestSubmit').addEventListener('click', async () => {
-            // Minimal mapping for request: use first (or only) selected pet
             const petSelect = document.getElementById('petSelect');
-            const pet_id = petSelect && petSelect.value ? parseInt(petSelect.value) : null;
+            // Prefer first selected pet in the list; fallback to current select value
+            const chosen = selectedPets.length ? selectedPets[0] : null;
+            const pet_id = chosen ? parseInt(chosen.id) : (petSelect && petSelect.value ? parseInt(petSelect.value) : null);
             if (!pet_id) {
                 alert('กรุณาเลือกสัตว์เลี้ยง');
                 return;
             }
-            // For now map only description and a preferred_date from the first date field if present
+
+            // Gather fields
             const textareas = document.getElementsByTagName('textarea');
-            const description = textareas && textareas.length > 0 ? textareas[0].value : '';
-            const dateInputs = Array.from(document.querySelectorAll('input[type="date"]'));
-            const preferred_date = dateInputs.length ? dateInputs[0].value : null;
+            const detailText = textareas && textareas.length > 0 ? textareas[0].value.trim() : '';
+            const addrText = textareas && textareas.length > 1 ? textareas[1].value.trim() : '';
+            const inputs = Array.from(document.querySelectorAll('input'));
+            const title = inputs[0]?.value?.trim() || '';
+            const sitterName = inputs[1]?.value?.trim() || '';
+            const district = document.querySelector('input[placeholder="กรุณาใส่เขต/อำเภอ"]')?.value?.trim() || '';
+            const province = document.querySelector('input[placeholder="กรุณาใส่จังหวัด"]')?.value?.trim() || '';
+            const postal = document.querySelector('input[placeholder="กรุณาใส่รหัสไปรษณีย์"]')?.value?.trim() || '';
+            const typeSel = document.getElementById('serviceType');
+            const service_type = typeSel && typeSel.value ? typeSel.value : '';
+            const service_type_label = typeSel && typeSel.selectedIndex > 0 ? typeSel.options[typeSel.selectedIndex].text : '';
+            const dates = Array.from(document.querySelectorAll('input[type="date"]'));
+            const start_date = dates[0]?.value || null;
+            const end_date = dates[1]?.value || null;
+            const times = Array.from(document.querySelectorAll('input[type="time"]'));
+            const start_time = times[0]?.value || '';
+            const end_time = times[1]?.value || '';
+            const budgetInput = document.querySelector('input[placeholder="หน่วยเป็นบาท"]');
+            const budget = budgetInput ? budgetInput.value.trim() : '';
+
+            // Build human-readable description (sitter-service accepts only a text field)
+            const lines = [];
+            if (title) lines.push(`ชื่องาน: ${title}`);
+            if (detailText) lines.push(`รายละเอียด: ${detailText}`);
+            if (service_type_label) lines.push(`ประเภทงาน: ${service_type_label}`);
+            if (start_date) lines.push(`วันเริ่มงาน: ${start_date}`);
+            if (end_date) lines.push(`วันสิ้นสุด: ${end_date}`);
+            if (start_time || end_time) lines.push(`เวลา: ${start_time || '-'} - ${end_time || '-'}`);
+            if (budget) lines.push(`งบประมาณ: ${budget} บาท`);
+            if (addrText) lines.push(`ที่อยู่: ${addrText}`);
+            if (district || province || postal) lines.push(`เขต/จังหวัด/ไปรษณีย์: ${district} / ${province} / ${postal}`);
+            if (sitterName) lines.push(`ระบุพี่เลี้ยง: ${sitterName}`);
+            if (chosen && chosen.name) lines.push(`สัตว์เลี้ยง: ${chosen.name} (${chosen.type || ''})`);
+
+            const description = lines.join('\n');
+            const preferred_date = start_date; // Map start date to preferred date
+
+            if (!service_type) {
+                alert('กรุณาเลือกประเภทงาน');
+                return;
+            }
+
             try {
                 const resp = await fetch('/user/api/requests', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ pet_id, description, preferred_date })
+                    body: JSON.stringify({ pet_id, description, preferred_date, service_type })
                 });
                 if (resp.ok) {
                     alert('สร้างคำขอเรียบร้อย');
@@ -178,35 +218,31 @@
                 alert('เกิดข้อผิดพลาดในการเชื่อมต่อ');
             }
         });
+
         document.addEventListener('DOMContentLoaded', function() {
             const petSelect = document.getElementById('petSelect');
             const selectedPetsContainer = document.getElementById('selectedPets');
-            let selectedPets = [];
+
             function renderSelectedPets() {
                 selectedPetsContainer.innerHTML = '';
-                
                 if (selectedPets.length === 0) {
                     selectedPetsContainer.innerHTML = '<p class="text-gray-500 text-center py-2">ยังไม่มีสัตว์เลี้ยงที่เลือก</p>';
                     return;
                 }
-                
                 selectedPets.forEach((pet, index) => {
                     const petCard = document.createElement('div');
                     petCard.className = 'pet-card';
-                    
                     petCard.innerHTML = `
                         <div>
                             <span class="font-medium">${pet.name}</span>
-                            <span class="text-gray-600 text-sm ml-2">${pet.type}</span>
+                            <span class="text-gray-600 text-sm ml-2">${pet.type || ''}</span>
                         </div>
                         <button class="remove-btn" data-index="${index}">
                             <i class="fas fa-times"></i>
                         </button>
                     `;
-                    
                     selectedPetsContainer.appendChild(petCard);
                 });
-                
                 document.querySelectorAll('.remove-btn').forEach(button => {
                     button.addEventListener('click', function() {
                         const index = parseInt(this.getAttribute('data-index'));
@@ -215,20 +251,19 @@
                 });
             }
 
-            function addPet(petName) {
-                const option = Array.from(petSelect.options).find(opt => opt.value === petName);
+            function addPet(petId) {
+                const option = Array.from(petSelect.options).find(opt => opt.value === petId);
                 if (option) {
                     const text = option.textContent;
                     const match = text.match(/(.+)\s+\((.+)\)/);
-                    
+                    let name = text, type = '';
                     if (match) {
-                        const name = match[1];
-                        const type = match[2];
-                        
-                        selectedPets.push({ name, type });
-                        renderSelectedPets();
-                        updatePetSelect();
+                        name = match[1];
+                        type = match[2];
                     }
+                    selectedPets.push({ id: petId, name, type });
+                    renderSelectedPets();
+                    updatePetSelect();
                 }
             }
 
@@ -241,20 +276,18 @@
             function updatePetSelect() {
                 Array.from(petSelect.options).forEach((option, index) => {
                     if (index > 0) {
-                        const petName = option.value;
-                        option.disabled = selectedPets.some(pet => pet.name === petName);
+                        option.disabled = selectedPets.some(pet => String(pet.id) === String(option.value));
                     }
                 });
-                
                 petSelect.value = "";
             }
-            
+
             petSelect.addEventListener('change', function() {
                 if (this.value) {
                     addPet(this.value);
                 }
             });
-            
+
             renderSelectedPets();
         });
     </script>

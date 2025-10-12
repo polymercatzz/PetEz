@@ -26,7 +26,6 @@ router.get('/', userController.getUserMain);
 router.get('/profile', userController.getUserProfile);
 router.get('/bookings', userController.getUserBookings);
 router.get('/create-booking', userController.getCreateBooking); // legacy create-booking (still usable)
-router.get('/create', userController.getCreateRequest); // new: request creation page
 router.get('/edit-booking/:id', userController.getEditBooking);
 router.get('/history', userController.getUserHistory);
 router.get('/book/:id', userController.getBookingForm); // booking by service
@@ -52,8 +51,7 @@ router.post('/api/bookings', requireAuth, userController.addBooking);
 router.put('/api/bookings/:id', requireAuth, userController.updateBooking);
 router.delete('/api/bookings/:id', requireAuth, userController.cancelBooking);
 
-// Requests
-router.post('/api/requests', requireAuth, userController.addRequest);
+// Requests feature removed: no user-side creation routes
 
 // Sitter registration
 router.post('/api/sitter/register', requireAuth, userController.registerSitter);
