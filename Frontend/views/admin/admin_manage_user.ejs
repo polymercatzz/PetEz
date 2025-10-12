@@ -23,16 +23,15 @@
     </div>
 
     <div class="mt-7 text-[2.3vh]">
-      <div class="shadow-sm p-3 rounded-lg border border-gray-200 w-fit bg-[#EDEDED]">
-        <a href="" class="bg-white rounded-lg mr-4 px-5 py-1">Users</a>
-        <a href="" class="text-gray-600 px-5 py-1 rounded-lg">Pet Sitter</a>
-        <!-- ใส่ class="bg-white shadow-md p-1 rounded-md border border-gray-300" หน้า petsitter เอา class user ออก -->
+      <div class="shadow-sm p-1 rounded-lg border border-gray-200 inline-flex bg-[#EDEDED]">
+        <button id="tab-users" class="bg-white rounded-lg mr-2 px-5 py-1" onclick="showTab('users')">Users</button>
+        <button id="tab-sitters" class="text-gray-700 px-5 py-1 rounded-lg" onclick="showTab('sitters')">Pet Sitter</button>
       </div>
     </div>
 
     <div class="p-5 min-h-screen bg-white border border-gray-200 rounded-xl mt-4 mb-6">
 
-      <div class="overflow-auto rounded-lg shadow hidden md:block">
+      <div id="panel-users" class="overflow-auto rounded-lg shadow hidden md:block">
         <table class="w-full">
           <thead class="bg-gray-50 border-b-2 border-gray-200">
             <tr>
@@ -46,147 +45,209 @@
             </tr>
           </thead>
           <tbody class="divide-y divide-gray-100">
-            <tr class="bg-white">
-              <td class="p-3 text-[2vh] text-gray-700 whitespace-nowrap">
-                <p href="#" class="hover:underline">10001</p>
-              </td>
-              <td class="p-3 text-[2vh] text-gray-700 whitespace-nowrap">
-                Kittipich Hirunwong
-              </td>
-              <td class="p-3 text-[2vh] text-gray-700 whitespace-nowrap">
-                66070018@kmitl.ac.th
-              </td>
-              <td class="p-3 text-[2vh] text-gray-700 whitespace-nowrap">
-                087-716-0351
-              </td>
-              <td class="p-3 text-[2vh] text-gray-700 whitespace-nowrap">
-                <span 
-                  class="accountStatus p-1.5 text-[1.7vh] font-medium  tracking-wider text-white bg-red-600 rounded-lg ">ถูกระงับ</span>
-              </td>
-              <td class="p-3 text-[2vh] text-gray-700 whitespace-nowrap">16/10/2021</td>
-              <td class="p-3 text-[2vh] text-gray-700 whitespace-nowrap justify-center flex">
-                <div>
-                  <div onclick="toggleDropdown(event)">
-                    <i class="bi bi-three-dots-vertical cursor-pointe"></i>
+            <% (users || []).forEach(function(u){ %>
+              <tr class="bg-white" data-user-id="<%= u.user_id %>">
+                <td class="p-3 text-[2vh] text-gray-700 whitespace-nowrap">
+                  <p class="hover:underline"><%= u.user_id %></p>
+                </td>
+                <td class="p-3 text-[2vh] text-gray-700 whitespace-nowrap">
+                  <%= u.full_name || u.username || '-' %>
+                </td>
+                <td class="p-3 text-[2vh] text-gray-700 whitespace-nowrap">
+                  <%= u.email || '-' %>
+                </td>
+                <td class="p-3 text-[2vh] text-gray-700 whitespace-nowrap">
+                  <%= u.phone || '-' %>
+                </td>
+                <td class="p-3 text-[2vh] text-gray-700 whitespace-nowrap">
+                  <span class="accountStatus p-1.5 text-[1.7vh] font-medium tracking-wider text-white <%= (u.status === 'active' ? 'bg-blue-600' : (u.status === 'suspended' ? 'bg-red-600' : 'bg-gray-500')) %> rounded-lg">
+                    <%= u.status === 'active' ? 'กำลังใช้งาน' : (u.status === 'suspended' ? 'ถูกระงับ' : 'ไม่ทราบสถานะ') %>
+                  </span>
+                </td>
+                <td class="p-3 text-[2vh] text-gray-700 whitespace-nowrap"><%= (u.createdAt && new Date(u.createdAt).toLocaleDateString('th-TH')) || '-' %></td>
+                <td class="p-3 text-[2vh] text-gray-700 whitespace-nowrap justify-center flex">
+                  <div>
+                    <div onclick="toggleDropdown(event)">
+                      <i class="bi bi-three-dots-vertical cursor-pointe"></i>
+                    </div>
+                    <div class="dropDown absolute rounded-xl border bg-white p-3 right-20 select-none hidden">
+                      <button onclick="changeStatus('active',this)" class="flex text-[2vh] mb-2 cursor-pointer hover:bg-gray-100 p-2 rounded-xl">
+                        <i class="bi bi-power mr-1"></i>
+                        <p>Activate Account</p>
+                      </button>
+                      <button onclick="changeStatus('suspend',this)" class="flex text-[2vh] mb-2 cursor-pointer hover:bg-gray-100 p-2 rounded-xl">
+                        <i class="bi bi-x-circle mr-1 "></i>
+                        <p>Suspend Account</p>
+                      </button>
+                      <button onclick="changeStatus('delete',this)" class="flex text-[2vh] text-red-500 cursor-pointer hover:bg-gray-100 p-2 rounded-xl">
+                        <i class="bi bi-trash-fill mr-1 "></i>
+                        <p>Delete Account</p>
+                      </button>
+                    </div>
                   </div>
-                  <div  class="dropDown absolute rounded-xl border bg-white p-3 right-20 select-none hidden">
-                    <button onclick="changeStatus('active',this)"
-                      class="flex text-[2vh] mb-2 cursor-pointer hover:bg-gray-100 p-2 rounded-xl">
-                      <i class="bi bi-power mr-1"></i>
-                      <p>Activate Account</p>
-                    </button>
-                    <button onclick="changeStatus('suspend',this)"
-                      class="flex text-[2vh] mb-2 cursor-pointer hover:bg-gray-100 p-2 rounded-xl">
-                      <i class="bi bi-x-circle mr-1 "></i>
-                      <p>Suspend Account</p>
-                    </button>
-                    <button onclick="changeStatus('delete',this)"
-                      class="flex text-[2vh] text-red-500 cursor-pointer hover:bg-gray-100 p-2 rounded-xl">
-                      <i class="bi bi-trash-fill mr-1 "></i>
-                      <p>Delete Account</p>
-                    </button>
-                  </div>
-                </div>
-              </td>
-            </tr>
+                </td>
+              </tr>
+            <% }) %>
           </tbody>
         </table>
       </div>
 
-      <div class="grid grid-cols-1  gap-4 md:hidden">
-        <div class="res bg-white space-y-3 p-4 rounded-lg shadow-lg">
-          <div class="flex">
-            <div class="flex items-center space-x-4 text-[2vh]">
-              <div>
-                <p href="#" class="text-blue-500 font-bold hover:underline">ID:1000</p>
+      <div id="panel-sitters" class="overflow-auto rounded-lg shadow hidden md:block" style="display:none">
+        <table class="w-full">
+          <thead class="bg-gray-50 border-b-2 border-gray-200">
+            <tr>
+              <th class="w-20 p-3 text-[1.2rem] font-medium tracking-wide text-left text-gray-600">ID</th>
+              <th class="p-3 text-[1.2rem] font-medium tracking-wide text-left text-gray-600">Name</th>
+              <th class="p-3 text-[1.2rem] font-medium tracking-wide text-left text-gray-600">Email</th>
+              <th class="p-3 text-[1.2rem] font-medium tracking-wide text-left text-gray-600">Phone</th>
+              <th class="w-24 p-3 text-[1.2rem] font-medium tracking-wide text-left text-gray-600">Status</th>
+              <th class="w-30 p-3 text-[1.2rem] font-medium tracking-wide text-left text-gray-600">Start Date</th>
+              <th class=" p-3 text-[1.2rem] font-medium tracking-wide text-left text-gray-600">Action</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-gray-100">
+            <% (sitters || []).forEach(function(s){ %>
+              <tr class="bg-white" data-user-id="<%= s.user_id %>">
+                <td class="p-3 text-[2vh] text-gray-700 whitespace-nowrap">
+                  <p class="hover:underline"><%= s.user_id %></p>
+                </td>
+                <td class="p-3 text-[2vh] text-gray-700 whitespace-nowrap">
+                  <%= s.full_name || s.username || '-' %>
+                </td>
+                <td class="p-3 text-[2vh] text-gray-700 whitespace-nowrap">
+                  <%= s.email || '-' %>
+                </td>
+                <td class="p-3 text-[2vh] text-gray-700 whitespace-nowrap">
+                  <%= s.phone || '-' %>
+                </td>
+                <td class="p-3 text-[2vh] text-gray-700 whitespace-nowrap">
+                  <span class="accountStatus p-1.5 text-[1.7vh] font-medium tracking-wider text-white <%= (s.status === 'active' ? 'bg-blue-600' : (s.status === 'suspended' ? 'bg-red-600' : 'bg-gray-500')) %> rounded-lg">
+                    <%= s.status === 'active' ? 'กำลังใช้งาน' : (s.status === 'suspended' ? 'ถูกระงับ' : 'ไม่ทราบสถานะ') %>
+                  </span>
+                </td>
+                <td class="p-3 text-[2vh] text-gray-700 whitespace-nowrap"><%= (s.createdAt && new Date(s.createdAt).toLocaleDateString('th-TH')) || '-' %></td>
+                <td class="p-3 text-[2vh] text-gray-700 whitespace-nowrap justify-center flex">
+                  <div>
+                    <div onclick="toggleDropdown(event)">
+                      <i class="bi bi-three-dots-vertical cursor-pointe"></i>
+                    </div>
+                    <div class="dropDown absolute rounded-xl border bg-white p-3 right-20 select-none hidden">
+                      <button onclick="changeStatus('active',this)" class="flex text-[2vh] mb-2 cursor-pointer hover:bg-gray-100 p-2 rounded-xl">
+                        <i class="bi bi-power mr-1"></i>
+                        <p>Activate Account</p>
+                      </button>
+                      <button onclick="changeStatus('suspend',this)" class="flex text-[2vh] mb-2 cursor-pointer hover:bg-gray-100 p-2 rounded-xl">
+                        <i class="bi bi-x-circle mr-1 "></i>
+                        <p>Suspend Account</p>
+                      </button>
+                      <button onclick="changeStatus('delete',this)" class="flex text-[2vh] text-red-500 cursor-pointer hover:bg-gray-100 p-2 rounded-xl">
+                        <i class="bi bi-trash-fill mr-1 "></i>
+                        <p>Delete Account</p>
+                      </button>
+                    </div>
+                  </div>
+                </td>
+              </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="grid grid-cols-1 gap-4 md:hidden">
+        <div id="card-users" class="space-y-3">
+          <% (users || []).forEach(function(u){ %>
+            <div class="res bg-white space-y-3 p-4 rounded-lg shadow-lg" data-user-id="<%= u.user_id %>">
+              <div class="flex">
+                <div class="flex items-center space-x-4 text-[2vh]">
+                  <div>
+                    <p class="text-blue-500 font-bold">ID:<%= u.user_id %></p>
+                  </div>
+                  <div class="text-gray-500"><%= (u.createdAt && new Date(u.createdAt).toLocaleDateString('th-TH')) || '-' %></div>
+                  <div>
+                    <span class="accountStatus p-1.5 text-[1.7vh] font-medium tracking-wider text-white <%= (u.status === 'active' ? 'bg-blue-600' : (u.status === 'suspended' ? 'bg-red-600' : 'bg-gray-500')) %> rounded-lg">
+                      <%= u.status === 'active' ? 'กำลังใช้งาน' : (u.status === 'suspended' ? 'ถูกระงับ' : 'ไม่ทราบสถานะ') %>
+                    </span>
+                  </div>
+                </div>
+                <div class="ml-auto">
+                  <div class="">
+                    <div onclick="toggleDropdown(event)">
+                      <i class="bi bi-three-dots-vertical cursor-pointe"></i>
+                    </div>
+                    <div class="dropDown absolute rounded-xl border bg-white p-3 right-10 select-none hidden">
+                      <button onclick="changeStatus('active',this)" class="flex text-[2vh] mb-2 cursor-pointer hover:bg-gray-100 p-2 rounded-xl">
+                        <i class="bi bi-power mr-1"></i>
+                        <p>Activate Account</p>
+                      </button>
+                      <button onclick="changeStatus('suspend',this)" class="flex text-[2vh] mb-2 cursor-pointer hover:bg-gray-100 p-2 rounded-xl">
+                        <i class="bi bi-x-circle mr-1 "></i>
+                        <p>Suspend Account</p>
+                      </button>
+                      <button onclick="changeStatus('delete',this)" class="flex text-[2vh] text-red-500 cursor-pointer hover:bg-gray-100 p-2 rounded-xl">
+                        <i class="bi bi-trash-fill mr-1 "></i>
+                        <p>Delete Account</p>
+                      </button>
+                    </div>
+                  </div>
+                </div>
               </div>
-              <div class="text-gray-500">10/10/2021</div>
-              <div>
-                <span 
-                  class="accountStatus p-1.5 text-[1.7vh] font-medium  tracking-wider text-white bg-[#334DCC] rounded-lg ">กำลังใช้งาน</span>
+
+              <div class="text-[2vh] text-gray-700 space-y-2">
+                <p>Name: <%= u.full_name || u.username || '-' %></p>
+                <p>Email: <%= u.email || '-' %></p>
+                <p>Phone: <%= u.phone || '-' %></p>
               </div>
             </div>
-            <div class="ml-auto">
-              <div class="">
-                <div onclick="toggleDropdown(event)">
-                  <i class="bi bi-three-dots-vertical cursor-pointe"></i>
-                </div>
-                <div  class="dropDown absolute rounded-xl border bg-white p-3 right-10 select-none hidden">
-                  <button onclick="changeStatus('active',this)"
-                    class="flex text-[2vh] mb-2 cursor-pointer hover:bg-gray-100 p-2 rounded-xl">
-                    <i class="bi bi-power mr-1"></i>
-                    <p>Activate Account</p>
-                  </button>
-                  <button onclick="changeStatus('suspend',this)"
-                    class="flex text-[2vh] mb-2 cursor-pointer hover:bg-gray-100 p-2 rounded-xl">
-                    <i class="bi bi-x-circle mr-1 "></i>
-                    <p>Suspend Account</p>
-                  </button>
-                  <button onclick="changeStatus('delete',this)"
-                    class="flex text-[2vh] text-red-500 cursor-pointer hover:bg-gray-100 p-2 rounded-xl">
-                    <i class="bi bi-trash-fill mr-1 "></i>
-                    <p>Delete Account</p>
-                  </button>
-                </div>
-              </div>
-            </div>
-
-          </div>
-
-          <div class="text-[2vh] text-gray-700 space-y-2">
-            <p>Name: Kittipich Hirunwong</p>
-            <p>Email: 66070018@kmitl.ac.th</p>
-            <p>Phone: 087-716-0351</p>
-          </div>
+          <% }) %>
         </div>
 
-                <div class="res bg-white space-y-3 p-4 rounded-lg shadow-lg">
-          <div class="flex">
-            <div class="flex items-center space-x-4 text-[2vh]">
-              <div>
-                <p href="#" class="text-blue-500 font-bold hover:underline">ID:1000</p>
+        <div id="card-sitters" class="space-y-3" style="display:none">
+          <% (sitters || []).forEach(function(s){ %>
+            <div class="res bg-white space-y-3 p-4 rounded-lg shadow-lg" data-user-id="<%= s.user_id %>">
+              <div class="flex">
+                <div class="flex items-center space-x-4 text-[2vh]">
+                  <div>
+                    <p class="text-blue-500 font-bold">ID:<%= s.user_id %></p>
+                  </div>
+                  <div class="text-gray-500"><%= (s.createdAt && new Date(s.createdAt).toLocaleDateString('th-TH')) || '-' %></div>
+                  <div>
+                    <span class="accountStatus p-1.5 text-[1.7vh] font-medium tracking-wider text-white <%= (s.status === 'active' ? 'bg-blue-600' : (s.status === 'suspended' ? 'bg-red-600' : 'bg-gray-500')) %> rounded-lg">
+                      <%= s.status === 'active' ? 'กำลังใช้งาน' : (s.status === 'suspended' ? 'ถูกระงับ' : 'ไม่ทราบสถานะ') %>
+                    </span>
+                  </div>
+                </div>
+                <div class="ml-auto">
+                  <div class="">
+                    <div onclick="toggleDropdown(event)">
+                      <i class="bi bi-three-dots-vertical cursor-pointe"></i>
+                    </div>
+                    <div class="dropDown absolute rounded-xl border bg-white p-3 right-10 select-none hidden">
+                      <button onclick="changeStatus('active',this)" class="flex text-[2vh] mb-2 cursor-pointer hover:bg-gray-100 p-2 rounded-xl">
+                        <i class="bi bi-power mr-1"></i>
+                        <p>Activate Account</p>
+                      </button>
+                      <button onclick="changeStatus('suspend',this)" class="flex text-[2vh] mb-2 cursor-pointer hover:bg-gray-100 p-2 rounded-xl">
+                        <i class="bi bi-x-circle mr-1 "></i>
+                        <p>Suspend Account</p>
+                      </button>
+                      <button onclick="changeStatus('delete',this)" class="flex text-[2vh] text-red-500 cursor-pointer hover:bg-gray-100 p-2 rounded-xl">
+                        <i class="bi bi-trash-fill mr-1 "></i>
+                        <p>Delete Account</p>
+                      </button>
+                    </div>
+                  </div>
+                </div>
               </div>
-              <div class="text-gray-500">10/10/2021</div>
-              <div>
-                <span 
-                  class="accountStatus p-1.5 text-[1.7vh] font-medium  tracking-wider text-white bg-blue-600 rounded-lg ">กำลังใช้งาน</span>
+
+              <div class="text-[2vh] text-gray-700 space-y-2">
+                <p>Name: <%= s.full_name || s.username || '-' %></p>
+                <p>Email: <%= s.email || '-' %></p>
+                <p>Phone: <%= s.phone || '-' %></p>
               </div>
             </div>
-            <div class="ml-auto">
-              <div class="">
-                <div onclick="toggleDropdown(event)">
-                  <i class="bi bi-three-dots-vertical cursor-pointe"></i>
-                </div>
-                <div  class="dropDown absolute rounded-xl border bg-white p-3 right-10 select-none hidden">
-                  <button onclick="changeStatus('active',this)"
-                    class="flex text-[2vh] mb-2 cursor-pointer hover:bg-gray-100 p-2 rounded-xl">
-                    <i class="bi bi-power mr-1"></i>
-                    <p>Activate Account</p>
-                  </button>
-                  <button onclick="changeStatus('suspend',this)"
-                    class="flex text-[2vh] mb-2 cursor-pointer hover:bg-gray-100 p-2 rounded-xl">
-                    <i class="bi bi-x-circle mr-1 "></i>
-                    <p>Suspend Account</p>
-                  </button>
-                  <button onclick="changeStatus('delete',this)"
-                    class="flex text-[2vh] text-red-500 cursor-pointer hover:bg-gray-100 p-2 rounded-xl">
-                    <i class="bi bi-trash-fill mr-1 "></i>
-                    <p>Delete Account</p>
-                  </button>
-                </div>
-              </div>
-            </div>
-
-          </div>
-
-          <div class="text-[2vh] text-gray-700 space-y-2">
-            <p>Name: Kittipich Hirunwong</p>
-            <p>Email: 66070018@kmitl.ac.th</p>
-            <p>Phone: 087-716-0351</p>
-          </div>
+          <% }) %>
         </div>
-
-
+      </div>
 
 
 
@@ -202,13 +263,44 @@
   <script>
     // nav
     function dropDown() {
-      document.querySelector('#submenu').classList.toggle('hidden')
-      document.querySelector('#arrow').classList.toggle('rotate-0')
+      const submenu = document.querySelector('#submenu');
+      const arrow = document.querySelector('#arrow');
+      if (submenu) submenu.classList.toggle('hidden');
+      if (arrow) arrow.classList.toggle('rotate-0');
     }
     dropDown()
     function Openbar() {
       document.querySelector('.sidebar').classList.toggle('left-[-300px]')
     }
+
+    // tabs
+    function showTab(tab) {
+      const usersPanel = document.getElementById('panel-users');
+      const sittersPanel = document.getElementById('panel-sitters');
+      const usersCard = document.getElementById('card-users');
+      const sittersCard = document.getElementById('card-sitters');
+      const tabUsers = document.getElementById('tab-users');
+      const tabSitters = document.getElementById('tab-sitters');
+
+      if (tab === 'sitters') {
+        if (usersPanel) usersPanel.style.display = 'none';
+        if (sittersPanel) sittersPanel.style.display = '';
+        if (usersCard) usersCard.style.display = 'none';
+        if (sittersCard) sittersCard.style.display = '';
+        if (tabUsers) tabUsers.classList.remove('bg-white');
+        if (tabSitters) tabSitters.classList.add('bg-white');
+      } else {
+        if (usersPanel) usersPanel.style.display = '';
+        if (sittersPanel) sittersPanel.style.display = 'none';
+        if (usersCard) usersCard.style.display = '';
+        if (sittersCard) sittersCard.style.display = 'none';
+        if (tabUsers) tabUsers.classList.add('bg-white');
+        if (tabSitters) tabSitters.classList.remove('bg-white');
+      }
+    }
+
+    // default to show users tab
+    showTab('users');
 
     // dropdown
 // toggle dropdown menu เฉพาะแถวที่คลิก
@@ -226,30 +318,47 @@
     menu.classList.toggle('hidden');
   }
 
-  function changeStatus(status, button) {
-    const container = button.closest('tr') || button.closest('.res'); // หา container ที่ใกล้สุด
+  async function changeStatus(status, button) {
+    const container = button.closest('tr') || button.closest('.res');
     if (!container) return;
+    const userId = container.getAttribute('data-user-id');
+    if (!userId) return;
 
-    const statusSpan = container.querySelector('.accountStatus');
     const dropdown = container.querySelector('.dropDown');
 
-    if (!statusSpan) return;
+    try {
+      if (status === 'delete') {
+        const resp = await fetch(`/admin/api/users/${userId}`, { method: 'DELETE' });
+        if (!resp.ok) throw new Error('Delete failed');
+        // remove row/card from UI
+        container.remove();
+      } else if (status === 'active' || status === 'suspend') {
+        const newStatus = status === 'active' ? 'active' : 'suspended';
+        const resp = await fetch(`/admin/api/users/${userId}/status`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ status: newStatus })
+        });
+        if (!resp.ok) throw new Error('Update status failed');
 
-    if (status === 'active') {
-      statusSpan.textContent = 'กำลังใช้งาน';
-      statusSpan.className =
-        'accountStatus p-1.5 text-[1.7vh] font-medium tracking-wider text-white bg-blue-600 rounded-lg';
-    } else if (status === 'suspend') {
-      statusSpan.textContent = 'ถูกระงับ';
-      statusSpan.className =
-        'accountStatus p-1.5 text-[1.7vh] font-medium tracking-wider text-white bg-red-600 rounded-lg';
-    } else if (status === 'delete') {
-      statusSpan.textContent = 'ลบบัญชีแล้ว';
-      statusSpan.className =
-        'accountStatus p-1.5 text-[1.7vh] font-medium tracking-wider text-white bg-gray-500 rounded-lg';
+        // Update UI badge
+        const statusSpan = container.querySelector('.accountStatus');
+        if (statusSpan) {
+          if (newStatus === 'active') {
+            statusSpan.textContent = 'กำลังใช้งาน';
+            statusSpan.className = 'accountStatus p-1.5 text-[1.7vh] font-medium tracking-wider text-white bg-blue-600 rounded-lg';
+          } else {
+            statusSpan.textContent = 'ถูกระงับ';
+            statusSpan.className = 'accountStatus p-1.5 text-[1.7vh] font-medium tracking-wider text-white bg-red-600 rounded-lg';
+          }
+        }
+      }
+    } catch (e) {
+      alert('ดำเนินการไม่สำเร็จ กรุณาลองใหม่อีกครั้ง');
+      console.error(e);
+    } finally {
+      if (dropdown) dropdown.classList.add('hidden');
     }
-
-    dropdown.classList.add('hidden');
   }
 
   // ปิด dropdown ถ้าคลิกนอก

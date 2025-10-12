@@ -54,32 +54,41 @@ app.post('/login', async (req, res) => {
     if (!email || !password) {
         return res.status(400).send('Email and password are required.');
     }
-    const authApiUrl = 'http://auth-service:3002/login';
-    try {
-        const response = await axios.post(authApiUrl, { email, password }, {
-            headers: {
-                'Content-Type': 'application/json',
-            }
-        });
-        
-        const data = response.data;
-        console.log('Login successful:', data);
 
+    const dockerUrl = 'http://auth-service:3002/login';
+    const localUrl = 'http://localhost:3002/login';
+
+    async function postLogin(url) {
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email, password })
+        });
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => ({ message: 'Authentication failed' }));
+            throw Object.assign(new Error(errorData.message || 'Authentication failed'), { status: response.status });
+        }
+        return response.json();
+    }
+
+    try {
+        const data = await postLogin(dockerUrl).catch(async (e) => {
+            // Only fallback on network/connectivity errors
+            return await postLogin(localUrl);
+        });
+
+        console.log('Login successful:', data);
         req.session.user = data.user;
         req.session.token = data.token;
         req.session.loginTime = new Date();
-        
         res.redirect('/user/');
     } catch (error) {
-        if (error.response) {
-            // Server responded with error status
-            console.error('External API authentication failed:', error.response.status, error.response.data?.message);
-            return res.status(401).send(error.response.data?.message || 'Invalid credentials');
-        } else {
-            // Network or other error
-            console.error('Network or server error during login:', error);
-            res.status(500).send('Internal server error during authentication check.');
+        const status = error.status || 500;
+        console.error('Login error:', error.message || error);
+        if (status === 401 || status === 403) {
+            return res.status(status).send(error.message || 'Invalid credentials');
         }
+        res.status(500).send('Internal server error during authentication check.');
     }
 });
 
@@ -108,37 +117,37 @@ app.post('/register', async (req, res) => {
         return res.status(400).send('Passwords do not match.');
     }
     
-    const authApiUrl = 'http://auth-service:3002/register';
-    try {
-        const response = await axios.post(authApiUrl, { 
-            email, 
-            password, 
-            username, 
-            firstName, 
-            lastName, 
-            age, 
-            phone, 
-            address, 
-            district, 
-            province, 
-            postalCode 
-        }, {
-            headers: {
-                'Content-Type': 'application/json',
-            }
+    const dockerUrl = 'http://auth-service:3002/register';
+    const localUrl = 'http://localhost:3002/register';
+
+    async function postRegister(url) {
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ 
+                email, password, username, firstName, lastName, age, phone, address, district, province, postalCode 
+            })
         });
-        
-        const data = response.data;
-        console.log('Registration successful:', data);
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => ({ message: 'Registration failed' }));
+            throw Object.assign(new Error(errorData.message || 'Registration failed'), { status: response.status });
+        }
+        return response.json();
+    }
+
+    try {
+        await postRegister(dockerUrl).catch(async () => {
+            return await postRegister(localUrl);
+        });
+        console.log('Registration successful');
         res.redirect('/');
     } catch (error) {
-        if (error.response) {
-            console.error('External API registration failed:', error.response.status, error.response.data?.message);
-            return res.status(400).send(error.response.data?.message || 'Registration failed');
-        } else {
-            console.error('Network or server error during registration:', error);
-            res.status(500).send('Internal server error during registration.');
+        const status = error.status || 500;
+        console.error('Registration error:', error.message || error);
+        if (status >= 400 && status < 500) {
+            return res.status(status).send(error.message || 'Registration failed');
         }
+        res.status(500).send('Internal server error during registration.');
     }
 });
 

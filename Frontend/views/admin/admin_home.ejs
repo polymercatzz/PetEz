@@ -29,7 +29,7 @@
             <p class="pb-2 text-[2vh]">ผู้ใช้ทั้งหมด</p>
             <i class="bi bi-people-fill text-[3vh]"></i>
           </div>
-          <p class="text-[4.5vh]">10,000</p>
+          <p class="text-[4.5vh]"><%= users.length %></p>
         </div>
       </div>
       <div id="summery" class="">
@@ -38,7 +38,7 @@
             <p class="pb-2 text-[2vh]">จำนวนพี่เลี้ยง</p>
             <i class="bi bi-person-fill text-[3vh]"></i>
           </div>
-          <p class="text-[4.5vh]">5,000</p>
+          <p class="text-[4.5vh]"><%= sitters.length %></p>
         </div>
       </div>
       <div id="summery" class="">
@@ -238,7 +238,6 @@
     barChart2.render();
 
   </script>
-
 
   <script>
     function dropDown() {

@@ -1,6 +1,7 @@
 const express = require('express');
 const jwt = require('jsonwebtoken');
 const session = require('express-session');
+const { Op } = require('sequelize');
 const { User, Pet, initDatabase } = require('./src/models/index');
 
 const app = express();
@@ -23,7 +24,7 @@ app.use(session({
 
 app.use(express.json());
 
-initDatabase();
+// Initialize DB and start server later
 
 // JWT middleware
 const verifyToken = (req, res, next) => {
@@ -470,6 +471,77 @@ app.delete('/pets/:id', verifyToken, async (req, res) => {
     }
 });
 
-app.listen(PORT, () => {
-    console.log(`Auth service is running on http://localhost:${PORT}`);
+app.get('/api/users/all', async (req, res) => {
+    try {
+        const users = await User.findAll({
+            attributes: { exclude: ['password'] },
+            where: { role: { [Op.ne]: 'admin' } },
+            order: [['createdAt', 'DESC']]
+        });
+
+        return res.status(200).json({ users });
+    } catch (error) {
+        console.error('Error fetching users:', error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+});
+
+// Get all sitters
+app.get('/api/sitters/all', async (req, res) => {
+    try {
+        const sitters = await User.findAll({
+            attributes: { exclude: ['password'] },
+            where: { role: 'sitter' },
+            order: [['createdAt', 'DESC']]
+        });
+        return res.status(200).json({ sitters });
+    } catch (error) {
+        console.error('Error fetching sitters:', error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+});
+
+// Update user status (admin)
+app.put('/api/users/:id/status', async (req, res) => {
+    try {
+        const userId = req.params.id;
+        const { status } = req.body || {};
+        if (!['active', 'suspended'].includes(status)) {
+            return res.status(400).json({ message: 'Invalid status' });
+        }
+        const user = await User.findByPk(userId);
+        if (!user) return res.status(404).json({ message: 'User not found' });
+        await user.update({ status });
+        const plain = user.get({ plain: true });
+        delete plain.password;
+        return res.status(200).json({ message: 'Status updated', user: plain });
+    } catch (error) {
+        console.error('Error updating user status:', error);
+        return res.status(500).json({ message: 'Internal server error' });
+    }
+});
+
+// Delete user (admin)
+app.delete('/api/users/:id', async (req, res) => {
+    try {
+        const userId = req.params.id;
+        const user = await User.findByPk(userId);
+        if (!user) return res.status(404).json({ message: 'User not found' });
+        await user.destroy();
+        return res.status(200).json({ message: 'User deleted' });
+    } catch (error) {
+        console.error('Error deleting user:', error);
+        // Possible FK constraint
+        return res.status(500).json({ message: 'Internal server error' });
+    }
+});
+
+// Start server after DB initialized
+initDatabase().then(() => {
+    app.listen(PORT, () => {
+        console.log(`Auth service is running on http://localhost:${PORT}`);
+    });
+}).catch((err) => {
+    console.error('Failed to initialize database:', err);
+    process.exit(1);
 });
