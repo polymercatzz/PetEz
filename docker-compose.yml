@@ -13,6 +13,7 @@ services:
       - mysql-auth-data:/var/lib/mysql
     networks:
       - pet-ez-network
+    restart: always
 
   auth-service:
     build:
@@ -28,6 +29,7 @@ services:
       - mysql-auth
     networks:
       - pet-ez-network
+    restart: always
 
   booking-service:
     build:
@@ -43,6 +45,7 @@ services:
       - mysql-auth
     networks:
       - pet-ez-network
+    restart: always
 
   sitter-service:
     build:
@@ -62,7 +65,8 @@ services:
       - mysql-auth
     networks:
       - pet-ez-network
-    
+    restart: always
+
   payment-service:
     build:
       context: ./Services/payment-service
@@ -80,6 +84,7 @@ services:
       - mysql-auth
     networks:
       - pet-ez-network
+    restart: always
 
   frontend:
     build:
@@ -95,6 +100,23 @@ services:
       - auth-service
       - booking-service
       - payment-service
+    networks:
+      - pet-ez-network
+    restart: always
+
+  nginx:
+    build:
+      context: ./nginx
+      dockerfile: Dockerfile
+    container_name: pet-ez-nginx
+    ports:
+      - "80:80"
+    depends_on:
+      - auth-service
+      - booking-service
+      - sitter-service
+      - payment-service
+      - frontend
     networks:
       - pet-ez-network
 
