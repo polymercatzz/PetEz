@@ -114,7 +114,7 @@ async function start() {
       console.log('Payment DB connected.');
       await sequelize.sync();
       console.log('Payment DB synced.');
-      app.listen(PORT, () => console.log(`Payment service on http://localhost:${PORT}`));
+      app.listen(PORT, '0.0.0.0', () => console.log(`Payment service on http://0.0.0.0:${PORT}`));
       return;
     } catch (e) {
       console.error(`DB connect/sync failed (attempt ${attempt}):`, e?.message || e);

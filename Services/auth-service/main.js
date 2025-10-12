@@ -582,8 +582,8 @@ app.put('/api/users/:id/role', async (req, res) => {
 
 // Start server after DB initialized
 initDatabase().then(() => {
-    app.listen(PORT, () => {
-        console.log(`Auth service is running on http://localhost:${PORT}`);
+    app.listen(PORT, '0.0.0.0', () => {
+        console.log(`Auth service is running on http://0.0.0.0:${PORT}`);
     });
 }).catch((err) => {
     console.error('Failed to initialize database:', err);

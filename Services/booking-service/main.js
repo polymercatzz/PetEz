@@ -252,8 +252,8 @@ app.delete('/bookings/:id', authenticateToken, async (req, res) => {
 
 // Start server
 connectToDatabase().then(() => {
-    app.listen(PORT, () => {
-        console.log(`Booking service is running on http://localhost:${PORT}`);
+    app.listen(PORT, '0.0.0.0', () => {
+        console.log(`Booking service is running on http://0.0.0.0:${PORT}`);
     });
 });
 

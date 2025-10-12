@@ -708,8 +708,8 @@ app.delete('/admin/sitters/:id', verifyToken, requireAdmin, async (req, res) => 
 });
 
 // Start server
-app.listen(PORT, () => {
-    console.log(`Sitter Service is running on http://localhost:${PORT}`);
+app.listen(PORT, '0.0.0.0', () => {
+    console.log(`Sitter Service is running on http://0.0.0.0:${PORT}`);
 });
 
 module.exports = app;
