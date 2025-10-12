@@ -62,6 +62,24 @@ services:
       - mysql-auth
     networks:
       - pet-ez-network
+    
+  payment-service:
+    build:
+      context: ./Services/payment-service
+      dockerfile: Dockerfile
+    container_name: pet-ez-payment-service
+    ports:
+      - "3007:3007"
+    environment:
+      DB_NAME: auth_db
+      DB_USER: root
+      DB_PASSWORD: root
+      DB_HOST: mysql-auth
+      JWT_SECRET: petez-super-secret-jwt-key-2024
+    depends_on:
+      - mysql-auth
+    networks:
+      - pet-ez-network
 
   frontend:
     build:
@@ -70,8 +88,13 @@ services:
     container_name: pet-ez-frontend
     ports:
       - "3001:3001"
+    environment:
+      DATABASE_URL: mysql://root:root@mysql-auth:3306/auth_db
+      JWT_SECRET: petez-super-secret-jwt-key-2024
     depends_on:
       - auth-service
+      - booking-service
+      - payment-service
     networks:
       - pet-ez-network
 

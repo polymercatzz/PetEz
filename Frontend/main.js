@@ -81,7 +81,11 @@ app.post('/login', async (req, res) => {
         req.session.user = data.user;
         req.session.token = data.token;
         req.session.loginTime = new Date();
-        res.redirect('/user/');
+        // Redirect admin straight to admin dashboard, others to user area
+        if (data.user && data.user.role === 'admin') {
+            return res.redirect('/admin');
+        }
+        return res.redirect('/user/');
     } catch (error) {
         const status = error.status || 500;
         console.error('Login error:', error.message || error);

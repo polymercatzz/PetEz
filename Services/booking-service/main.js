@@ -38,84 +38,17 @@ const sequelize = new Sequelize(process.env.DATABASE_URL || 'mysql://root:root@m
     }
 });
 
-// Booking Model
+// Booking Model (aligned to existing DB columns)
 const Booking = sequelize.define('Booking', {
-    booking_id: {
-        type: DataTypes.INTEGER,
-        primaryKey: true,
-        autoIncrement: true
-    },
-    user_id: {
-        type: DataTypes.INTEGER,
-        allowNull: false,
-        references: {
-            model: 'users',
-            key: 'user_id'
-        }
-    },
-    pet_id: {
-        type: DataTypes.INTEGER,
-        allowNull: false,
-        references: {
-            model: 'pets',
-            key: 'pet_id'
-        }
-    },
-    sitter_id: {
-        type: DataTypes.INTEGER,
-        allowNull: true, // Can be null if no sitter assigned yet
-        references: {
-            model: 'users',
-            key: 'user_id'
-        }
-    },
-    start_date: {
-        type: DataTypes.DATE,
-        allowNull: false
-    },
-    end_date: {
-        type: DataTypes.DATE,
-        allowNull: false
-    },
-    total_hours: {
-        type: DataTypes.INTEGER,
-        allowNull: false
-    },
-    service_type: {
-        type: DataTypes.ENUM('sitting', 'walking', 'boarding', 'grooming'),
-        allowNull: false,
-        defaultValue: 'sitting'
-    },
-    special_instructions: {
-        type: DataTypes.TEXT,
-        allowNull: true
-    },
-    location: {
-        type: DataTypes.STRING(500),
-        allowNull: true
-    },
-    price_per_hour: {
-        type: DataTypes.DECIMAL(10, 2),
-        allowNull: false,
-        defaultValue: 50.00
-    },
-    total_price: {
-        type: DataTypes.DECIMAL(10, 2),
-        allowNull: false
-    },
-    status: {
-        type: DataTypes.ENUM('pending', 'confirmed', 'in_progress', 'completed', 'cancelled'),
-        allowNull: false,
-        defaultValue: 'pending'
-    },
-    emergency_contact: {
-        type: DataTypes.STRING(20),
-        allowNull: true
-    }
-}, {
-    tableName: 'bookings',
-    timestamps: true
-});
+    booking_id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
+    user_id: { type: DataTypes.INTEGER, allowNull: false },
+    pet_id: { type: DataTypes.INTEGER, allowNull: false },
+    sitter_id: { type: DataTypes.INTEGER, allowNull: true },
+    start_date: { type: DataTypes.DATE, allowNull: false },
+    end_date: { type: DataTypes.DATE, allowNull: false },
+    total_price: { type: DataTypes.DECIMAL(10, 2), allowNull: false },
+    status: { type: DataTypes.ENUM('pending', 'confirmed', 'in_progress', 'completed', 'cancelled'), allowNull: false, defaultValue: 'pending' },
+}, { tableName: 'bookings', timestamps: true });
 
 // JWT Middleware
 const authenticateToken = (req, res, next) => {
@@ -203,32 +136,22 @@ app.post('/bookings', authenticateToken, async (req, res) => {
             pet_id,
             start_date,
             end_date,
-            service_type,
-            special_instructions,
-            location,
-            price_per_hour,
-            emergency_contact
+            // extra fields are ignored if not present in schema
         } = req.body;
 
         // Calculate total hours and price
         const startDateTime = new Date(start_date);
         const endDateTime = new Date(end_date);
-        const total_hours = Math.ceil((endDateTime - startDateTime) / (1000 * 60 * 60));
-        const hourly_rate = price_per_hour || 50.00;
-        const total_price = total_hours * hourly_rate;
+        const hours = Math.max(0, Math.ceil((endDateTime - startDateTime) / (1000 * 60 * 60)));
+        const hourlyRate = 50.00; // default internal rate; not stored in DB
+        const total_price = hours * hourlyRate;
 
         const booking = await Booking.create({
             user_id: req.user.id,
             pet_id,
             start_date: startDateTime,
             end_date: endDateTime,
-            total_hours,
-            service_type: service_type || 'sitting',
-            special_instructions,
-            location,
-            price_per_hour: hourly_rate,
             total_price,
-            emergency_contact,
             status: 'pending'
         });
 
@@ -256,39 +179,21 @@ app.put('/bookings/:id', authenticateToken, async (req, res) => {
             return res.status(404).json({ message: 'Booking not found' });
         }
 
-        const {
-            start_date,
-            end_date,
-            service_type,
-            special_instructions,
-            location,
-            price_per_hour,
-            emergency_contact,
-            status
-        } = req.body;
+        const { start_date, end_date, status } = req.body;
 
         // Recalculate if dates changed
-        let updateData = {
-            service_type,
-            special_instructions,
-            location,
-            emergency_contact,
-            status
-        };
+        let updateData = { status };
 
         if (start_date && end_date) {
             const startDateTime = new Date(start_date);
             const endDateTime = new Date(end_date);
-            const total_hours = Math.ceil((endDateTime - startDateTime) / (1000 * 60 * 60));
-            const hourly_rate = price_per_hour || booking.price_per_hour;
-            
+            const hours = Math.max(0, Math.ceil((endDateTime - startDateTime) / (1000 * 60 * 60)));
+            const hourlyRate = 50.00; // internal rate for recompute
             updateData = {
                 ...updateData,
                 start_date: startDateTime,
                 end_date: endDateTime,
-                total_hours,
-                price_per_hour: hourly_rate,
-                total_price: total_hours * hourly_rate
+                total_price: hours * hourlyRate,
             };
         }
 
@@ -332,4 +237,39 @@ connectToDatabase().then(() => {
     app.listen(PORT, () => {
         console.log(`Booking service is running on http://localhost:${PORT}`);
     });
+});
+
+// Admin: Get all bookings
+app.get('/admin/bookings', authenticateToken, async (req, res) => {
+    try {
+        const bookings = await Booking.findAll({
+            order: [['createdAt', 'DESC']]
+        });
+        res.json({ bookings });
+    } catch (error) {
+        console.error('Error fetching all bookings (admin):', error);
+        res.status(500).json({ message: 'Error fetching bookings' });
+    }
+});
+
+// Admin: Update booking status
+app.put('/admin/bookings/:id/status', authenticateToken, async (req, res) => {
+    try {
+        const { status } = req.body || {};
+        const allowed = ['pending', 'confirmed', 'in_progress', 'completed', 'cancelled'];
+        if (!allowed.includes(status)) {
+            return res.status(400).json({ message: 'Invalid status value' });
+        }
+
+        const booking = await Booking.findOne({ where: { booking_id: req.params.id } });
+        if (!booking) {
+            return res.status(404).json({ message: 'Booking not found' });
+        }
+
+        await booking.update({ status });
+        return res.json({ message: 'Status updated successfully', booking });
+    } catch (error) {
+        console.error('Error updating booking status (admin):', error);
+        res.status(500).json({ message: 'Error updating booking status' });
+    }
 });

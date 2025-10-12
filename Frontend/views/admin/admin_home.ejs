@@ -47,16 +47,16 @@
             <p class="pb-2 text-[2vh]">ยอดจองเดือนนี้</p>
             <i class="bi bi-book-fill text-[3vh]"></i>
           </div>
-          <p class="text-[4.5vh]">130</p>
+          <p class="text-[4.5vh]"><%= (stats && stats.bookingsCountMonth) || 0 %></p>
         </div>
       </div>
       <div id="summery" class="">
         <div class="bg-white rounded-xl text-[#000000] p-4 pt-3  shadow-lg shadow-black-500">
           <div class="flex justify-between items-center">
-            <p class="pb-2 text-[2vh]">รายได้รวม</p>
+            <p class="pb-2 text-[2vh]">รายได้รวม (ธุรกรรม)</p>
             <i class="bi bi-currency-exchange text-[3vh]"></i>
           </div>
-          <p class="text-[4.5vh]">100,000</p>
+          <p class="text-[4.5vh]"><%= (stats && Number(stats.revenueTotal || 0).toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })) || '0.00' %></p>
         </div>
       </div>
     </div>
@@ -64,7 +64,7 @@
     <div
         class="charts-card bg-white mt-5 p-[25px] box-border break-inside-avoid border border-[#d2d2d3] rounded-[16px] shadow-lg">
         <p class="chart-title flex items-center justify-center text-[2vh]">
-          ยอดจองรายเดือน</p>
+          รายได้รายเดือน</p>
         <div id="area-chart"></div>
       </div>
 
@@ -112,14 +112,18 @@
 
     <!-- apexchart -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/apexcharts/4.7.0/apexcharts.min.js"></script>
+  <!-- Server data for charts -->
+  <script id="serviceCountsData" type="application/json"><%- JSON.stringify((stats && stats.serviceCounts) || []) %></script>
+  <script id="revenueMonthlyData" type="application/json"><%- JSON.stringify((stats && stats.revenueMonthly) || { labels: [], series: [] }) %></script>
 
   <script>
-    //กราฟเส้น
+    // กราฟเส้น (รายได้ 12 เดือนล่าสุดจาก payment-service)
+    const revenueMonthly = JSON.parse(document.getElementById('revenueMonthlyData')?.textContent || '{"labels":[],"series":[]}');
     const areaChartOptions = {
       series: [
         {
           name: 'รายได้',
-          data: [12000, 18000, 25000, 40000, 30000, 22000, 15000, 20000, 60000],
+          data: Array.isArray(revenueMonthly.series) ? revenueMonthly.series : [],
         },
       ],
       chart: {
@@ -130,58 +134,26 @@
         },
       },
       colors: ['#38bdf8'],
-      dataLabels: {
-        enabled: false,
-      },
-      stroke: {
-        curve: 'smooth',
-      },
-      labels: ['มค', 'กพ', 'มีค', 'เมย', 'พค', 'มิย', 'กค', 'สค', 'กย'],
-
-      markers: {
-        size: 0,
-      },
-      yaxis: [
-        {
-          title: {
-            text: 'รายได้่',
-          },
-        },
-
-      ],
-      xaxis: {
-        title: {
-          text: '12 เดือนล่าสุด',
-        },
-      },
-
-      tooltip: {
-        shared: true,
-        intersect: false,
-      },
+      dataLabels: { enabled: false },
+      stroke: { curve: 'smooth' },
+      labels: Array.isArray(revenueMonthly.labels) ? revenueMonthly.labels : [],
+      markers: { size: 0 },
+      yaxis: [{ title: { text: 'รายได้' } }],
+      xaxis: { title: { text: '12 เดือนล่าสุด' } },
+      tooltip: { shared: true, intersect: false },
     };
 
-    const areaChart = new ApexCharts(
-      document.querySelector('#area-chart'),
-      areaChartOptions
-    );
+    const areaChart = new ApexCharts(document.querySelector('#area-chart'), areaChartOptions);
     areaChart.render();
 
 
 
+  const serviceCounts = JSON.parse(document.getElementById('serviceCountsData')?.textContent || '[]');
     const barChartOptions2 = {
       series: [
         {
-          name: 'ฝากเลี้ยง',
-          data: [150000, 180000, 170000, 200000, 210000, 220000],
-        },
-        {
-          name: 'ไปดูแลที่บ้าน',
-          data: [70000, 85000, 80000, 95000, 100000, 110000],
-        },
-        {
-          name: 'อาบน้ำ',
-          data: [80000, 95000, 90000, 105000, 110000, 110000],
+          name: 'จำนวนการจอง',
+          data: serviceCounts.map(s => s.count),
         },
       ],
       chart: {
@@ -198,7 +170,7 @@
           borderRadius: 6,
         },
       },
-      colors: ['#4A90E2', '#E57373', '#81C784'], // น้ำเงิน แดง เขียว
+      colors: ['#4A90E2'],
       dataLabels: {
         enabled: false,
       },
@@ -208,22 +180,16 @@
         colors: ['transparent'],
       },
       xaxis: {
-        categories: ['เม.ย.', 'พ.ค.', 'มิ.ย.', 'ก.ค.', 'ส.ค.', 'ก.ย.'],
+        categories: serviceCounts.map(s => s.label || s.key),
       },
       yaxis: {
-        title: {
-          text: 'จำนวนเงิน (฿)',
-        },
+        title: { text: 'จำนวนการจอง' },
       },
       fill: {
         opacity: 1,
       },
       tooltip: {
-        y: {
-          formatter: function (val) {
-            return val.toLocaleString() + " ฿";
-          },
-        },
+        y: { formatter: function (val) { return val.toLocaleString(); } },
       },
       legend: {
         position: 'top',

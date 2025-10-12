@@ -470,6 +470,110 @@ app.delete('/pets/:id', verifyToken, async (req, res) => {
     }
 });
 
-app.listen(PORT, () => {
-    console.log(`Auth service is running on http://localhost:${PORT}`);
+app.get('/api/users/all', async (req, res) => {
+    try {
+        const users = await User.findAll({
+            attributes: { exclude: ['password'] },
+            order: [['user_id', 'ASC']]
+        });
+
+        return res.status(200).json({ users });
+    } catch (error) {
+        console.error('Error fetching users:', error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+});
+
+// Get all sitters
+app.get('/api/sitters/all', async (req, res) => {
+    try {
+        const sitters = await User.findAll({
+            attributes: { exclude: ['password'] },
+            where: { role: 'sitter' },
+            order: [['createdAt', 'DESC']]
+        });
+        return res.status(200).json({ sitters });
+    } catch (error) {
+        console.error('Error fetching sitters:', error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+});
+
+// Update user status (admin)
+app.put('/api/users/:id/status', async (req, res) => {
+    try {
+        const userId = req.params.id;
+        const { status } = req.body || {};
+        if (!['active', 'suspended'].includes(status)) {
+            return res.status(400).json({ message: 'Invalid status' });
+        }
+        const user = await User.findByPk(userId);
+        if (!user) return res.status(404).json({ message: 'User not found' });
+        await user.update({ status });
+        const plain = user.get({ plain: true });
+        delete plain.password;
+        return res.status(200).json({ message: 'Status updated', user: plain });
+    } catch (error) {
+        console.error('Error updating user status:', error);
+        return res.status(500).json({ message: 'Internal server error' });
+    }
+});
+
+// Delete user (admin)
+app.delete('/api/users/:id', async (req, res) => {
+    try {
+        const userId = req.params.id;
+        const user = await User.findByPk(userId);
+        if (!user) return res.status(404).json({ message: 'User not found' });
+        await user.destroy();
+        return res.status(200).json({ message: 'User deleted' });
+    } catch (error) {
+        console.error('Error deleting user:', error);
+        // Possible FK constraint
+        return res.status(500).json({ message: 'Internal server error' });
+    }
+});
+
+// Update user role (admin)
+app.put('/api/users/:id/role', async (req, res) => {
+    try {
+        // Verify requester is admin via JWT token
+        const token = req.headers['authorization']?.split(' ')[1];
+        if (!token) return res.status(401).json({ message: 'Access token is required' });
+        let decoded;
+        try {
+            decoded = require('jsonwebtoken').verify(token, JWT_SECRET);
+        } catch (e) {
+            return res.status(403).json({ message: 'Invalid or expired token' });
+        }
+        if (!decoded || decoded.role !== 'admin') {
+            return res.status(403).json({ message: 'Admin access required' });
+        }
+
+        const userId = req.params.id;
+        const { role } = req.body || {};
+        const allowed = ['user', 'sitter', 'admin'];
+        if (!allowed.includes(role)) {
+            return res.status(400).json({ message: 'Invalid role' });
+        }
+        const user = await User.findByPk(userId);
+        if (!user) return res.status(404).json({ message: 'User not found' });
+        await user.update({ role });
+        const plain = user.get({ plain: true });
+        delete plain.password;
+        return res.status(200).json({ message: 'Role updated', user: plain });
+    } catch (error) {
+        console.error('Error updating user role:', error);
+        return res.status(500).json({ message: 'Internal server error' });
+    }
+});
+
+// Start server after DB initialized
+initDatabase().then(() => {
+    app.listen(PORT, () => {
+        console.log(`Auth service is running on http://localhost:${PORT}`);
+    });
+}).catch((err) => {
+    console.error('Failed to initialize database:', err);
+    process.exit(1);
 });

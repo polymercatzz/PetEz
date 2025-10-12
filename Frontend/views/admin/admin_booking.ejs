@@ -55,92 +55,34 @@
             </tr>
           </thead>
           <tbody class="divide-y divide-gray-100">
-            <tr class="bg-white">
-              <td class="p-3 text-[2vh] text-gray-700 whitespace-nowrap">
-                <p href="#" class="hover:underline">10001</p>
-              </td>
-              <td class="p-3 text-[2vh] text-gray-700 whitespace-nowrap">01/12/2025 - 12/12/2025</td>
-              <td class="p-3 text-[2vh] text-gray-700 whitespace-nowrap">
-                Kittipich Hirunwong
-              </td>
-              <td class="p-3 text-[2vh] text-gray-700 whitespace-nowrap">rum</td>
-              <td class="p-3 text-[2vh] text-gray-700 whitespace-nowrap">
-                ฝากเลี้ยง
-              </td>
-              <td class="p-3 text-[2vh] text-gray-700 whitespace-nowrap">
-                087-716-0351
-              </td>
-              <td class="p-3 text-[2vh] text-gray-700 whitespace-nowrap">
-                2000
-              </td>
-              <td class="p-3 text-[2vh] text-gray-700 whitespace-nowrap">
-                <span
-                  class="accountStatus px-3 py-1 text-[1.7vh] font-medium  tracking-wider text-white bg-yellow-400 rounded-lg ">รออนุมัติ</span>
-              </td>
-              <td class="p-3 text-[2vh] text-gray-700 whitespace-nowrap justify-center flex">
-                <button class="openPopup">
-                  <i class="bi bi-three-dots-vertical cursor-pointe"></i>
-                </button>
-              </td>
-            </tr>
-            
-            <tr class="bg-white">
-              <td class="p-3 text-[2vh] text-gray-700 whitespace-nowrap">
-                <p href="#" class="font-bold text-blue-500 hover:underline">10001</p>
-              </td>
-              <td class="p-3 text-[2vh] text-gray-700 whitespace-nowrap">01/12/2025 - 12/12/2025</td>
-              <td class="p-3 text-[2vh] text-gray-700 whitespace-nowrap">
-                Kittipich Hirunwong
-              </td>
-              <td class="p-3 text-[2vh] text-gray-700 whitespace-nowrap">rum</td>
-              <td class="p-3 text-[2vh] text-gray-700 whitespace-nowrap">
-                ฝากเลี้ยง
-              </td>
-              <td class="p-3 text-[2vh] text-gray-700 whitespace-nowrap">
-                087-716-0351
-              </td>
-              <td class="p-3 text-[2vh] text-gray-700 whitespace-nowrap">
-                2000
-              </td>
-              <td class="p-3 text-[2vh] text-gray-700 whitespace-nowrap">
-                <span
-                  class="accountStatus px-3 py-1 text-[1.7vh] font-medium  tracking-wider text-white bg-red-600 rounded-lg ">ยกเลิก</span>
-              </td>
-              <td class="p-3 text-[2vh] text-gray-700 whitespace-nowrap justify-center flex">
-                <button class="openPopup">
-                  <i class="bi bi-three-dots-vertical cursor-pointe"></i>
-                </button>
-              </td>
-            </tr>
-            <tr class="bg-white">
-              <td class="p-3 text-[2vh] text-gray-700 whitespace-nowrap">
-                <p href="#" class="font-bold text-blue-500 hover:underline">10001</p>
-              </td>
-              <td class="p-3 text-[2vh] text-gray-700 whitespace-nowrap">01/12/2025 - 12/12/2025</td>
-              <td class="p-3 text-[2vh] text-gray-700 whitespace-nowrap">
-                Kittipich Hirunwong
-              </td>
-              <td class="p-3 text-[2vh] text-gray-700 whitespace-nowrap">rum</td>
-              <td class="p-3 text-[2vh] text-gray-700 whitespace-nowrap">
-                ฝากเลี้ยง
-              </td>
-              <td class="p-3 text-[2vh] text-gray-700 whitespace-nowrap">
-                087-716-0351
-              </td>
-              <td class="p-3 text-[2vh] text-gray-700 whitespace-nowrap">
-                2000
-              </td>
-              <td class="p-3 text-[2vh] text-gray-700 whitespace-nowrap">
-                <span
-                  class="accountStatus px-3 py-1 text-[1.7vh] font-medium  tracking-wider text-white bg-[#334DCC] rounded-lg ">เสร็จสิ้น</span>
-              </td>
-              <td class="p-3 text-[2vh] text-gray-700 whitespace-nowrap justify-center flex">
-                <button class="openPopup">
-                  <i class="bi bi-three-dots-vertical cursor-pointe"></i>
-                </button>
-              </td>
-            </tr>
-
+            <% const statusMap = {
+                pending: { label: 'รออนุมัติ', cls: 'bg-yellow-400' },
+                confirmed: { label: 'ยืนยันแล้ว', cls: 'bg-blue-500' },
+                in_progress: { label: 'กำลังดำเนินการ', cls: 'bg-blue-600' },
+                completed: { label: 'เสร็จสิ้น', cls: 'bg-green-600' },
+                cancelled: { label: 'ยกเลิก', cls: 'bg-red-600' }
+            }; %>
+            <% (bookings || []).forEach(b => { const st = statusMap[b.status] || statusMap.pending; %>
+              <tr class="bg-white">
+                <td class="p-3 text-[2vh] text-gray-700 whitespace-nowrap"><%= b.booking_id %></td>
+                <td class="p-3 text-[2vh] text-gray-700 whitespace-nowrap">
+                  <%= new Date(b.start_date).toLocaleString('th-TH') %> - <%= new Date(b.end_date).toLocaleString('th-TH') %>
+                </td>
+                <td class="p-3 text-[2vh] text-gray-700 whitespace-nowrap">#<%= b.user_id %></td>
+                <td class="p-3 text-[2vh] text-gray-700 whitespace-nowrap"><%= b.sitter_id ? ('#' + b.sitter_id) : '-' %></td>
+                <td class="p-3 text-[2vh] text-gray-700 whitespace-nowrap"><%= b.service_type %></td>
+                <td class="p-3 text-[2vh] text-gray-700 whitespace-nowrap"><%= b.emergency_contact || '-' %></td>
+                <td class="p-3 text-[2vh] text-gray-700 whitespace-nowrap"><%= Number(b.total_price || 0).toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) %></td>
+                <td class="p-3 text-[2vh] text-gray-700 whitespace-nowrap">
+                  <span class="accountStatus px-3 py-1 text-[1.7vh] font-medium tracking-wider text-white rounded-lg <%= st.cls %>"><%= st.label %></span>
+                </td>
+                <td class="p-3 text-[2vh] text-gray-700 whitespace-nowrap justify-center flex">
+                  <button class="openPopup" data-booking='<%- JSON.stringify(b) %>'>
+                    <i class="bi bi-three-dots-vertical cursor-pointe"></i>
+                  </button>
+                </td>
+              </tr>
+            <% }) %>
           </tbody>
         </table>
       </div>
@@ -161,7 +103,7 @@
               </div>
             </div>
             <div class="ml-auto">
-                <button class="openPopup">
+                <button class="openPopup" data-booking='{}'>
                   <i class="bi bi-three-dots-vertical cursor-pointe"></i>
                 </button>
             </div>
@@ -263,7 +205,7 @@
           </button>
 
           <p class="font-semibold mb-1 text-[3vh]">รายละเอียดการจอง</p>
-          <p class="text-[2vh] text-gray-500 mb-4">ID #001</p>
+          <p class="text-[2vh] text-gray-500 mb-4">ID #<span id="popupBookingId">-</span></p>
 
           <div class="space-y-2 text-[2vh] lg:m-8">
             <div class="grid grid-cols-2 lg:grid-cols-3 lg:gap-8">
@@ -314,10 +256,13 @@
             <label for="status" class="font-medium">สถานะ</label>
             <select id="status"
               class="mt-1 w-full border rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-gray-400">
-              <option>รออนุมัติ</option>
-              <option>เสร็จสิ้น</option>
-              <option>ยกเลิก</option>
+              <option value="pending">รออนุมัติ</option>
+              <option value="confirmed">ยืนยันแล้ว</option>
+              <option value="in_progress">กำลังดำเนินการ</option>
+              <option value="completed">เสร็จสิ้น</option>
+              <option value="cancelled">ยกเลิก</option>
             </select>
+            <button id="saveStatusBtn" class="mt-3 px-4 py-2 bg-blue-600 text-white rounded-lg">บันทึก</button>
           </div>
         </div>
       </div>
@@ -332,12 +277,22 @@
 
 
         // popup description
-        const popup = document.getElementById('popup');
-        const closeBtn = document.getElementById('closePopup');
+  const popup = document.getElementById('popup');
+  const closeBtn = document.getElementById('closePopup');
+  const statusSelect = document.getElementById('status');
+  const saveStatusBtn = document.getElementById('saveStatusBtn');
+  const popupBookingId = document.getElementById('popupBookingId');
+  let currentBooking = null;
 
         document.addEventListener('click', (e) => {
           // เปิด popup
           if (e.target.closest('.openPopup')) {
+            const btn = e.target.closest('.openPopup');
+            try { currentBooking = JSON.parse(btn.dataset.booking); } catch { currentBooking = null; }
+            if (currentBooking) {
+              popupBookingId.textContent = currentBooking.booking_id || '-';
+              if (currentBooking.status) statusSelect.value = currentBooking.status;
+            }
             popup.classList.remove('hidden');
             document.body.classList.add('overflow-hidden');
           }
@@ -355,8 +310,28 @@
           }
         });
 
-// change status
-
+        // change status
+        if (saveStatusBtn) {
+          saveStatusBtn.addEventListener('click', async () => {
+            if (!currentBooking) return;
+            const newStatus = statusSelect.value;
+            try {
+              const resp = await fetch(`/admin/api/bookings/${currentBooking.booking_id}/status`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ status: newStatus })
+              });
+              if (resp.ok) {
+                window.location.reload();
+              } else {
+                const data = await resp.json().catch(() => ({ message: 'อัปเดตสถานะไม่สำเร็จ' }));
+                alert(data.message || 'อัปเดตสถานะไม่สำเร็จ');
+              }
+            } catch (err) {
+              alert('เกิดข้อผิดพลาดระหว่างอัปเดตสถานะ');
+            }
+          });
+        }
 
 
       </script>

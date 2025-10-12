@@ -40,6 +40,7 @@
               <th class="p-3 text-[1.2rem] font-medium tracking-wide text-left text-gray-600">Email</th>
               <th class="p-3 text-[1.2rem] font-medium tracking-wide text-left text-gray-600">Phone</th>
               <th class="w-24 p-3 text-[1.2rem] font-medium tracking-wide text-left text-gray-600">Status</th>
+              <th class="w-24 p-3 text-[1.2rem] font-medium tracking-wide text-left text-gray-600">Role</th>
               <th class="w-30 p-3 text-[1.2rem] font-medium tracking-wide text-left text-gray-600">Start Date</th>
               <th class=" p-3 text-[1.2rem] font-medium tracking-wide text-left text-gray-600">Action</th>
             </tr>
@@ -65,6 +66,13 @@
                   </span>
                 </td>
                 <td class="p-3 text-[2vh] text-gray-700 whitespace-nowrap"><%= (u.createdAt && new Date(u.createdAt).toLocaleDateString('th-TH')) || '-' %></td>
+                <td class="p-3 text-[2vh] text-gray-700 whitespace-nowrap">
+                  <select class="roleSelect border rounded px-2 py-1" onchange="changeRole(this)" data-current-role="<%= u.role %>">
+                    <option value="user" <%= u.role==='user'?'selected':'' %>>user</option>
+                    <option value="sitter" <%= u.role==='sitter'?'selected':'' %>>sitter</option>
+                    <option value="admin" <%= u.role==='admin'?'selected':'' %>>admin</option>
+                  </select>
+                </td>
                 <td class="p-3 text-[2vh] text-gray-700 whitespace-nowrap justify-center flex">
                   <div>
                     <div onclick="toggleDropdown(event)">
@@ -101,6 +109,7 @@
               <th class="p-3 text-[1.2rem] font-medium tracking-wide text-left text-gray-600">Email</th>
               <th class="p-3 text-[1.2rem] font-medium tracking-wide text-left text-gray-600">Phone</th>
               <th class="w-24 p-3 text-[1.2rem] font-medium tracking-wide text-left text-gray-600">Status</th>
+              <th class="w-24 p-3 text-[1.2rem] font-medium tracking-wide text-left text-gray-600">Role</th>
               <th class="w-30 p-3 text-[1.2rem] font-medium tracking-wide text-left text-gray-600">Start Date</th>
               <th class=" p-3 text-[1.2rem] font-medium tracking-wide text-left text-gray-600">Action</th>
             </tr>
@@ -126,6 +135,13 @@
                   </span>
                 </td>
                 <td class="p-3 text-[2vh] text-gray-700 whitespace-nowrap"><%= (s.createdAt && new Date(s.createdAt).toLocaleDateString('th-TH')) || '-' %></td>
+                <td class="p-3 text-[2vh] text-gray-700 whitespace-nowrap">
+                  <select class="roleSelect border rounded px-2 py-1" onchange="changeRole(this)" data-current-role="<%= s.role %>">
+                    <option value="user" <%= s.role==='user'?'selected':'' %>>user</option>
+                    <option value="sitter" <%= s.role==='sitter'?'selected':'' %>>sitter</option>
+                    <option value="admin" <%= s.role==='admin'?'selected':'' %>>admin</option>
+                  </select>
+                </td>
                 <td class="p-3 text-[2vh] text-gray-700 whitespace-nowrap justify-center flex">
                   <div>
                     <div onclick="toggleDropdown(event)">
@@ -196,6 +212,14 @@
                 <p>Name: <%= u.full_name || u.username || '-' %></p>
                 <p>Email: <%= u.email || '-' %></p>
                 <p>Phone: <%= u.phone || '-' %></p>
+                <div class="mt-2">
+                  <label class="mr-2 text-gray-600">Role</label>
+                  <select class="roleSelect border rounded px-2 py-1" onchange="changeRole(this)" data-current-role="<%= u.role %>">
+                    <option value="user" <%= u.role==='user'?'selected':'' %>>user</option>
+                    <option value="sitter" <%= u.role==='sitter'?'selected':'' %>>sitter</option>
+                    <option value="admin" <%= u.role==='admin'?'selected':'' %>>admin</option>
+                  </select>
+                </div>
               </div>
             </div>
           <% }) %>
@@ -243,6 +267,14 @@
                 <p>Name: <%= s.full_name || s.username || '-' %></p>
                 <p>Email: <%= s.email || '-' %></p>
                 <p>Phone: <%= s.phone || '-' %></p>
+                <div class="mt-2">
+                  <label class="mr-2 text-gray-600">Role</label>
+                  <select class="roleSelect border rounded px-2 py-1" onchange="changeRole(this)" data-current-role="<%= s.role %>">
+                    <option value="user" <%= s.role==='user'?'selected':'' %>>user</option>
+                    <option value="sitter" <%= s.role==='sitter'?'selected':'' %>>sitter</option>
+                    <option value="admin" <%= s.role==='admin'?'selected':'' %>>admin</option>
+                  </select>
+                </div>
               </div>
             </div>
           <% }) %>
@@ -366,6 +398,34 @@
     document.querySelectorAll('.dropDown').forEach(d => d.classList.add('hidden'));
   });
    </script>
+  <script>
+    async function changeRole(selectEl) {
+      const container = selectEl.closest('tr') || selectEl.closest('.res');
+      if (!container) return;
+      const userId = container.getAttribute('data-user-id');
+      if (!userId) return;
+      const newRole = selectEl.value;
+      const prevRole = selectEl.getAttribute('data-current-role');
+      if (newRole === prevRole) return;
+      try {
+        const resp = await fetch(`/admin/api/users/${userId}/role`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ role: newRole })
+        });
+        if (!resp.ok) {
+          const data = await resp.json().catch(()=>({message:'Update role failed'}));
+          alert(data.message || 'Update role failed');
+          selectEl.value = prevRole; // revert
+          return;
+        }
+        selectEl.setAttribute('data-current-role', newRole);
+      } catch (err) {
+        alert('เกิดข้อผิดพลาดระหว่างการอัปเดตสิทธิ์');
+        selectEl.value = prevRole;
+      }
+    }
+  </script>
 </body>
 
 </html>
