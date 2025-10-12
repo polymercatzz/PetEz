@@ -5,6 +5,7 @@ const userController = {
     // View controllers
     getUserMain: async (req, res) => {
         const user = req.session.user;
+        const qRaw = (req.query && req.query.q) ? String(req.query.q).trim() : '';
         try {
             const svcUrl = process.env.SITTER_SERVICE_URL || 'http://sitter-service:3004/public/services';
             const resp = await fetch(svcUrl);
@@ -13,10 +14,20 @@ const userController = {
                 const data = await resp.json();
                 services = data.services || [];
             }
-            res.render('user/main', { title: 'Welcome to PetEz', activeMenu: 'home', user, services });
+            // Apply simple filter by service_type or name (case-insensitive, contains)
+            let filtered = services;
+            if (qRaw) {
+                const q = qRaw.toLowerCase();
+                filtered = services.filter(s => {
+                    const t1 = (s.service_type || '').toString().toLowerCase();
+                    const t2 = (s.name || '').toString().toLowerCase();
+                    return (t1.includes(q) || t2.includes(q));
+                });
+            }
+            res.render('user/main', { title: 'Welcome to PetEz', activeMenu: 'home', user, services: filtered, q: qRaw });
         } catch (e) {
             console.error('Error loading services for home:', e);
-            res.render('user/main', { title: 'Welcome to PetEz', activeMenu: 'home', user, services: [] });
+            res.render('user/main', { title: 'Welcome to PetEz', activeMenu: 'home', user, services: [], q: qRaw });
         }
     },
     getUserProfile: async (req, res) => {

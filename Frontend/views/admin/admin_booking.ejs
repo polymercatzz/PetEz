@@ -25,19 +25,33 @@
 
     <div class="p-5 min-h-screen bg-white border border-gray-200 rounded-xl mt-4 mb-6">
       <div class="flex space-x-6 text-[2vh]">
-        <div
-          class="border border-gray-300 p-2 max-w-[65%] w-full flex justify-center items-center space-x-2 rounded-xl mb-4">
-          <i class="bi bi-search text-[2vh]"></i>
-          <input type="text" placeholder="ค้นหาผู้ใช้หรือพี่เลี้ยง" class=" pl-4 w-full rounded-lg focus:outline-none ">
-        </div>
-        <div>
-          <select name="" id="" class="p-2 border  border-gray-300 rounded-xl">
-            <option value="">ทั้งหมด</option>
-            <option value="">รออนุมัติ</option>
-            <option value="">เสร็จสิ้น</option>
-            <option value="">ยกเลิก</option>
-          </select>
-        </div>
+        <select id="statusFilter" class="px-2 border border-gray-300 rounded-xl text-center">
+          <option value="">ทั้งหมด</option>
+          <option value="pending">รออนุมัติ</option>
+          <option value="confirmed">ยืนยันแล้ว</option>
+          <option value="in_progress">กำลังดำเนินการ</option>
+          <option value="completed">เสร็จสิ้น</option>
+          <option value="cancelled">ยกเลิก</option>
+        </select>
+        <button id="statusSearchBtn" class="px-4 py-2 bg-blue-600 text-white rounded-xl">ค้นหา</button>
+        <script>
+          document.getElementById('statusSearchBtn').onclick = function() {
+            const status = document.getElementById('statusFilter').value;
+            document.querySelectorAll('tbody tr').forEach(tr => {
+              const statusText = tr.querySelector('.accountStatus')?.textContent.trim() || '';
+              let show = false;
+              if (!status) show = true;
+              else if (
+                (status === 'pending' && statusText === 'รออนุมัติ') ||
+                (status === 'confirmed' && statusText === 'ยืนยันแล้ว') ||
+                (status === 'in_progress' && statusText === 'กำลังดำเนินการ') ||
+                (status === 'completed' && statusText === 'เสร็จสิ้น') ||
+                (status === 'cancelled' && statusText === 'ยกเลิก')
+              ) show = true;
+              tr.style.display = show ? '' : 'none';
+            });
+          };
+        </script>
       </div>
       <div class="overflow-auto rounded-lg shadow hidden md:block">
         <table class="w-full">
@@ -211,43 +225,43 @@
             <div class="grid grid-cols-2 lg:grid-cols-3 lg:gap-8">
               <div class="flex-row justify-center items-center">
                 <p class="font-light text-[#7D7D7D]">ชื่อ-นามสกุล</p>
-                <p class="font-medium">Kittipich Hirunwong</p>
+                <p class="font-medium" id="popupUserName">-</p>
               </div>
               <div class="flex-row justify-center items-center">
                 <p class="font-light text-[#7D7D7D]">Email</p>
-                <p class="font-medium">66070018@kmitl.ac.th</p>
+                <p class="font-medium" id="popupEmail">-</p>
               </div>
               <div class="flex-row justify-center items-center">
                 <p class="font-light text-[#7D7D7D]">Phone</p>
-                <p class="font-medium">087-716-0351</p>
+                <p class="font-medium" id="popupPhone">-</p>
               </div>
             </div>
             <div class="grid grid-cols-2 lg:grid-cols-3 lg:gap-8">
               <div class="flex-row justify-center items-center">
                 <p class="font-light text-[#7D7D7D]">พี่เลี้ยงสัตว์</p>
-                <p class="font-medium">Man Sea</p>
+                <p class="font-medium" id="popupSitter">-</p>
               </div>
               <div class="flex-row justify-center items-center">
                 <p class="font-light text-[#7D7D7D]">บริการ</p>
-                <p class="font-medium">ฝากเลี้ยง</p>
+                <p class="font-medium" id="popupService">-</p>
               </div>
               <div class="flex-row justify-center items-center">
                 <p class="font-light text-[#7D7D7D]">สถานที่</p>
-                <p class="font-medium">ร้าน</p>
+                <p class="font-medium" id="popupLocation">-</p>
               </div>
             </div>
             <div class="grid grid-cols-2 lg:grid-cols-3 lg:gap-8">
               <div class="flex-row justify-center items-center">
                 <p class="font-light text-[#7D7D7D]">วันที่ใช้บริการ</p>
-                <p class="font-medium">01/12/2025 - 12/12/2025</p>
+                <p class="font-medium" id="popupDateRange">-</p>
               </div>
               <div class="flex-row justify-center items-center">
                 <p class="font-light text-[#7D7D7D]">จำนวนวัน</p>
-                <p class="font-medium">12 วัน</p>
+                <p class="font-medium" id="popupDays">-</p>
               </div>
               <div class="flex-row justify-center items-center">
                 <p class="font-light text-[#7D7D7D]">ราคา</p>
-                <p class="font-medium">2,000</p>
+                <p class="font-medium" id="popupPrice">-</p>
               </div>
             </div>
           </div>
@@ -292,6 +306,31 @@
             if (currentBooking) {
               popupBookingId.textContent = currentBooking.booking_id || '-';
               if (currentBooking.status) statusSelect.value = currentBooking.status;
+
+              // Helper formatters
+              const fmtTH = (d) => d ? new Date(d).toLocaleString('th-TH') : '-';
+              const to2 = (n) => Number(n || 0).toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+              // Basic user/sitter/service info (fallback to IDs if names are unknown)
+              document.getElementById('popupUserName').textContent = currentBooking.user_id ? `ผู้ใช้ #${currentBooking.user_id}` : '-';
+              document.getElementById('popupEmail').textContent = '-';
+              document.getElementById('popupPhone').textContent = currentBooking.emergency_contact || '-';
+              document.getElementById('popupSitter').textContent = currentBooking.sitter_id ? `พี่เลี้ยง #${currentBooking.sitter_id}` : '-';
+              document.getElementById('popupService').textContent = currentBooking.service_type || (currentBooking.service_id ? `บริการ #${currentBooking.service_id}` : '-');
+              document.getElementById('popupLocation').textContent = currentBooking.location || '-';
+
+              // Dates, days, price
+              const sd = currentBooking.start_date ? new Date(currentBooking.start_date) : null;
+              const ed = currentBooking.end_date ? new Date(currentBooking.end_date) : null;
+              document.getElementById('popupDateRange').textContent = (sd && ed) ? `${fmtTH(sd)} - ${fmtTH(ed)}` : '-';
+              if (sd && ed) {
+                const diffMs = ed - sd;
+                const days = Math.max(1, Math.ceil(diffMs / (1000 * 60 * 60 * 24)));
+                document.getElementById('popupDays').textContent = `${days} วัน`;
+              } else {
+                document.getElementById('popupDays').textContent = '-';
+              }
+              document.getElementById('popupPrice').textContent = to2(currentBooking.total_price);
             }
             popup.classList.remove('hidden');
             document.body.classList.add('overflow-hidden');

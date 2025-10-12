@@ -63,6 +63,7 @@ app.post('/transactions', authenticateToken, async (req, res) => {
       status: 'success',
       proof_path: proof_path || null,
     });
+    console.log('Transaction created:', tx.id);
     return res.status(201).json({ message: 'Transaction recorded', transaction: tx });
   } catch (err) {
     console.error('Create transaction error:', err);
@@ -134,7 +135,7 @@ async function start() {
       console.log(`Connecting to DB (attempt ${attempt}/${maxAttempts})...`);
       await sequelize.authenticate();
       console.log('Payment DB connected.');
-      await sequelize.sync();
+      await sequelize.sync( { alter: true } );
       console.log('Payment DB synced.');
       app.listen(PORT, '0.0.0.0', () => console.log(`Payment service on http://0.0.0.0:${PORT}`));
       return;
