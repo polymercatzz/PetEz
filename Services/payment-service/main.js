@@ -3,6 +3,7 @@ const cors = require('cors');
 const jwt = require('jsonwebtoken');
 const { Sequelize, DataTypes, Op } = require('sequelize');
 const db = require('./models');
+const { register, collectHttpMetrics } = require('./src/metrics');
 
 const app = express();
 const PORT = process.env.PORT || 3007;
@@ -10,6 +11,7 @@ const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-this-in-pro
 
 app.use(cors());
 app.use(express.json());
+app.use(collectHttpMetrics);
 
 // Attach sequelize models
 const { sequelize, Transaction } = { sequelize: db.sequelize, Transaction: db.Transaction };
@@ -35,6 +37,16 @@ const requireAdmin = (req, res, next) => {
 
 // Health
 app.get('/health', (req, res) => res.json({ ok: true }));
+
+// Metrics endpoint for Prometheus
+app.get('/metrics', async (req, res) => {
+    try {
+        res.set('Content-Type', register.contentType);
+        res.end(await register.metrics());
+    } catch (error) {
+        res.status(500).end(error);
+    }
+});
 
 // Admin: get revenue summary (total and by month for last 12 months)
 app.get('/admin/revenue/summary', authenticateToken, requireAdmin, async (req, res) => {

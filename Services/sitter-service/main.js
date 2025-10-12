@@ -4,6 +4,7 @@ const jwt = require('jsonwebtoken');
 const session = require('express-session');
 const { User, Pet, Sitter, Service, Booking, Transaction, Request, sequelize, initDatabase } = require('./models/index');
 const { Op } = require('sequelize');
+const { register, collectHttpMetrics } = require('./src/metrics');
 
 const app = express();
 const PORT = 3004;
@@ -30,6 +31,7 @@ app.use(session({
 }));
 
 app.use(express.json());
+app.use(collectHttpMetrics);
 
 // Initialize database and create tables
 initDatabase();
@@ -60,6 +62,16 @@ const requireAdmin = (req, res, next) => {
 // Health check
 app.get('/health', (req, res) => {
     res.status(200).send('Sitter Service OK');
+});
+
+// Metrics endpoint for Prometheus
+app.get('/metrics', async (req, res) => {
+    try {
+        res.set('Content-Type', register.contentType);
+        res.end(await register.metrics());
+    } catch (error) {
+        res.status(500).end(error);
+    }
 });
 
 // ========================================

@@ -2,6 +2,7 @@ const express = require('express');
 const jwt = require('jsonwebtoken');
 const session = require('express-session');
 const { User, Pet, initDatabase } = require('./src/models/index');
+const { register, collectHttpMetrics } = require('./src/metrics');
 
 const app = express();
 const PORT = 3002;
@@ -22,6 +23,7 @@ app.use(session({
 }));
 
 app.use(express.json());
+app.use(collectHttpMetrics);
 
 initDatabase();
 
@@ -43,6 +45,16 @@ const verifyToken = (req, res, next) => {
 // Routes
 app.get('/health', (req, res) => {
     res.status(200).send('OK');
+});
+
+// Metrics endpoint for Prometheus
+app.get('/metrics', async (req, res) => {
+    try {
+        res.set('Content-Type', register.contentType);
+        res.end(await register.metrics());
+    } catch (error) {
+        res.status(500).end(error);
+    }
 });
 
 app.post('/login', async (req, res) => {

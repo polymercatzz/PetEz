@@ -2,6 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const jwt = require('jsonwebtoken');
 const { Sequelize, DataTypes } = require('sequelize');
+const { register, collectHttpMetrics } = require('./src/metrics');
 
 const app = express();
 const PORT = process.env.PORT || 3006;
@@ -10,6 +11,7 @@ const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-this-in-pro
 // Middleware
 app.use(cors());
 app.use(express.json());
+app.use(collectHttpMetrics);
 
 // Database connection
 const sequelize = new Sequelize(process.env.DATABASE_URL || 'mysql://root:root@mysql-auth:3306/auth_db', {
@@ -94,6 +96,16 @@ async function connectToDatabase() {
 // Test endpoint
 app.get('/test', (req, res) => {
     res.json({ message: 'Booking service is working', timestamp: new Date().toISOString() });
+});
+
+// Metrics endpoint for Prometheus
+app.get('/metrics', async (req, res) => {
+    try {
+        res.set('Content-Type', register.contentType);
+        res.end(await register.metrics());
+    } catch (error) {
+        res.status(500).end(error);
+    }
 });
 
 // Get all bookings for a user
