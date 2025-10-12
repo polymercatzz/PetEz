@@ -24,15 +24,15 @@
             <span class="text-[2rem]">บริการพี่เลี้ยงสัตว์คุณภาพสูง สำหรับสัตว์เลี้ยงที่คุณรัก</span>
             <span class="text-[1.3rem]">สะอาด ถูกสุขอนามัย ให้เจ้าของวางใจ ทุกการฝาก</span>
         </p>
-        <div class="w-full flex justify-center gap-3 mb-10">
+        <form class="w-full flex justify-center gap-3 mb-10" method="GET" action="/user/">
             <div class="flex items-center border border-white bg-white rounded-full shadow-sm px-4 py-2 w-[30%]">
                 <i class="fa-solid fa-magnifying-glass text-gray-400 mr-3"></i>
-                <input type="text" placeholder="ค้นหาชื่อพี่เลี้ยงที่ท่านต้องการ" class="flex-1 outline-none">
+                <input name="q" value="<%= (typeof q !== 'undefined' && q) ? q : '' %>" type="text" placeholder="ค้นหาชื่อบริการที่ท่านต้องการ" class="flex-1 outline-none">
             </div>
-            <div class="flex items-center bg-orange-500 rounded-xl text-white shadow-sm px-5 py-2 transition duration-200 ease-in-out hover:bg-orange-600">
-                <a href="#"><button class="cursor-pointer">ค้นหา</button></a>
+            <div>
+                <button type="submit" class="flex items-center bg-orange-500 rounded-xl text-white shadow-sm px-5 py-2 transition duration-200 ease-in-out hover:bg-orange-600 cursor-pointer">ค้นหา</button>
             </div>
-        </div>
+        </form>
         <div class="flex justify-center items-center border rounded-xl px-4 py-3 bg-white">
             <div class="w-full grid grid-cols-7">
                 <button class="cursor-pointer flex flex-col justify-center items-center">
@@ -73,7 +73,12 @@
     <section class="flex flex-col justify-center items-start p-5 mx-auto w-[80%]">
         <p class="text-[3rem]">บริการทั้งหมด</p>
         <div class="flex flex-col justify-center items-start mx-auto w-full">
-            <p>พบบริการ <%= (services && services.length) ? services.length : 0 %> รายการ</p>
+            <p>
+                พบบริการ <%= (services && services.length) ? services.length : 0 %> รายการ
+                <% if (q) { %>
+                    สำหรับคำค้น "<%= q %>"
+                <% } %>
+            </p>
             <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6 w-full">
                 <% if (services && services.length > 0) { %>
                     <% services.forEach(function(svc) { %>
