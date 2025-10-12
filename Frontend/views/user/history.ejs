@@ -3,488 +3,104 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><%= title %> - PetEz</title>
+    <title>PetEz</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@100..900&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        body {
+        body{
             font-family: "Noto Sans Thai", sans-serif;
         }
     </style>
 </head>
-<body class="bg-gray-50">
+<body>
     <%- include('../partials/user-nav') %>
 
     <div class="flex flex-col justify-center items-start mx-auto mt-10 mb-5 w-[80%]">
-        <a href="/user/"><button class="px-16 py-2 text-[1.3rem] text-blue-600 rounded-2xl shadow-sm cursor-pointer bg-white border border-blue-600 transition duration-300 ease-in-out shadow-[0_5px_15px_rgba(37,99,235,0.3)] hover:-translate-y-1 hover:shadow-[0_8px_20px_rgba(37,99,235,0.4)]">back</button></a>
+    <a href="/user/"><button class="px-16 py-2 text-[1.3rem] text-blue-600 rounded-2xl shadow-sm cursor-pointer bg-white border border-blue-600 transition duration-300 ease-in-out shadow-[0_5px_15px_rgba(37,99,235,0.3)] hover:-translate-y-1 hover:shadow-[0_8px_20px_rgba(37,99,235,0.4)]">back</button></a>
     </div>
 
-    <div class="flex flex-col justify-center items-start mb-10 mx-auto px-10 py-10 w-[80%] border border-gray-200 rounded-xl shadow-sm bg-white">
-        <div class="flex justify-between items-center w-full mb-8">
-            <div class="flex justify-center items-center gap-3">
-                <i class="fa-solid fa-clock-rotate-left fa-2x text-blue-600"></i>
-                <p class="text-[1.8rem] font-bold">ประวัติการจอง</p>
-            </div>
-            <a href="/user/create-booking" class="px-6 py-3 bg-blue-600 text-white text-[1.1rem] rounded-lg hover:bg-blue-700 transition duration-300 flex items-center gap-2">
-                <i class="fa-solid fa-plus"></i>
-                สร้างคำขอใหม่
-            </a>
+    <div class="flex flex-col justify-center items-start mb-10 mx-auto px-10 py-10 w-[80%] border border-gray-200 rounded-xl shadow-sm">
+        <div class="flex justify-center items-center gap-3 mb-5">
+            <i class="fa-solid fa-clock-rotate-left fa-2x"></i>
+            <p class="text-[1.8rem] font-bold">ประวัติการจอง</p>
         </div>
-
-        <!-- Filter and Search Section -->
-        <div class="flex justify-between items-center w-full mb-6 p-4 bg-gray-50 rounded-lg">
-            <div class="flex gap-4">
-                <select id="statusFilter" class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                    <option value="">สถานะทั้งหมด</option>
-                    <option value="pending">รอดำเนินการ</option>
-                    <option value="confirmed">ยืนยันแล้ว</option>
-                    <option value="in_progress">กำลังดำเนินการ</option>
-                    <option value="completed">สำเร็จ</option>
-                    <option value="cancelled">ยกเลิก</option>
-                </select>
-                <select id="serviceFilter" class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                    <option value="">บริการทั้งหมด</option>
-                    <option value="sitting">ดูแลสัตว์ที่บ้าน</option>
-                    <option value="walking">พาสัตว์เดิน</option>
-                    <option value="boarding">ฝากเลี้ยงสัตว์</option>
-                    <option value="grooming">บริการตัดขน</option>
-                </select>
-            </div>
-            <div class="relative">
-                <input type="text" id="searchInput" placeholder="ค้นหาจาก ID การจอง..." class="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                <i class="fa-solid fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
-            </div>
-        </div>
-
-        <!-- Loading State -->
-        <div id="loadingState" class="flex justify-center items-center w-full py-20">
-            <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-        </div>
-
-        <!-- Empty State -->
-        <div id="emptyState" class="hidden flex flex-col justify-center items-center w-full py-20 text-gray-500">
-            <i class="fa-solid fa-calendar-xmark fa-4x mb-4"></i>
-            <p class="text-xl mb-2">ไม่มีประวัติการจอง</p>
-            <p class="text-gray-400 mb-6">เริ่มต้นการจองแรกของคุณเพื่อดูแลสัตว์เลี้ยง</p>
-            <a href="/user/create-booking" class="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition duration-300">
-                สร้างคำขอแรก
-            </a>
-        </div>
-
-        <!-- Bookings List -->
-        <div id="bookingsList" class="grid grid-cols-1 gap-5 w-full">
-            <!-- Bookings will be loaded here -->
-        </div>
-
-        <!-- Pagination -->
-        <div id="pagination" class="hidden flex justify-center items-center gap-2 mt-8 w-full">
-            <button id="prevPage" class="px-4 py-2 bg-gray-200 text-gray-600 rounded-lg hover:bg-gray-300 transition duration-300" disabled>
-                <i class="fa-solid fa-chevron-left"></i>
-            </button>
-            <span id="pageInfo" class="px-4 py-2 text-gray-600">หน้า 1 จาก 1</span>
-            <button id="nextPage" class="px-4 py-2 bg-gray-200 text-gray-600 rounded-lg hover:bg-gray-300 transition duration-300" disabled>
-                <i class="fa-solid fa-chevron-right"></i>
-            </button>
-        </div>
-    </div>
-
-    <!-- Booking Detail Modal -->
-    <div id="bookingModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
-        <div class="bg-white rounded-xl p-8 max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
-            <div class="flex justify-between items-center mb-6">
-                <h3 class="text-xl font-bold">รายละเอียดการจอง</h3>
-                <button id="closeModal" class="text-gray-400 hover:text-gray-600 text-2xl">
-                    <i class="fa-solid fa-times"></i>
-                </button>
-            </div>
-            <div id="modalContent">
-                <!-- Modal content will be loaded here -->
-            </div>
-        </div>
-    </div>
-
-    <script>
-        let currentPage = 1;
-        let totalPages = 1;
-        let allBookings = [];
-        let filteredBookings = [];
-
-        // Status mapping for display
-        const statusMapping = {
-            'pending': { text: 'รอดำเนินการ', class: 'bg-yellow-100 text-yellow-800' },
-            'confirmed': { text: 'ยืนยันแล้ว', class: 'bg-blue-100 text-blue-800' },
-            'in_progress': { text: 'กำลังดำเนินการ', class: 'bg-purple-100 text-purple-800' },
-            'completed': { text: 'สำเร็จ', class: 'bg-green-100 text-green-800' },
-            'cancelled': { text: 'ยกเลิก', class: 'bg-red-100 text-red-800' }
-        };
-
-        const serviceMapping = {
-            'sitting': 'ดูแลสัตว์ที่บ้าน',
-            'walking': 'พาสัตว์เดิน',
-            'boarding': 'ฝากเลี้ยงสัตว์',
-            'grooming': 'บริการตัดขน'
-        };
-
-        // Load bookings on page load
-        document.addEventListener('DOMContentLoaded', function() {
-            loadBookings();
-            
-            // Event listeners for filters
-            document.getElementById('statusFilter').addEventListener('change', filterBookings);
-            document.getElementById('serviceFilter').addEventListener('change', filterBookings);
-            document.getElementById('searchInput').addEventListener('input', filterBookings);
-            
-            // Modal event listeners
-            document.getElementById('closeModal').addEventListener('click', closeModal);
-            document.getElementById('bookingModal').addEventListener('click', function(e) {
-                if (e.target === this) closeModal();
-            });
-        });
-
-        async function loadBookings() {
-            try {
-                document.getElementById('loadingState').classList.remove('hidden');
-                document.getElementById('emptyState').classList.add('hidden');
-                document.getElementById('bookingsList').classList.add('hidden');
-
-                const response = await fetch('/user/api/bookings');
-                
-                if (!response.ok) {
-                    throw new Error('Failed to fetch bookings');
-                }
-
-                const data = await response.json();
-                allBookings = data.bookings || [];
-                
-                // Sort by date (newest first)
-                allBookings.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-                
-                filteredBookings = [...allBookings];
-                
-                document.getElementById('loadingState').classList.add('hidden');
-                
-                if (allBookings.length === 0) {
-                    document.getElementById('emptyState').classList.remove('hidden');
-                } else {
-                    document.getElementById('bookingsList').classList.remove('hidden');
-                    renderBookings();
-                }
-            } catch (error) {
-                console.error('Error loading bookings:', error);
-                document.getElementById('loadingState').classList.add('hidden');
-                document.getElementById('bookingsList').innerHTML = `
-                    <div class="flex justify-center items-center py-20 text-red-500">
-                        <div class="text-center">
-                            <i class="fa-solid fa-exclamation-triangle fa-3x mb-4"></i>
-                            <p class="text-xl">ไม่สามารถโหลดข้อมูลได้</p>
-                            <button onclick="loadBookings()" class="mt-4 px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
-                                ลองใหม่
-                            </button>
-                        </div>
-                    </div>
-                `;
-                document.getElementById('bookingsList').classList.remove('hidden');
-            }
-        }
-
-        function filterBookings() {
-            const statusFilter = document.getElementById('statusFilter').value;
-            const serviceFilter = document.getElementById('serviceFilter').value;
-            const searchText = document.getElementById('searchInput').value.toLowerCase();
-
-            filteredBookings = allBookings.filter(booking => {
-                const matchesStatus = !statusFilter || booking.status === statusFilter;
-                const matchesService = !serviceFilter || booking.service_type === serviceFilter;
-                const matchesSearch = !searchText || 
-                    booking.booking_id.toString().includes(searchText) ||
-                    (booking.sitter_name && booking.sitter_name.toLowerCase().includes(searchText));
-
-                return matchesStatus && matchesService && matchesSearch;
-            });
-
-            currentPage = 1;
-            renderBookings();
-        }
-
-        function renderBookings() {
-            const bookingsList = document.getElementById('bookingsList');
-            const itemsPerPage = 5;
-            totalPages = Math.ceil(filteredBookings.length / itemsPerPage);
-            
-            const startIndex = (currentPage - 1) * itemsPerPage;
-            const endIndex = startIndex + itemsPerPage;
-            const pageBookings = filteredBookings.slice(startIndex, endIndex);
-
-            if (pageBookings.length === 0) {
-                bookingsList.innerHTML = `
-                    <div class="flex justify-center items-center py-20 text-gray-500">
-                        <div class="text-center">
-                            <i class="fa-solid fa-search fa-3x mb-4"></i>
-                            <p class="text-xl">ไม่พบข้อมูลที่ค้นหา</p>
-                        </div>
-                    </div>
-                `;
-                document.getElementById('pagination').classList.add('hidden');
-                return;
-            }
-
-            bookingsList.innerHTML = pageBookings.map(booking => `
-                <div class="flex flex-col p-6 border border-gray-300 rounded-xl shadow-sm hover:shadow-md transition-shadow duration-300 cursor-pointer booking-card" data-booking-id="${booking.booking_id}">
-                    <div class="flex justify-between items-start mb-4">
-                        <div class="flex flex-col">
-                            <p class="text-[1.3rem] font-semibold mb-1">การจอง #${booking.booking_id.toString().padStart(3, '0')}</p>
-                            <p class="text-sm text-gray-500">สร้างเมื่อ ${formatDate(booking.createdAt)}</p>
-                        </div>
-                        <span class="px-3 py-1 rounded-full text-sm font-medium ${statusMapping[booking.status]?.class || 'bg-gray-100 text-gray-800'}">
-                            ${statusMapping[booking.status]?.text || booking.status}
-                        </span>
-                    </div>
-                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-                        <div class="flex flex-col">
-                            <span class="text-gray-600 text-sm">พี่เลี้ยงสัตว์</span>
-                            <span class="font-medium">${booking.sitter_name || 'ยังไม่ได้กำหนด'}</span>
-                        </div>
-                        <div class="flex flex-col">
-                            <span class="text-gray-600 text-sm">วันที่บริการ</span>
-                            <span class="font-medium">${formatDateRange(booking.start_date, booking.end_date)}</span>
-                        </div>
-                        <div class="flex flex-col">
-                            <span class="text-gray-600 text-sm">ประเภทบริการ</span>
-                            <span class="font-medium">${serviceMapping[booking.service_type] || booking.service_type}</span>
-                        </div>
-                        <div class="flex flex-col">
-                            <span class="text-gray-600 text-sm">ราคา</span>
-                            <span class="font-medium text-green-600">${formatPrice(booking.total_price)} บาท</span>
-                        </div>
-                    </div>
-                    <div class="flex justify-end mt-4">
-                        <button class="text-blue-600 hover:text-blue-800 text-sm font-medium view-details" data-booking-id="${booking.booking_id}">
-                            ดูรายละเอียด <i class="fa-solid fa-chevron-right ml-1"></i>
-                        </button>
-                    </div>
+        <div class="grid grid-cols-1 gap-5 w-full">
+            <div class="flex flex-col p-5 border border-gray-300 rounded-xl shadow-sm">
+                <div class="flex justify-between mb-3">
+                    <p class="text-[1.3rem] font-semibold">บริการดูแลสัตว์เลี้ยงตามบ้าน #001</p>
+                    <p class="px-3 py-1 bg-green-100 text-green-800 rounded-full">สำเร็จ</p>
                 </div>
-            `).join('');
-
-            // Add click event listeners
-            document.querySelectorAll('.booking-card').forEach(card => {
-                card.addEventListener('click', function(e) {
-                    if (!e.target.closest('.view-details')) {
-                        const bookingId = this.dataset.bookingId;
-                        showBookingDetails(bookingId);
-                    }
-                });
-            });
-
-            document.querySelectorAll('.view-details').forEach(btn => {
-                btn.addEventListener('click', function(e) {
-                    e.stopPropagation();
-                    const bookingId = this.dataset.bookingId;
-                    showBookingDetails(bookingId);
-                });
-            });
-
-            // Update pagination
-            updatePagination();
-        }
-
-        function updatePagination() {
-            const pagination = document.getElementById('pagination');
-            const prevBtn = document.getElementById('prevPage');
-            const nextBtn = document.getElementById('nextPage');
-            const pageInfo = document.getElementById('pageInfo');
-
-            if (totalPages <= 1) {
-                pagination.classList.add('hidden');
-                return;
-            }
-
-            pagination.classList.remove('hidden');
-            pageInfo.textContent = `หน้า ${currentPage} จาก ${totalPages}`;
-            
-            prevBtn.disabled = currentPage === 1;
-            nextBtn.disabled = currentPage === totalPages;
-            
-            prevBtn.onclick = () => {
-                if (currentPage > 1) {
-                    currentPage--;
-                    renderBookings();
-                }
-            };
-            
-            nextBtn.onclick = () => {
-                if (currentPage < totalPages) {
-                    currentPage++;
-                    renderBookings();
-                }
-            };
-        }
-
-        function showBookingDetails(bookingId) {
-            const booking = allBookings.find(b => b.booking_id == bookingId);
-            if (!booking) return;
-
-            const modalContent = document.getElementById('modalContent');
-            modalContent.innerHTML = `
-                <div class="space-y-6">
-                    <div class="grid grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">รหัสการจอง</label>
-                            <p class="text-lg font-semibold">#${booking.booking_id.toString().padStart(3, '0')}</p>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">สถานะ</label>
-                            <span class="px-3 py-1 rounded-full text-sm font-medium ${statusMapping[booking.status]?.class || 'bg-gray-100 text-gray-800'}">
-                                ${statusMapping[booking.status]?.text || booking.status}
-                            </span>
-                        </div>
-                    </div>
-                    
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">ประเภทบริการ</label>
-                            <p>${serviceMapping[booking.service_type] || booking.service_type}</p>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">พี่เลี้ยงสัตว์</label>
-                            <p>${booking.sitter_name || 'ยังไม่ได้กำหนด'}</p>
-                        </div>
-                    </div>
-                    
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">วันที่เริ่มบริการ</label>
-                            <p>${formatDateTime(booking.start_date)}</p>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">วันที่สิ้นสุดบริการ</label>
-                            <p>${formatDateTime(booking.end_date)}</p>
-                        </div>
-                    </div>
-                    
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">จำนวนชั่วโมง</label>
-                            <p>${booking.total_hours} ชั่วโมง</p>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">ราคารวม</label>
-                            <p class="text-xl font-bold text-green-600">${formatPrice(booking.total_price)} บาท</p>
-                        </div>
-                    </div>
-                    
-                    ${booking.special_instructions ? `
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">คำแนะนำพิเศษ</label>
-                            <p class="bg-gray-50 p-3 rounded-lg">${booking.special_instructions}</p>
-                        </div>
-                    ` : ''}
-                    
-                    ${booking.location ? `
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">สถานที่</label>
-                            <p class="bg-gray-50 p-3 rounded-lg">${booking.location}</p>
-                        </div>
-                    ` : ''}
-                    
-                    <div class="border-t pt-4">
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-600">
-                            <div>
-                                <label class="block font-medium mb-1">สร้างเมื่อ</label>
-                                <p>${formatDateTime(booking.createdAt)}</p>
-                            </div>
-                            <div>
-                                <label class="block font-medium mb-1">อัปเดตล่าสุด</label>
-                                <p>${formatDateTime(booking.updatedAt)}</p>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    ${booking.status === 'pending' || booking.status === 'confirmed' ? `
-                        <div class="flex justify-end gap-3 pt-4 border-t">
-                            ${booking.status === 'pending' ? `
-                                <button onclick="editBooking(${booking.booking_id})" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition duration-300">
-                                    <i class="fa-solid fa-edit mr-2"></i>แก้ไข
-                                </button>
-                            ` : ''}
-                            <button onclick="cancelBooking(${booking.booking_id})" class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition duration-300">
-                                <i class="fa-solid fa-times mr-2"></i>ยกเลิก
-                            </button>
-                        </div>
-                    ` : ''}
+                <div class="grid grid-cols-4">
+                    <p class="flex flex-col">
+                        <span class="text-gray-600">พี่เลี้ยงสัตว์</span>
+                        <span>Man Sea</span>
+                    </p>
+                    <p class="flex flex-col">
+                        <span class="text-gray-600">วันที่</span>
+                        <span>01/12/2025 - 03/12/2025</span>
+                    </p>
+                    <p class="flex flex-col">
+                        <span class="text-gray-600">ประเภทบริการ</span>
+                        <span>ดูแลสัตว์ที่บ้าน</span>
+                    </p>
+                    <p class="flex flex-col">
+                        <span class="text-gray-600">ราคา</span>
+                        <span>3,210 บาท</span>
+                    </p>
                 </div>
-            `;
-
-            document.getElementById('bookingModal').classList.remove('hidden');
-        }
-
-        function closeModal() {
-            document.getElementById('bookingModal').classList.add('hidden');
-        }
-
-        function editBooking(bookingId) {
-            window.location.href = `/user/edit-booking/${bookingId}`;
-        }
-
-        async function cancelBooking(bookingId) {
-            if (!confirm('คุณแน่ใจหรือไม่ว่าต้องการยกเลิกการจองนี้?')) {
-                return;
-            }
-
-            try {
-                const response = await fetch(`/user/api/bookings/${bookingId}`, {
-                    method: 'DELETE'
-                });
-
-                if (response.ok) {
-                    alert('ยกเลิกการจองเรียบร้อยแล้ว');
-                    closeModal();
-                    loadBookings(); // Reload the list
-                } else {
-                    const error = await response.json();
-                    alert(`ไม่สามารถยกเลิกการจองได้: ${error.message}`);
-                }
-            } catch (error) {
-                console.error('Error cancelling booking:', error);
-                alert('เกิดข้อผิดพลาดในการยกเลิกการจอง');
-            }
-        }
-
-        // Utility functions
-        function formatDate(dateString) {
-            return new Date(dateString).toLocaleDateString('th-TH', {
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric'
-            });
-        }
-
-        function formatDateTime(dateString) {
-            return new Date(dateString).toLocaleDateString('th-TH', {
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric',
-                hour: '2-digit',
-                minute: '2-digit'
-            });
-        }
-
-        function formatDateRange(startDate, endDate) {
-            const start = new Date(startDate);
-            const end = new Date(endDate);
-            
-            if (start.toDateString() === end.toDateString()) {
-                return formatDate(startDate);
-            } else {
-                return `${formatDate(startDate)} - ${formatDate(endDate)}`;
-            }
-        }
-
-        function formatPrice(price) {
-            return new Intl.NumberFormat('th-TH').format(price);
-        }
-    </script>
+            </div>
+            <div class="flex flex-col p-5 border border-gray-300 rounded-xl shadow-sm">
+                <div class="flex justify-between mb-3">
+                    <p class="text-[1.3rem] font-semibold">บริการดูแลสัตว์เลี้ยงตามบ้าน #002</p>
+                    <p class="px-3 py-1 bg-red-100 text-red-800 rounded-full">ยกเลิก</p>
+                </div>
+                <div class="grid grid-cols-4">
+                    <p class="flex flex-col">
+                        <span class="text-gray-600">พี่เลี้ยงสัตว์</span>
+                        <span>Man Sea</span>
+                    </p>
+                    <p class="flex flex-col">
+                        <span class="text-gray-600">วันที่</span>
+                        <span>01/12/2025 - 03/12/2025</span>
+                    </p>
+                    <p class="flex flex-col">
+                        <span class="text-gray-600">ประเภทบริการ</span>
+                        <span>ดูแลสัตว์ที่บ้าน</span>
+                    </p>
+                    <p class="flex flex-col">
+                        <span class="text-gray-600">ราคา</span>
+                        <span>3,210 บาท</span>
+                    </p>
+                </div>
+            </div>
+            <div class="flex flex-col p-5 border border-gray-300 rounded-xl shadow-sm">
+                <div class="flex justify-between mb-3">
+                    <p class="text-[1.3rem] font-semibold">บริการดูแลสัตว์เลี้ยงตามบ้าน #003</p>
+                    <p class="px-3 py-1 bg-yellow-100 text-yellow-800 rounded-full">รอดำเนินการ</p>
+                </div>
+                <div class="grid grid-cols-4">
+                    <p class="flex flex-col">
+                        <span class="text-gray-600">พี่เลี้ยงสัตว์</span>
+                        <span>Man Sea</span>
+                    </p>
+                    <p class="flex flex-col">
+                        <span class="text-gray-600">วันที่</span>
+                        <span>01/12/2025 - 03/12/2025</span>
+                    </p>
+                    <p class="flex flex-col">
+                        <span class="text-gray-600">ประเภทบริการ</span>
+                        <span>ดูแลสัตว์ที่บ้าน</span>
+                    </p>
+                    <p class="flex flex-col">
+                        <span class="text-gray-600">ราคา</span>
+                        <span>3,210 บาท</span>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
 </body>
 </html>

@@ -3,9 +3,21 @@ const axios = require('axios');
 
 const userController = {
     // View controllers
-    getUserMain: (req, res) => {
+    getUserMain: async (req, res) => {
         const user = req.session.user;
-        res.render('user/main', { title: 'Welcome to PetEz', activeMenu: 'home', user: user });
+        try {
+            const svcUrl = process.env.SITTER_SERVICE_URL || 'http://sitter-service:3004/public/services';
+            const resp = await fetch(svcUrl);
+            let services = [];
+            if (resp.ok) {
+                const data = await resp.json();
+                services = data.services || [];
+            }
+            res.render('user/main', { title: 'Welcome to PetEz', activeMenu: 'home', user, services });
+        } catch (e) {
+            console.error('Error loading services for home:', e);
+            res.render('user/main', { title: 'Welcome to PetEz', activeMenu: 'home', user, services: [] });
+        }
     },
     getUserProfile: async (req, res) => {
         const user = req.session.user;
@@ -104,19 +116,36 @@ const userController = {
                 pets = data.pets || [];
             }
 
-            res.render('user/create-booking', { 
+            // Fetch sitter services for selection (optional in this view if coming directly)
+            let services = [];
+            try {
+                const svcUrl = process.env.SITTER_SERVICE_URL || 'http://sitter-service:3004/public/services';
+                const svcResp = await fetch(svcUrl);
+                if (svcResp.ok) {
+                    const svcData = await svcResp.json();
+                    services = svcData.services || [];
+                }
+            } catch (err) {
+                console.warn('Unable to fetch services for booking form:', err.message);
+            }
+
+            res.render('user/booking', { 
                 title: 'Create Booking', 
                 activeMenu: 'create-booking', 
                 user: user,
-                pets: pets 
+                pets: pets,
+                services: services,
+                service: null
             });
         } catch (error) {
             console.error('Error fetching pets for booking:', error);
-            res.render('user/create-booking', { 
+            res.render('user/booking', { 
                 title: 'Create Booking', 
                 activeMenu: 'create-booking', 
                 user: user,
-                pets: [] 
+                pets: [],
+                services: [],
+                service: null
             });
         }
     },
@@ -165,13 +194,37 @@ const userController = {
         }
     },
 
-    getBookingForm: (req, res) => {
+    getBookingForm: async (req, res) => {
         const user = req.session.user;
         if (!user) {
             return res.redirect('/');
         }
-        const petsitterId = req.params.id;
-        res.render('user/booking', { title: 'Book Pet Sitter', petsitterId, user: user });
+        const serviceId = req.params.id;
+        try {
+            // Fetch service detail
+            const svcBase = process.env.SITTER_SERVICE_URL_BASE || 'http://sitter-service:3004';
+            const svcResp = await fetch(`${svcBase}/public/services/${serviceId}`);
+            let service = null;
+            if (svcResp.ok) {
+                const data = await svcResp.json();
+                service = data.service || null;
+            }
+            // Fetch user's pets
+            const petsApiUrl = 'http://auth-service:3002/pets';
+            const petsResp = await fetch(petsApiUrl, {
+                method: 'GET',
+                headers: { 'Authorization': `Bearer ${req.session.token}` }
+            });
+            let pets = [];
+            if (petsResp.ok) {
+                const pdata = await petsResp.json();
+                pets = pdata.pets || [];
+            }
+            return res.render('user/booking', { title: 'จองบริการ', activeMenu: 'book', user, service, pets });
+        } catch (e) {
+            console.error('Error loading booking form:', e);
+            return res.render('user/booking', { title: 'จองบริการ', activeMenu: 'book', user, service: null, pets: [] });
+        }
     },
 
     getEditBooking: async (req, res) => {
@@ -196,7 +249,7 @@ const userController = {
 
             // Ensure this booking belongs to the current user
             if (booking.user_id !== user.id) {
-                return res.redirect('/user/bookings');
+                return res.redirect('/user/booking');
             }
 
             // Get user's pets for the form
@@ -225,12 +278,100 @@ const userController = {
             if (error.response) {
                 console.error('API error fetching booking for edit:', error.response.status, error.response.data);
                 if (error.response.status === 404) {
-                    return res.redirect('/user/bookings');
+                    return res.redirect('/user/booking');
                 }
             } else {
                 console.error('Network error fetching booking for edit:', error);
             }
-            res.redirect('/user/bookings');
+            res.redirect('/user/booking');
+        }
+    },
+
+    // Request creation (user inquiry to sitters) - new page user/create.ejs
+    getCreateRequest: async (req, res) => {
+        const user = req.session.user;
+        if (!user) {
+            return res.redirect('/');
+        }
+
+        try {
+            // Fetch user's pets
+            const petsApiUrl = 'http://auth-service:3002/pets';
+            const response = await fetch(petsApiUrl, {
+                method: 'GET',
+                headers: { 'Authorization': `Bearer ${req.session.token}` }
+            });
+            let pets = [];
+            if (response.ok) {
+                const data = await response.json();
+                pets = data.pets || [];
+            }
+            // Render dedicated request page (create.ejs)
+            res.render('user/create', {
+                title: 'สร้างคำขอ', activeMenu: 'create', user, pets
+            });
+        } catch (err) {
+            console.error('Error loading pets for request form:', err);
+            res.render('user/create', {
+                title: 'สร้างคำขอ', activeMenu: 'create', user, pets: []
+            });
+        }
+    },
+
+    addRequest: async (req, res) => {
+        const user = req.session.user;
+        if (!user) {
+            if (req.headers['content-type']?.includes('application/json')) {
+                return res.status(401).json({ message: 'Authentication required' });
+            }
+            return res.redirect('/');
+        }
+        if (!req.session.token) {
+            return res.status(401).json({ message: 'Authentication token missing' });
+        }
+        try {
+            const svcBase = process.env.SITTER_SERVICE_URL_BASE || 'http://sitter-service:3004';
+            // If a service_id is provided, enrich payload with sitter_id
+            let body = { ...req.body };
+            if (body.service_id) {
+                try {
+                    const detailResp = await fetch(`${svcBase}/public/services/${body.service_id}`);
+                    if (detailResp.ok) {
+                        const detail = await detailResp.json();
+                        if (detail && detail.service) {
+                            body.sitter_id = detail.service.sitter_id;
+                            // Map optional fields: use start_date as preferred_date if provided
+                            if (body.start_date && !body.preferred_date) {
+                                body.preferred_date = body.start_date;
+                            }
+                            // Map special_instructions to description if provided
+                            if (body.special_instructions && !body.description) {
+                                body.description = body.special_instructions;
+                            }
+                        }
+                    }
+                } catch (e) {
+                    console.warn('Failed to enrich request from service_id:', e.message);
+                }
+            }
+            const resp = await fetch(`${svcBase}/requests`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${req.session.token}`
+                },
+                body: JSON.stringify(body)
+            });
+            if (resp.ok) {
+                const data = await resp.json();
+                return res.status(201).json(data);
+            } else {
+                const errData = await resp.json().catch(() => ({ message: 'Failed to create request' }));
+                return res.status(resp.status).json({ message: errData.message || 'Failed to create request' });
+            }
+        } catch (error) {
+            console.error('Error creating request:', error);
+            return res.status(500).json({ message: 'Internal server error' });
         }
     },
 
@@ -578,6 +719,24 @@ const userController = {
         }
 
         try {
+            // If service_id provided, enrich booking with sitter_id and compute total_price by calling sitter-service
+            let body = { ...req.body };
+            if (req.body.service_id) {
+                try {
+                    const svcDetailUrl = (process.env.SITTER_SERVICE_URL_BASE || 'http://sitter-service:3004') + `/public/services/${req.body.service_id}`;
+                    const svcResp = await fetch(svcDetailUrl);
+                    if (svcResp.ok) {
+                        const svcData = await svcResp.json();
+                        const service = svcData.service;
+                        if (service) {
+                            body.sitter_id = service.sitter_id;
+                            body.price_per_hour = service.price_per_hour;
+                        }
+                    }
+                } catch (err) {
+                    console.warn('Failed to enrich booking from sitter service:', err.message);
+                }
+            }
             console.log('Making request to booking service with token:', req.session.token.substring(0, 20) + '...');
             const bookingApiUrl = 'http://booking-service:3006/bookings';
             const response = await fetch(bookingApiUrl, {
@@ -586,7 +745,7 @@ const userController = {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${req.session.token}`
                 },
-                body: JSON.stringify(req.body)
+                body: JSON.stringify(body)
             });
 
             console.log('Booking service response status:', response.status);
@@ -670,6 +829,34 @@ const userController = {
             return res.status(500).json({ message: 'Internal server error' });
         }
     },
+
+    // Register as sitter
+    registerSitter: async (req, res) => {
+        const user = req.session.user;
+        if (!user) {
+            return res.status(401).json({ message: 'Authentication required' });
+        }
+        try {
+            const svcBase = process.env.SITTER_SERVICE_URL_BASE || 'http://sitter-service:3004';
+            const resp = await fetch(`${svcBase}/register`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${req.session.token}`
+                },
+                body: JSON.stringify(req.body)
+            });
+            if (resp.ok) {
+                const data = await resp.json();
+                return res.status(201).json(data);
+            }
+            const err = await resp.json().catch(() => ({ message: 'Register failed' }));
+            return res.status(resp.status).json({ message: err.message || 'Register failed' });
+        } catch (e) {
+            console.error('Register sitter error:', e);
+            return res.status(500).json({ message: 'Internal server error' });
+        }
+    }
 };
 
 module.exports = userController;

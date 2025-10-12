@@ -49,6 +49,14 @@ const verifyToken = (req, res, next) => {
     }
 };
 
+// Admin role middleware
+const requireAdmin = (req, res, next) => {
+    if (!req.user || req.user.role !== 'admin') {
+        return res.status(403).json({ message: 'Admin access required' });
+    }
+    next();
+};
+
 // Health check
 app.get('/health', (req, res) => {
     res.status(200).send('Sitter Service OK');
@@ -61,26 +69,19 @@ app.get('/health', (req, res) => {
 // Register as pet sitter
 app.post('/register', verifyToken, async (req, res) => {
     try {
-        const { bio, experience, services } = req.body;
-        
-        if (!bio || !experience) {
-            return res.status(400).json({ message: 'Bio and experience are required' });
-        }
+        const { id_card_doc, services } = req.body || {};
 
         // Check if user is already a sitter
-        const existingSitter = await Sitter.findOne({
-            where: { sitter_id: req.user.id }
-        });
-
+        const existingSitter = await Sitter.findOne({ where: { sitter_id: req.user.id } });
         if (existingSitter) {
             return res.status(409).json({ message: 'User is already registered as a sitter' });
         }
 
-        // Create sitter profile
+        // Create sitter profile (user_id mirrors sitter_id in this service)
         const newSitter = await Sitter.create({
             sitter_id: req.user.id,
-            bio,
-            experience,
+            user_id: req.user.id,
+            id_card_doc: id_card_doc || null,
             verified: false,
             approval_status: 'pending'
         });
@@ -90,17 +91,14 @@ app.post('/register', verifyToken, async (req, res) => {
             for (const service of services) {
                 await Service.create({
                     sitter_id: req.user.id,
-                    service_type: service.type,
-                    price_per_hour: service.price,
+                    service_type: service.service_type || service.type,
+                    price_per_hour: service.price_per_hour ?? service.price ?? 0,
                     description: service.description || ''
                 });
             }
         }
 
-        res.status(201).json({
-            message: 'Sitter registration successful',
-            sitter: newSitter
-        });
+        res.status(201).json({ message: 'Sitter registration successful', sitter: newSitter });
     } catch (error) {
         console.error('Error registering sitter:', error);
         res.status(500).json({ message: 'Internal server error' });
@@ -113,10 +111,6 @@ app.get('/profile', verifyToken, async (req, res) => {
         const sitter = await Sitter.findOne({
             where: { sitter_id: req.user.id },
             include: [
-                {
-                    model: User,
-                    attributes: ['email', 'username', 'full_name', 'phone']
-                },
                 {
                     model: Service,
                     attributes: ['service_id', 'service_type', 'price_per_hour', 'description', 'availability']
@@ -166,6 +160,41 @@ app.put('/profile', verifyToken, async (req, res) => {
 // ========================================
 // SERVICE MANAGEMENT ENDPOINTS
 // ========================================
+
+// Public: list available services (no auth required)
+app.get('/public/services', async (req, res) => {
+    try {
+        const { service_type, availability } = req.query;
+
+        const whereClause = {};
+        if (service_type) whereClause.service_type = service_type;
+        if (availability !== undefined) whereClause.availability = availability === 'true';
+
+        const services = await Service.findAll({
+            where: whereClause,
+            order: [['createdAt', 'DESC']]
+        });
+
+        return res.status(200).json({ services });
+    } catch (error) {
+        console.error('Error fetching public services:', error);
+        return res.status(500).json({ message: 'Internal server error' });
+    }
+});
+
+// Public: get a single service by id (no auth required)
+app.get('/public/services/:id', async (req, res) => {
+    try {
+        const service = await Service.findOne({ where: { service_id: req.params.id } });
+        if (!service) {
+            return res.status(404).json({ message: 'Service not found' });
+        }
+        return res.status(200).json({ service });
+    } catch (error) {
+        console.error('Error fetching public service by id:', error);
+        return res.status(500).json({ message: 'Internal server error' });
+    }
+});
 
 // Get sitter services
 app.get('/services', verifyToken, async (req, res) => {
@@ -280,6 +309,31 @@ app.delete('/services/:id', verifyToken, async (req, res) => {
 // ========================================
 // JOB/BOOKING MANAGEMENT ENDPOINTS
 // ========================================
+
+// Create a request to contact/engage a sitter (user inquiry)
+app.post('/requests', verifyToken, async (req, res) => {
+    try {
+        const { sitter_id, pet_id, description, preferred_date } = req.body || {};
+
+        if (!pet_id) {
+            return res.status(400).json({ message: 'pet_id is required' });
+        }
+
+        const request = await Request.create({
+            user_id: req.user.id,
+            sitter_id: sitter_id || null,
+            pet_id: pet_id || null,
+            description: description || '',
+            preferred_date: preferred_date ? new Date(preferred_date) : null,
+            status: 'open'
+        });
+
+        return res.status(201).json({ message: 'Request created successfully', request });
+    } catch (error) {
+        console.error('Error creating request:', error);
+        return res.status(500).json({ message: 'Internal server error' });
+    }
+});
 
 // Get available jobs for sitters
 app.get('/jobs', verifyToken, async (req, res) => {
@@ -557,6 +611,87 @@ app.get('/statistics', verifyToken, async (req, res) => {
     } catch (error) {
         console.error('Error fetching statistics:', error);
         res.status(500).json({ message: 'Internal server error' });
+    }
+});
+
+// ========================================
+// ADMIN: APPROVAL MANAGEMENT ENDPOINTS
+// ========================================
+
+// List sitters by approval status (default pending)
+app.get('/admin/sitters', verifyToken, requireAdmin, async (req, res) => {
+    try {
+        const { status } = req.query; // pending|approved|rejected
+        const where = {};
+        if (status) where.approval_status = status;
+        const sitters = await Sitter.findAll({
+            where,
+            order: [['createdAt', 'DESC']]
+        });
+        console.log('Sitters fetched for admin:', sitters.length);
+        return res.status(200).json({ sitters });
+    } catch (error) {
+        console.error('Error fetching sitters for admin:', error);
+        return res.status(500).json({ message: 'Internal server error' });
+    }
+});
+
+// Update sitter approval status
+app.put('/admin/sitters/:id/status', verifyToken, requireAdmin, async (req, res) => {
+    try {
+        const { id } = req.params; // sitter_id
+        const { status } = req.body || {};
+        const allowed = ['pending', 'approved', 'rejected'];
+        if (!allowed.includes(status)) {
+            return res.status(400).json({ message: 'Invalid status' });
+        }
+        const sitter = await Sitter.findOne({ where: { sitter_id: id } });
+        if (!sitter) return res.status(404).json({ message: 'Sitter not found' });
+        await sitter.update({
+            approval_status: status,
+            verified: status === 'approved'
+        });
+        // If approved, also update user role to 'sitter' in auth-service
+        if (status === 'approved') {
+            try {
+                const authUrl = `http://auth-service:3002/api/users/${sitter.user_id || sitter.sitter_id}/role`;
+                const resp = await fetch(authUrl, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        // Forward admin's Authorization header
+                        'Authorization': req.headers['authorization'] || ''
+                    },
+                    body: JSON.stringify({ role: 'sitter' })
+                });
+                if (!resp.ok) {
+                    const text = await resp.text().catch(() => '');
+                    console.warn('Auth role update failed:', resp.status, text);
+                }
+            } catch (e) {
+                console.warn('Failed to call auth-service to set role sitter:', e.message);
+            }
+        }
+        return res.status(200).json({ message: 'Sitter status updated', sitter });
+    } catch (error) {
+        console.error('Error updating sitter status:', error);
+        return res.status(500).json({ message: 'Internal server error' });
+    }
+});
+
+// Delete sitter (admin reject: remove sitter and related services)
+app.delete('/admin/sitters/:id', verifyToken, requireAdmin, async (req, res) => {
+    try {
+        const { id } = req.params;
+        const sitter = await Sitter.findOne({ where: { sitter_id: id } });
+        if (!sitter) return res.status(404).json({ message: 'Sitter not found' });
+        // Remove dependent services first for safety
+        await Service.destroy({ where: { sitter_id: id } });
+        await Sitter.destroy({ where: { sitter_id: id } });
+        return res.status(200).json({ message: 'Sitter deleted' });
+    } catch (error) {
+        console.error('Error deleting sitter:', error);
+        return res.status(500).json({ message: 'Internal server error' });
     }
 });
 

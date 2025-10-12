@@ -16,45 +16,13 @@
     </style>
 </head>
 <body>
-    <div class="flex justify-between items-center bg-white h-20 px-10 py-4 shadow-[0_2px_4px_rgba(0,0,0,0.3)] z-50 transition-all duration-300">
-        <a href="main.html" class="flex justify-center items-center gap-4">
-            <i class="fa-solid fa-paw fa-3x"></i>
-            <h1 class="text-[2.2rem] font-bold">PetEz</h1>
-        </a>
-        <div class="flex justify-center items-center gap-5">
-            <a href="regis.html"><button class="px-5 py-2 bg-blue-500 text-white text-[1.2rem] rounded-lg cursor-pointer hover:bg-blue-700">สมัครเป็นพี่เลี้ยงสัตว์</button></a>
-            <a href="create.html" class="text-[1.2rem] underline-offset-4 hover:underline cursor-pointer">สร้างคำขอ</a>
-            <a href="history.html" class="text-[1.2rem] underline-offset-4 hover:underline cursor-pointer">ประวัติการจอง</a>
-            <label class="relative inline-block">
-                <input type="checkbox" class="hidden peer" />
-                <p class="w-full h-full flex items-center justify-center gap-2 text-gray-700 text-[1.4rem] font-semibold cursor-pointer">
-                    <img src="../static/user.png" class="w-12 h-12 rounded-full cursor-pointer">
-                </p>
-                <nav class="absolute right-0 top-[60px] w-[200px] bg-white border border-none rounded-lg shadow-[0_4px_10px_rgba(0,0,0,0.25)] invisible opacity-0 transition-all duration-200 ease-in-out z-10 peer-checked:visible peer-checked:opacity-100">
-                    <ul class="list-none p-2 m-0">
-                        <li>
-                            <a href="profile.html" class="flex justify-start items-center gap-4 block w-full px-3 py-2 text-left text-[1rem] font-light rounded-md hover:bg-blue-200 hover:text-white cursor-pointer transition-colors duration-150">
-                                <i class="fa-solid fa-user"></i>
-                                โปรไฟล์
-                            </a>
-                        </li>
-                        <li>
-                            <a href="index.html" class="flex justify-start items-center gap-4 block w-full px-3 py-2 text-left text-[1rem] font-light rounded-md hover:bg-blue-200 hover:text-white cursor-pointer transition-colors duration-150">
-                                <i class="fa-solid fa-right-from-bracket"></i>
-                                Sign Out
-                            </a>
-                        </li>
-                    </ul>
-                </nav>
-            </label>
-        </div>
-    </div>
+    <%- include('../partials/user-nav') %>
 
     <div class="flex flex-col justify-center items-start my-10 mx-auto px-10 py-10 w-[80%] border border-gray-200 rounded-xl shadow-sm">
         <h1 class="text-[1.8rem] font-bold mb-5">สมัครเป็นพี่เลี้ยงสัตว์</h1>
         <div class="w-full mb-4">
             <label for="" class="flex items-center gap-3 text-lg">คำนำหน้าชื่อ</label>
-            <select name="" id="" class="w-full border-2 border-[#e2e8f0] rounded-2xl text-[1rem] px-5 py-2 transition duration-300 ease-in-out focus:outline-none focus:border-[#3b5bdb] focus:shadow-[0_0_0_4px_rgba(59,91,219,0.1)]">
+            <select name="" id="title" class="w-full border-2 border-[#e2e8f0] rounded-2xl text-[1rem] px-5 py-2 transition duration-300 ease-in-out focus:outline-none focus:border-[#3b5bdb] focus:shadow-[0_0_0_4px_rgba(59,91,219,0.1)]">
                     <option value="" disabled selected>เลือกคำนำหน้าชื่อ</option>
                     <option value="">นาย</option>
                     <option value="">นางสาว</option>
@@ -63,46 +31,44 @@
         </div>
         <div class="w-full grid grid-cols-3 gap-5 mb-4">
             <div class="w-full">
+                <% first_name = user.full_name.split(' ')[0] %>
                 <label for="" class="flex items-center gap-3 text-lg">ชื่อ</label>
-                <input type="text" placeholder="กรุณาใส่ชื่อ" class="w-full border-2 border-[#e2e8f0] rounded-2xl text-[1rem] px-5 py-2 transition duration-300 ease-in-out focus:outline-none focus:border-[#3b5bdb] focus:shadow-[0_0_0_4px_rgba(59,91,219,0.1)]" />
+                <input id="firstName" type="text" placeholder="กรุณาใส่ชื่อ" value="<%= first_name || '' %>" readonly class="w-full bg-gray-100 border-2 border-[#e2e8f0] rounded-2xl text-[1rem] px-5 py-2" />
             </div>
             <div class="w-full">
+                <% last_name = user.full_name.split(' ')[1] %>
                 <label for="" class="flex items-center gap-3 text-lg">นามสกุล</label>
-                <input type="text" placeholder="กรุณาใส่นามสกุล" class="w-full border-2 border-[#e2e8f0] rounded-2xl text-[1rem] px-5 py-2 transition duration-300 ease-in-out focus:outline-none focus:border-[#3b5bdb] focus:shadow-[0_0_0_4px_rgba(59,91,219,0.1)]" />
+                <input id="lastName" type="text" placeholder="กรุณาใส่นามสกุล" value="<%= last_name || '' %>" readonly class="w-full bg-gray-100 border-2 border-[#e2e8f0] rounded-2xl text-[1rem] px-5 py-2" />
             </div>
             <div class="w-full">
                 <label for="" class="flex items-center gap-3 text-lg">อายุ</label>
-                <input type="text" placeholder="กรุณาใส่อายุ" class="w-full border-2 border-[#e2e8f0] rounded-2xl text-[1rem] px-5 py-2 transition duration-300 ease-in-out focus:outline-none focus:border-[#3b5bdb] focus:shadow-[0_0_0_4px_rgba(59,91,219,0.1)]" />
+                <input id="age" type="number" placeholder="กรุณาใส่อายุ" value="<%= user?.age || '' %>" readonly class="w-full bg-gray-100 border-2 border-[#e2e8f0] rounded-2xl text-[1rem] px-5 py-2" />
             </div>
             <div class="w-full">
                 <label for="" class="flex items-center gap-3 text-lg">เบอร์โทรศัพท์</label>
-                <input type="text" placeholder="กรุณาใส่เบอร์โทรศัพท์" class="w-full border-2 border-[#e2e8f0] rounded-2xl text-[1rem] px-5 py-2 transition duration-300 ease-in-out focus:outline-none focus:border-[#3b5bdb] focus:shadow-[0_0_0_4px_rgba(59,91,219,0.1)]" />
+                <input id="phone" type="text" placeholder="กรุณาใส่เบอร์โทรศัพท์" value="<%= user?.phone || '' %>" readonly class="w-full bg-gray-100 border-2 border-[#e2e8f0] rounded-2xl text-[1rem] px-5 py-2" />
             </div>
             <div class="w-full">
                 <label for="" class="flex items-center gap-3 text-lg">Email</label>
-                <input type="email" placeholder="กรุณาใส่ Email" class="w-full border-2 border-[#e2e8f0] rounded-2xl text-[1rem] px-5 py-2 transition duration-300 ease-in-out focus:outline-none focus:border-[#3b5bdb] focus:shadow-[0_0_0_4px_rgba(59,91,219,0.1)]" />
-            </div>
-            <div class="w-full">
-                <label for="" class="flex items-center gap-3 text-lg">ID Line</label>
-                <input type="text" placeholder="กรุณาใส่ ID Line" class="w-full border-2 border-[#e2e8f0] rounded-2xl text-[1rem] px-5 py-2 transition duration-300 ease-in-out focus:outline-none focus:border-[#3b5bdb] focus:shadow-[0_0_0_4px_rgba(59,91,219,0.1)]" />
+                <input id="email" type="email" placeholder="กรุณาใส่ Email" value="<%= user?.email || '' %>" readonly class="w-full bg-gray-100 border-2 border-[#e2e8f0] rounded-2xl text-[1rem] px-5 py-2" />
             </div>
         </div>
         <div class="mb-4 w-full">
             <label class="block mb-1 text-gray-700 font-medium">ที่อยู่</label>
-            <textarea placeholder="สถานที่ที่ให้ไปบริการ" class="w-full border-2 border-[#e2e8f0] rounded-2xl text-[1rem] px-5 py-2 transition duration-300 ease-in-out focus:outline-none focus:border-[#3b5bdb] focus:shadow-[0_0_0_4px_rgba(59,91,219,0.1)]"></textarea>
+            <textarea id="address" placeholder="สถานที่ที่ให้ไปบริการ" class="w-full border-2 border-[#e2e8f0] rounded-2xl text-[1rem] px-5 py-2"><%= user?.address || '' %></textarea>
         </div>
         <div class="w-full grid grid-cols-3 gap-5 mb-4">
             <div class="w-full">
                 <label for="" class="flex items-center gap-3 text-lg">เขต/อำเภอ</label>
-                <input type="text" placeholder="กรุณาใส่เขต/อำเภอ" class="w-full border-2 border-[#e2e8f0] rounded-2xl text-[1rem] px-5 py-2 transition duration-300 ease-in-out focus:outline-none focus:border-[#3b5bdb] focus:shadow-[0_0_0_4px_rgba(59,91,219,0.1)]" />
+                <input id="district" type="text" placeholder="กรุณาใส่เขต/อำเภอ" class="w-full border-2 border-[#e2e8f0] rounded-2xl text-[1rem] px-5 py-2 transition duration-300 ease-in-out focus:outline-none focus;border-[#3b5bdb] focus:shadow-[0_0_0_4px_rgba(59,91,219,0.1)]" />
             </div>
             <div class="w-full">
                 <label for="" class="flex items-center gap-3 text-lg">จังหวัด</label>
-                <input type="text" placeholder="กรุณาใส่จังหวัด" class="w-full border-2 border-[#e2e8f0] rounded-2xl text-[1rem] px-5 py-2 transition duration-300 ease-in-out focus:outline-none focus:border-[#3b5bdb] focus:shadow-[0_0_0_4px_rgba(59,91,219,0.1)]" />
+                <input id="province" type="text" placeholder="กรุณาใส่จังหวัด" class="w-full border-2 border-[#e2e8f0] rounded-2xl text-[1rem] px-5 py-2 transition duration-300 ease-in-out focus:outline-none focus:border-[#3b5bdb] focus:shadow-[0_0_0_4px_rgba(59,91,219,0.1)]" />
             </div>
             <div class="w-full">
                 <label for="" class="flex items-center gap-3 text-lg">รหัสไปรษณีย์</label>
-                <input type="text" placeholder="กรุณาใส่รหัสไปรษณีย์" class="w-full border-2 border-[#e2e8f0] rounded-2xl text-[1rem] px-5 py-2 transition duration-300 ease-in-out focus:outline-none focus:border-[#3b5bdb] focus:shadow-[0_0_0_4px_rgba(59,91,219,0.1)]" />
+                <input id="postalCode" type="text" placeholder="กรุณาใส่รหัสไปรษณีย์" class="w-full border-2 border-[#e2e8f0] rounded-2xl text-[1rem] px-5 py-2 transition duration-300 ease-in-out focus:outline-none focus:border-[#3b5bdb] focus:shadow-[0_0_0_4px_rgba(59,91,219,0.1)]" />
             </div>
         </div>
         <h1 class="text-[1.8rem] font-bold mb-5">เอกสารต่าง ๆ</h1>
@@ -111,44 +77,82 @@
                 <label for="" class="flex items-center gap-3 text-lg">สำเนาบัตรประชาชน</label>
                 <div class="w-full">
                     <label class="flex flex-col items-start justify-center w-full h-12 px-4 py-2 bg-white border-2 border-[#e2e8f0] rounded-2xl text-gray-600 cursor-pointer hover:border-[#3b5bdb] hover:shadow-md transition duration-300 ease-in-out">
-                        <span>คลิกเพื่ออัปโหลดไฟล์</span>
-                        <input type="file" class="hidden" />
-                    </label>
+                            <span>คลิกเพื่ออัปโหลดไฟล์</span>
+                            <input id="idCardFile" type="file" class="hidden" />
+                        </label>
                 </div>
-            </div>
-            <div class="w-full">
-                <label for="" class="flex items-center gap-3 text-lg">สำเนาทะเบียนบ้าน</label>
-                <div class="w-full">
-                    <label class="flex flex-col items-start justify-center w-full h-12 px-4 py-2 bg-white border-2 border-[#e2e8f0] rounded-2xl text-gray-600 cursor-pointer hover:border-[#3b5bdb] hover:shadow-md transition duration-300 ease-in-out">
-                        <span>คลิกเพื่ออัปโหลดไฟล์</span>
-                        <input type="file" class="hidden" />
-                    </label>
-                </div>
-            </div>
-            <div class="w-full">
-                <label for="" class="flex items-center gap-3 text-lg">วุฒิการศึกษา (Transcript)</label>
-                <div class="w-full">
-                    <label class="flex flex-col items-start justify-center w-full h-12 px-4 py-2 bg-white border-2 border-[#e2e8f0] rounded-2xl text-gray-600 cursor-pointer hover:border-[#3b5bdb] hover:shadow-md transition duration-300 ease-in-out">
-                        <span>คลิกเพื่ออัปโหลดไฟล์</span>
-                        <input type="file" class="hidden" />
-                    </label>
-                </div>
-            </div>
-        </div>
-        <div class="w-full">
-            <label for="" class="flex items-center gap-3 text-lg">เอกสารอื่น ๆ (สามารถเลือกได้หลายไฟล์)</label>
-            <div class="w-full">
-                <label class="flex flex-col items-start justify-center w-full h-12 px-4 py-2 bg-white border-2 border-[#e2e8f0] rounded-2xl text-gray-600 cursor-pointer hover:border-[#3b5bdb] hover:shadow-md transition duration-300 ease-in-out">
-                    <span>คลิกเพื่ออัปโหลดไฟล์</span>
-                    <input type="file" class="hidden" multiple />
-                </label>
             </div>
         </div>
         <div class="flex justify-end items-end gap-5 w-full mt-5">
-            <a href="main.html"><button class="border border-vlue-600 bg-white px-10 py-2 text-blue-600 text-[1.2rem] rounded-xl cursor-pointer transition deration-200 ease-in-out hadow-[0_5px_15px_rgba(37,99,235,0.3)] hover:shadow-[0_8px_20px_rgba(37,99,235,0.4)] hover:border-blue-500">ยกเลิก</button></a>
-            <a href="work.html"><button type="submit" class="bg-blue-600 px-10 py-2 text-white text-[1.2rem] rounded-xl shadow-sm cursor-pointer transition deration-200 ease-in-out hover:bg-blue-800">ยืนยัน</button></a>
+            <a href="/user/"><button class="border border-vlue-600 bg-white px-10 py-2 text-blue-600 text-[1.2rem] rounded-xl cursor-pointer transition deration-200 ease-in-out hadow-[0_5px_15px_rgba(37,99,235,0.3)] hover:shadow-[0_8px_20px_rgba(37,99,235,0.4)] hover:border-blue-500">ยกเลิก</button></a>
+            <button id="sitterSubmit" type="button" class="bg-blue-600 px-10 py-2 text-white text-[1.2rem] rounded-xl shadow-sm cursor-pointer transition deration-200 ease-in-out hover:bg-blue-800">ยืนยัน</button>
         </div>
     </div>
+    <script>
+        // Handle ID card upload to local storage
+        const idCardInput = document.getElementById('idCardFile');
+        let idCardPath = null;
+        if (idCardInput) {
+            idCardInput.addEventListener('change', async () => {
+                const file = idCardInput.files?.[0];
+                if (!file) return;
+                const formData = new FormData();
+                formData.append('id_card', file);
+                try {
+                    const resp = await fetch('/user/api/sitter/upload-id', { method: 'POST', body: formData });
+                    const data = await resp.json();
+                    if (resp.ok) {
+                        idCardPath = data.path;
+                        alert('อัปโหลดสำเนาบัตรประชาชนสำเร็จ');
+                    } else {
+                        alert(data.message || 'อัปโหลดไฟล์ไม่สำเร็จ');
+                    }
+                } catch (e) {
+                    alert('เกิดข้อผิดพลาดในการอัปโหลดไฟล์');
+                }
+            });
+        }
 
+        // Submit sitter registration to backend
+        document.getElementById('sitterSubmit').addEventListener('click', async () => {
+            const title = document.getElementById('title').value.trim();
+            const firstName = document.getElementById('firstName').value.trim();
+            const lastName = document.getElementById('lastName').value.trim();
+            const age = document.getElementById('age').value.trim();
+            const phone = document.getElementById('phone').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const address = document.getElementById('address').value.trim();
+            const district = document.getElementById('district').value.trim();
+            const province = document.getElementById('province').value.trim();
+            const postalCode = document.getElementById('postalCode').value.trim();
+
+            if (!firstName || !lastName || !age || !phone) {
+                alert('กรุณากรอกข้อมูลที่จำเป็นให้ครบถ้วน');
+                return;
+            }
+
+            // Map sitter payload expected by sitter-service (now uses user_id, experience, id_card_doc)
+            const payload = {
+                id_card_doc: idCardPath,
+            };
+            try {
+                const resp = await fetch('/user/api/sitter/register', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                if (resp.ok) {
+                    alert('ส่งคำขอสมัครพี่เลี้ยงสำเร็จ');
+                    // After registering, send the user to sitter home
+                    window.location.href = '/user/';
+                } else {
+                    const err = await resp.json().catch(() => ({ message: 'สมัครไม่สำเร็จ' }));
+                    alert(err.message || 'สมัครไม่สำเร็จ');
+                }
+            } catch (e) {
+                alert('เกิดข้อผิดพลาดในการเชื่อมต่อ');
+            }
+        });
+    </script>
 </body>
 </html>

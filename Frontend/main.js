@@ -52,7 +52,13 @@ app.post('/login', async (req, res) => {
     const password = req.body.password;
     console.log(email, password);
     if (!email || !password) {
-        return res.status(400).send('Email and password are required.');
+        return res.status(400).render('index', { 
+            title: 'PetEz - Pet Sitting Service',
+            error: 'กรุณากรอกอีเมลและรหัสผ่าน',
+            success: null,
+            activeTab: 'login',
+            form: { email }
+        });
     }
 
     const dockerUrl = 'http://auth-service:3002/login';
@@ -89,10 +95,16 @@ app.post('/login', async (req, res) => {
     } catch (error) {
         const status = error.status || 500;
         console.error('Login error:', error.message || error);
-        if (status === 401 || status === 403) {
-            return res.status(status).send(error.message || 'Invalid credentials');
-        }
-        res.status(500).send('Internal server error during authentication check.');
+        const message = (status === 401 || status === 403)
+            ? (error.message || 'อีเมลหรือรหัสผ่านไม่ถูกต้อง')
+            : 'เกิดข้อผิดพลาดจากระบบ ลองใหม่อีกครั้ง';
+        return res.status(status).render('index', {
+            title: 'PetEz - Pet Sitting Service',
+            error: message,
+            success: null,
+            activeTab: 'login',
+            form: { email }
+        });
     }
 });
 
@@ -114,11 +126,23 @@ app.post('/register', async (req, res) => {
     } = req.body;
 
     if (!email || !password || !username) {
-        return res.status(400).send('Email, username and password are required.');
+        return res.status(400).render('index', {
+            title: 'PetEz - Pet Sitting Service',
+            error: 'กรุณากรอกอีเมล ชื่อผู้ใช้ และรหัสผ่าน',
+            success: null,
+            activeTab: 'register',
+            form: { email, username, firstName, lastName, age, phone, address, district, province, postalCode }
+        });
     }
-    
+
     if (password !== confirmPassword) {
-        return res.status(400).send('Passwords do not match.');
+        return res.status(400).render('index', {
+            title: 'PetEz - Pet Sitting Service',
+            error: 'รหัสผ่านและยืนยันรหัสผ่านไม่ตรงกัน',
+            success: null,
+            activeTab: 'register',
+            form: { email, username, firstName, lastName, age, phone, address, district, province, postalCode }
+        });
     }
     
     const dockerUrl = 'http://auth-service:3002/register';
@@ -144,14 +168,26 @@ app.post('/register', async (req, res) => {
             return await postRegister(localUrl);
         });
         console.log('Registration successful');
-        res.redirect('/');
+        return res.status(200).render('index', {
+            title: 'PetEz - Pet Sitting Service',
+            error: null,
+            success: 'สมัครสมาชิกสำเร็จ กรุณาเข้าสู่ระบบ',
+            activeTab: 'login',
+            form: {}
+        });
     } catch (error) {
         const status = error.status || 500;
         console.error('Registration error:', error.message || error);
-        if (status >= 400 && status < 500) {
-            return res.status(status).send(error.message || 'Registration failed');
-        }
-        res.status(500).send('Internal server error during registration.');
+        const message = (status >= 400 && status < 500)
+            ? (error.message || 'สมัครสมาชิกไม่สำเร็จ')
+            : 'เกิดข้อผิดพลาดจากระบบ ลองใหม่อีกครั้ง';
+        return res.status(status).render('index', {
+            title: 'PetEz - Pet Sitting Service',
+            error: message,
+            success: null,
+            activeTab: 'register',
+            form: { email, username, firstName, lastName, age, phone, address, district, province, postalCode }
+        });
     }
 });
 

@@ -34,6 +34,40 @@ router.get('/users', requireAuth, requireAdmin, adminController.getUsers);
 router.get('/bookings', requireAuth, requireAdmin, adminController.getBookings);
 router.get('/approval', requireAuth, requireAdmin, adminController.getApproval);
 
+// Admin sitter approval APIs (proxy to sitter-service)
+router.get('/api/sitters', requireAuth, requireAdmin, async (req, res) => {
+	const qs = new URLSearchParams(req.query).toString();
+	const base = 'http://sitter-service:3004/admin/sitters';
+	const local = 'http://localhost:3004/admin/sitters';
+	const url = qs ? `${base}?${qs}` : base;
+	const urlLocal = qs ? `${local}?${qs}` : local;
+	try {
+		const headers = { 'Authorization': `Bearer ${req.session.token}` };
+		let resp = await fetch(url, { headers }).catch(() => null);
+		if (!resp) resp = await fetch(urlLocal, { headers });
+		const data = await resp.json().catch(() => ({}));
+		return res.status(resp.status).json(data);
+	} catch (err) {
+		console.error('Proxy fetch sitters error:', err);
+		return res.status(500).json({ message: 'Internal server error' });
+	}
+});
+
+router.put('/api/sitters/:id/status', requireAuth, requireAdmin, async (req, res) => {
+	const { id } = req.params;
+	const base = `http://sitter-service:3004/admin/sitters/${id}/status`;
+	const local = `http://localhost:3004/admin/sitters/${id}/status`;
+	try {
+		const headers = { 'Authorization': `Bearer ${req.session.token}`, 'Content-Type': 'application/json' };
+		let resp = await fetch(base, { method: 'PUT', headers, body: JSON.stringify(req.body) }).catch(() => null);
+		if (!resp) resp = await fetch(local, { method: 'PUT', headers, body: JSON.stringify(req.body) });
+		const data = await resp.json().catch(() => ({}));
+		return res.status(resp.status).json(data);
+	} catch (err) {
+		console.error('Proxy update sitter status error:', err);
+		return res.status(500).json({ message: 'Internal server error' });
+	}
+});
 
 // Admin API to update user status
 router.put('/api/users/:id/status', requireAuth, requireAdmin, async (req, res) => {
@@ -134,6 +168,22 @@ router.put('/api/users/:id/role', requireAuth, requireAdmin, async (req, res) =>
 		return res.status(resp.status).json(data);
 	} catch (err) {
 		console.error('Proxy update role error:', err);
+		return res.status(500).json({ message: 'Internal server error' });
+	}
+});
+
+router.delete('/api/sitters/:id', requireAuth, requireAdmin, async (req, res) => {
+	const { id } = req.params;
+	const base = `http://sitter-service:3004/admin/sitters/${id}`;
+	const local = `http://localhost:3004/admin/sitters/${id}`;
+	try {
+		const headers = { 'Authorization': `Bearer ${req.session.token}` };
+		let resp = await fetch(base, { method: 'DELETE', headers }).catch(() => null);
+		if (!resp) resp = await fetch(local, { method: 'DELETE', headers });
+		const data = await resp.json().catch(() => ({}));
+		return res.status(resp.status).json(data);
+	} catch (err) {
+		console.error('Proxy delete sitter error:', err);
 		return res.status(500).json({ message: 'Internal server error' });
 	}
 });

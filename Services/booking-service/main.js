@@ -41,13 +41,15 @@ const sequelize = new Sequelize(process.env.DATABASE_URL || 'mysql://root:root@m
 // Booking Model (aligned to existing DB columns)
 const Booking = sequelize.define('Booking', {
     booking_id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
-    user_id: { type: DataTypes.INTEGER, allowNull: false },
-    pet_id: { type: DataTypes.INTEGER, allowNull: false },
-    sitter_id: { type: DataTypes.INTEGER, allowNull: true },
-    start_date: { type: DataTypes.DATE, allowNull: false },
-    end_date: { type: DataTypes.DATE, allowNull: false },
-    total_price: { type: DataTypes.DECIMAL(10, 2), allowNull: false },
-    status: { type: DataTypes.ENUM('pending', 'confirmed', 'in_progress', 'completed', 'cancelled'), allowNull: false, defaultValue: 'pending' },
+    user_id: DataTypes.INTEGER,
+    sitter_id: DataTypes.INTEGER,
+    service_id: DataTypes.INTEGER,
+    pet_id: DataTypes.INTEGER,
+    start_date: DataTypes.DATE,
+    end_date: DataTypes.DATE,
+    total_price: DataTypes.DECIMAL(10,2),
+    status: { type: DataTypes.ENUM('pending','confirmed','completed','cancelled'), defaultValue: 'pending' },
+    payment_status: { type: DataTypes.ENUM('unpaid','paid','refunded'), defaultValue: 'unpaid' },
 }, { tableName: 'bookings', timestamps: true });
 
 // JWT Middleware
@@ -136,6 +138,8 @@ app.post('/bookings', authenticateToken, async (req, res) => {
             pet_id,
             start_date,
             end_date,
+            sitter_id,
+            price_per_hour,
             // extra fields are ignored if not present in schema
         } = req.body;
 
@@ -143,12 +147,14 @@ app.post('/bookings', authenticateToken, async (req, res) => {
         const startDateTime = new Date(start_date);
         const endDateTime = new Date(end_date);
         const hours = Math.max(0, Math.ceil((endDateTime - startDateTime) / (1000 * 60 * 60)));
-        const hourlyRate = 50.00; // default internal rate; not stored in DB
+        const hourlyRate = parseFloat(price_per_hour) > 0 ? parseFloat(price_per_hour) : 50.00; // allow override from selected service
         const total_price = hours * hourlyRate;
 
         const booking = await Booking.create({
             user_id: req.user.id,
             pet_id,
+            sitter_id: sitter_id || null,
+            service_id: req.body.service_id || null,
             start_date: startDateTime,
             end_date: endDateTime,
             total_price,
@@ -179,7 +185,7 @@ app.put('/bookings/:id', authenticateToken, async (req, res) => {
             return res.status(404).json({ message: 'Booking not found' });
         }
 
-        const { start_date, end_date, status } = req.body;
+    const { start_date, end_date, status, price_per_hour } = req.body;
 
         // Recalculate if dates changed
         let updateData = { status };
@@ -188,7 +194,7 @@ app.put('/bookings/:id', authenticateToken, async (req, res) => {
             const startDateTime = new Date(start_date);
             const endDateTime = new Date(end_date);
             const hours = Math.max(0, Math.ceil((endDateTime - startDateTime) / (1000 * 60 * 60)));
-            const hourlyRate = 50.00; // internal rate for recompute
+            const hourlyRate = parseFloat(price_per_hour) > 0 ? parseFloat(price_per_hour) : 50.00; // recompute with provided price if any
             updateData = {
                 ...updateData,
                 start_date: startDateTime,
@@ -255,8 +261,8 @@ app.get('/admin/bookings', authenticateToken, async (req, res) => {
 // Admin: Update booking status
 app.put('/admin/bookings/:id/status', authenticateToken, async (req, res) => {
     try {
-        const { status } = req.body || {};
-        const allowed = ['pending', 'confirmed', 'in_progress', 'completed', 'cancelled'];
+    const { status } = req.body || {};
+    const allowed = ['pending', 'confirmed', 'completed', 'cancelled'];
         if (!allowed.includes(status)) {
             return res.status(400).json({ message: 'Invalid status value' });
         }

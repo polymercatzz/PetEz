@@ -180,12 +180,27 @@ const adminController = {
         res.render('admin/admin_booking', { title: 'Manage Bookings', bookings });
     },
 
-    getApproval: (req, res) => {
+    getApproval: async (req, res) => {
         const user = req.session.user;
         if (!user) {
             return res.redirect('/');
         }
-        res.render('admin/admin_approval', { title: 'Approval Management' });
+        // Server-side fetch pending sitters to ensure data shows even if client fetch is blocked
+        const dockerUrl = 'http://sitter-service:3004/admin/sitters?status=pending';
+        const localUrl = 'http://localhost:3004/admin/sitters?status=pending';
+        let sitters = [];
+        try {
+            const headers = { 'Authorization': `Bearer ${req.session.token}` };
+            let resp = await fetch(dockerUrl, { headers }).catch(() => null);
+            if (!resp) resp = await fetch(localUrl, { headers });
+            if (resp && resp.ok) {
+                const data = await resp.json();
+                sitters = data.sitters || [];
+            }
+        } catch (err) {
+            console.error('Error fetching sitters for approval:', err.message || err);
+        }
+        res.render('admin/admin_approval', { title: 'Approval Management', sitters });
     },
 };
 

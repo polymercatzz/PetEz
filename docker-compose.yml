@@ -96,6 +96,9 @@ services:
     environment:
       DATABASE_URL: mysql://root:root@mysql-auth:3306/auth_db
       JWT_SECRET: petez-super-secret-jwt-key-2024
+    volumes:
+      # Persist uploaded sitter documents so they are served at /uploads/sitter and survive restarts
+      - ./Frontend/public/uploads:/app/public/uploads
     depends_on:
       - auth-service
       - booking-service
