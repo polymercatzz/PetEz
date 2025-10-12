@@ -28,78 +28,39 @@
             <p class="text-[1.8rem] font-bold">ประวัติการจอง</p>
         </div>
         <div class="grid grid-cols-1 gap-5 w-full">
-            <div class="flex flex-col p-5 border border-gray-300 rounded-xl shadow-sm">
-                <div class="flex justify-between mb-3">
-                    <p class="text-[1.3rem] font-semibold">บริการดูแลสัตว์เลี้ยงตามบ้าน #001</p>
-                    <p class="px-3 py-1 bg-green-100 text-green-800 rounded-full">สำเร็จ</p>
-                </div>
-                <div class="grid grid-cols-4">
-                    <p class="flex flex-col">
-                        <span class="text-gray-600">พี่เลี้ยงสัตว์</span>
-                        <span>Man Sea</span>
-                    </p>
-                    <p class="flex flex-col">
-                        <span class="text-gray-600">วันที่</span>
-                        <span>01/12/2025 - 03/12/2025</span>
-                    </p>
-                    <p class="flex flex-col">
-                        <span class="text-gray-600">ประเภทบริการ</span>
-                        <span>ดูแลสัตว์ที่บ้าน</span>
-                    </p>
-                    <p class="flex flex-col">
-                        <span class="text-gray-600">ราคา</span>
-                        <span>3,210 บาท</span>
-                    </p>
-                </div>
-            </div>
-            <div class="flex flex-col p-5 border border-gray-300 rounded-xl shadow-sm">
-                <div class="flex justify-between mb-3">
-                    <p class="text-[1.3rem] font-semibold">บริการดูแลสัตว์เลี้ยงตามบ้าน #002</p>
-                    <p class="px-3 py-1 bg-red-100 text-red-800 rounded-full">ยกเลิก</p>
-                </div>
-                <div class="grid grid-cols-4">
-                    <p class="flex flex-col">
-                        <span class="text-gray-600">พี่เลี้ยงสัตว์</span>
-                        <span>Man Sea</span>
-                    </p>
-                    <p class="flex flex-col">
-                        <span class="text-gray-600">วันที่</span>
-                        <span>01/12/2025 - 03/12/2025</span>
-                    </p>
-                    <p class="flex flex-col">
-                        <span class="text-gray-600">ประเภทบริการ</span>
-                        <span>ดูแลสัตว์ที่บ้าน</span>
-                    </p>
-                    <p class="flex flex-col">
-                        <span class="text-gray-600">ราคา</span>
-                        <span>3,210 บาท</span>
-                    </p>
-                </div>
-            </div>
-            <div class="flex flex-col p-5 border border-gray-300 rounded-xl shadow-sm">
-                <div class="flex justify-between mb-3">
-                    <p class="text-[1.3rem] font-semibold">บริการดูแลสัตว์เลี้ยงตามบ้าน #003</p>
-                    <p class="px-3 py-1 bg-yellow-100 text-yellow-800 rounded-full">รอดำเนินการ</p>
-                </div>
-                <div class="grid grid-cols-4">
-                    <p class="flex flex-col">
-                        <span class="text-gray-600">พี่เลี้ยงสัตว์</span>
-                        <span>Man Sea</span>
-                    </p>
-                    <p class="flex flex-col">
-                        <span class="text-gray-600">วันที่</span>
-                        <span>01/12/2025 - 03/12/2025</span>
-                    </p>
-                    <p class="flex flex-col">
-                        <span class="text-gray-600">ประเภทบริการ</span>
-                        <span>ดูแลสัตว์ที่บ้าน</span>
-                    </p>
-                    <p class="flex flex-col">
-                        <span class="text-gray-600">ราคา</span>
-                        <span>3,210 บาท</span>
-                    </p>
-                </div>
-            </div>
+            <% if (Array.isArray(bookings) && bookings.length) { %>
+                <% bookings.forEach(function(b){ %>
+                    <% const d = b._display || {}; %>
+                    <div class="flex flex-col p-5 border border-gray-300 rounded-xl shadow-sm">
+                        <div class="flex justify-between mb-3">
+                            <p class="text-[1.1rem] font-semibold">บริการ <%= d.service_type || '-' %> #<%= b.booking_id %></p>
+                            <% const st = (d.status || '').toLowerCase(); %>
+                            <% const badge = st === 'completed' ? 'bg-green-100 text-green-800' : (st === 'cancelled' ? 'bg-red-100 text-red-800' : (st === 'confirmed' ? 'bg-blue-100 text-blue-800' : 'bg-yellow-100 text-yellow-800')); %>
+                            <p class="px-3 py-1 rounded-full <%= badge %>"><%= st || 'pending' %></p>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
+                            <p class="flex flex-col">
+                                <span class="text-gray-600">พี่เลี้ยงสัตว์</span>
+                                <span><%= d.sitter_name || '-' %></span>
+                            </p>
+                            <p class="flex flex-col">
+                                <span class="text-gray-600">วันที่</span>
+                                <span><%= d.period || '-' %></span>
+                            </p>
+                            <p class="flex flex-col">
+                                <span class="text-gray-600">ประเภทบริการ</span>
+                                <span><%= d.service_type || '-' %></span>
+                            </p>
+                            <p class="flex flex-col">
+                                <span class="text-gray-600">ราคา</span>
+                                <span><%= d.price || '-' %></span>
+                            </p>
+                        </div>
+                    </div>
+                <% }) %>
+            <% } else { %>
+                <div class="text-center text-gray-500 py-10">ยังไม่มีประวัติการจอง</div>
+            <% } %>
         </div>
     </div>
 </body>

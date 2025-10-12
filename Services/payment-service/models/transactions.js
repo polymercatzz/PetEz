@@ -6,5 +6,6 @@ module.exports = (sequelize, DataTypes) => {
     payment_method: DataTypes.STRING,
     payment_date: DataTypes.DATE,
     status: { type: DataTypes.ENUM('success','failed','refund'), defaultValue: 'success' },
+    proof_path: DataTypes.STRING,
   }, { tableName: 'transactions', timestamps: true });
 };

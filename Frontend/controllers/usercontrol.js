@@ -102,6 +102,37 @@ const userController = {
         }
 
         try {
+            const svcBase = process.env.SITTER_SERVICE_URL_BASE || 'http://sitter-service:3004';
+            const serviceIdFromQuery = req.query && req.query.service_id ? req.query.service_id : null;
+            const sitterIdFromQuery = req.query && req.query.sitter_id ? req.query.sitter_id : null;
+            let service = null;
+            let sitterUser = null;
+            // If service_id provided, fetch service and sitter contact
+            if (serviceIdFromQuery) {
+                try {
+                    const svcResp = await fetch(`${svcBase}/public/services/${serviceIdFromQuery}`);
+                    if (svcResp.ok) {
+                        const svcData = await svcResp.json();
+                        service = svcData.service || null;
+                    }
+                } catch (e) {
+                    console.warn('Failed to load service detail for create-booking:', e.message);
+                }
+            }
+            // Determine sitter id for contact lookup
+            const contactSitterId = (service && service.sitter_id) ? service.sitter_id : (sitterIdFromQuery || null);
+            if (contactSitterId) {
+                try {
+                    const usersResp = await fetch('http://auth-service:3002/api/users/all');
+                    if (usersResp.ok) {
+                        const all = await usersResp.json();
+                        const users = all.users || [];
+                        sitterUser = users.find(u => String(u.user_id) === String(contactSitterId)) || null;
+                    }
+                } catch (e) {
+                    console.warn('Failed to load sitter contact for create-booking:', e.message);
+                }
+            }
             // Fetch user's pets for the booking form
             const petsApiUrl = 'http://auth-service:3002/pets';
             const response = await axios.get(petsApiUrl, {
@@ -120,10 +151,10 @@ const userController = {
             let services = [];
             try {
                 const svcUrl = process.env.SITTER_SERVICE_URL || 'http://sitter-service:3004/public/services';
-                const svcResp = await fetch(svcUrl);
-                if (svcResp.ok) {
-                    const svcData = await svcResp.json();
-                    services = svcData.services || [];
+                const svcResp2 = await fetch(svcUrl);
+                if (svcResp2.ok) {
+                    const svcData2 = await svcResp2.json();
+                    services = svcData2.services || [];
                 }
             } catch (err) {
                 console.warn('Unable to fetch services for booking form:', err.message);
@@ -135,7 +166,8 @@ const userController = {
                 user: user,
                 pets: pets,
                 services: services,
-                service: null
+                service: service,
+                sitterUser: sitterUser
             });
         } catch (error) {
             console.error('Error fetching pets for booking:', error);
@@ -145,7 +177,8 @@ const userController = {
                 user: user,
                 pets: [],
                 services: [],
-                service: null
+                service: null,
+                sitterUser: null
             });
         }
     },
@@ -174,8 +207,56 @@ const userController = {
                 console.error('Failed to fetch bookings for history:', response.status);
             }
 
-            // Sort bookings by date (newest first) and add additional info for display
+            // Sort bookings by date (newest first)
             bookings.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+            // Enrich display fields: service_type, sitter_name, period_text, price_text, status_text
+            try {
+                const svcBase = process.env.SITTER_SERVICE_URL_BASE || 'http://sitter-service:3004';
+                // Fetch services list to map service_id -> {service_type}
+                let services = [];
+                try {
+                    const svcResp = await fetch(`${svcBase}/public/services`);
+                    if (svcResp.ok) {
+                        const svcData = await svcResp.json();
+                        services = svcData.services || [];
+                    }
+                } catch (e) { console.warn('History: services load failed:', e.message); }
+                const serviceMap = new Map();
+                services.forEach(s => serviceMap.set(String(s.service_id), s));
+
+                // Optionally fetch all users once for sitter names (reuse existing admin endpoint)
+                let users = [];
+                try {
+                    const uResp = await fetch('http://auth-service:3002/api/users/all');
+                    if (uResp.ok) {
+                        const uData = await uResp.json();
+                        users = uData.users || [];
+                    }
+                } catch (e) { console.warn('History: users load failed:', e.message); }
+                const userMap = new Map();
+                users.forEach(u => userMap.set(String(u.user_id), u));
+
+                bookings = bookings.map(b => {
+                    const svc = b.service_id ? serviceMap.get(String(b.service_id)) : null;
+                    const sitter = b.sitter_id ? userMap.get(String(b.sitter_id)) : null;
+                    const start = b.start_date ? new Date(b.start_date) : null;
+                    const end = b.end_date ? new Date(b.end_date) : null;
+                    const price = typeof b.total_price !== 'undefined' && b.total_price !== null ? Number(b.total_price) : null;
+                    return {
+                        ...b,
+                        _display: {
+                            service_type: (svc && (svc.service_type || svc.name)) || '-',
+                            sitter_name: sitter ? (sitter.full_name || sitter.username || `#${b.sitter_id}`) : (b.sitter_id ? `#${b.sitter_id}` : '-'),
+                            period: (start && end) ? `${start.toLocaleDateString('th-TH')} - ${end.toLocaleDateString('th-TH')}` : '-',
+                            price: price !== null ? `${price.toLocaleString('th-TH')} บาท` : '-',
+                            status: b.status || 'pending'
+                        }
+                    };
+                });
+            } catch (e) {
+                console.warn('History: enrichment failed:', e.message);
+            }
 
             res.render('user/history', { 
                 title: 'Booking History', 
@@ -205,9 +286,23 @@ const userController = {
             const svcBase = process.env.SITTER_SERVICE_URL_BASE || 'http://sitter-service:3004';
             const svcResp = await fetch(`${svcBase}/public/services/${serviceId}`);
             let service = null;
+            let sitterUser = null;
             if (svcResp.ok) {
                 const data = await svcResp.json();
                 service = data.service || null;
+                // Enrich sitter contact info via auth-service using sitter_id
+                try {
+                    if (service && service.sitter_id) {
+                        const usersResp = await fetch('http://auth-service:3002/api/users/all');
+                        if (usersResp.ok) {
+                            const all = await usersResp.json();
+                            const users = all.users || [];
+                            sitterUser = users.find(u => String(u.user_id) === String(service.sitter_id)) || null;
+                        }
+                    }
+                } catch (e) {
+                    console.warn('Failed to load sitter contact info:', e.message);
+                }
             }
             // Fetch user's pets
             const petsApiUrl = 'http://auth-service:3002/pets';
@@ -220,10 +315,10 @@ const userController = {
                 const pdata = await petsResp.json();
                 pets = pdata.pets || [];
             }
-            return res.render('user/booking', { title: 'จองบริการ', activeMenu: 'book', user, service, pets });
+            return res.render('user/booking', { title: 'จองบริการ', activeMenu: 'book', user, service, pets, sitterUser });
         } catch (e) {
             console.error('Error loading booking form:', e);
-            return res.render('user/booking', { title: 'จองบริการ', activeMenu: 'book', user, service: null, pets: [] });
+            return res.render('user/booking', { title: 'จองบริการ', activeMenu: 'book', user, service: null, pets: [], sitterUser: null });
         }
     },
 

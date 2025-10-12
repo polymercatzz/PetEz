@@ -17,7 +17,7 @@ function requireSitter(req, res, next) {
 
 // Pet sitter view routes
 // Land sitters on jobs dashboard by default
-router.get('/', requireSitter, (req, res) => res.redirect('/petsitter/jobs'));
+router.get('/', requireSitter, (req, res) => res.redirect('/petsitter/register'));
 router.get('/profile', requireSitter, petsitterController.getPetsitterProfile);
 router.get('/register', requireSitter, petsitterController.getPetsitterRegister);
 router.get('/jobs', requireSitter, petsitterController.getAvailableJobs);

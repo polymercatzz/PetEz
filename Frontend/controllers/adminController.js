@@ -96,6 +96,12 @@ const adminController = {
         }, {});
         const serviceCounts = serviceTypes.map(k => ({ key: k, label: labelMap[k], count: serviceCountMap[k] || 0 }));
 
+        // Sum of monthly series from transactions for the top-right total (per request)
+        const revenueMonthlySafe = revenueSummary.monthly || { labels: [], series: [] };
+        const revenueTotalFromSeries = Array.isArray(revenueMonthlySafe.series)
+            ? revenueMonthlySafe.series.reduce((a, b) => a + Number(b || 0), 0)
+            : 0;
+
         res.render('admin/admin_home', { 
             title: 'Admin Dashboard', 
             users, 
@@ -104,8 +110,8 @@ const adminController = {
                 bookingsCountMonth,
                 revenueMonth,
                 serviceCounts,
-                revenueTotal: Number(revenueSummary.totalRevenue || 0),
-                revenueMonthly: revenueSummary.monthly || { labels: [], series: [] }
+                revenueTotal: Number(revenueTotalFromSeries || 0),
+                revenueMonthly: revenueMonthlySafe
             }
         });
     },

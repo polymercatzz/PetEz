@@ -92,7 +92,7 @@ app.post('/login', async (req, res) => {
             return res.redirect('/admin');
         }
         if (data.user && data.user.role === 'sitter') {
-            return res.redirect('/petsitter/history');
+            return res.redirect('/petsitter/register');
         }
         return res.redirect('/user/');
     } catch (error) {

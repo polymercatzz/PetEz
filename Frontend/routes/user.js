@@ -77,4 +77,43 @@ router.post('/api/sitter/upload-id', requireAuth, upload.single('id_card'), asyn
     return res.status(200).json({ message: 'Uploaded', path: relPath });
 });
 
+// Payment proof upload
+const payUploadDir = path.join(__dirname, '..', 'public', 'uploads', 'payments');
+if (!fs.existsSync(payUploadDir)) {
+    fs.mkdirSync(payUploadDir, { recursive: true });
+}
+const payStorage = multer.diskStorage({
+    destination: function (req, file, cb) { cb(null, payUploadDir); },
+    filename: function (req, file, cb) {
+        const ext = path.extname(file.originalname);
+        const base = path.basename(file.originalname, ext).replace(/[^a-zA-Z0-9_-]/g, '');
+        cb(null, `${Date.now()}_${base}${ext}`);
+    }
+});
+const uploadPay = multer({ storage: payStorage });
+
+router.post('/api/payments/upload-proof', requireAuth, uploadPay.single('proof'), async (req, res) => {
+    if (!req.file) return res.status(400).json({ message: 'No file uploaded' });
+    const relPath = `/uploads/payments/${req.file.filename}`;
+    return res.status(200).json({ message: 'Uploaded', path: relPath });
+});
+
+// Proxy to payment-service to create transaction
+router.post('/api/transactions', requireAuth, async (req, res) => {
+    try {
+        const paymentUrl = 'http://payment-service:3007/transactions';
+        console.log('Creating transaction via payment-service:', paymentUrl);
+        const resp = await fetch(paymentUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${req.session.token}` },
+            body: JSON.stringify(req.body)
+        });
+        const data = await resp.json().catch(() => ({}));
+        return res.status(resp.status).json(data);
+    } catch (e) {
+        console.error('Create transaction failed:', e);
+        return res.status(500).json({ message: 'Internal server error' });
+    }
+});
+
 module.exports = router;

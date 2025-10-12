@@ -48,6 +48,28 @@ app.get('/metrics', async (req, res) => {
     }
 });
 
+// Create a transaction (user)
+app.post('/transactions', authenticateToken, async (req, res) => {
+  try {
+    const { booking_id, amount, payment_method, proof_path } = req.body || {};
+    if (!booking_id || !amount) {
+      return res.status(400).json({ message: 'booking_id and amount are required' });
+    }
+    const tx = await Transaction.create({
+      booking_id,
+      amount,
+      payment_method: payment_method || 'qr',
+      payment_date: new Date(),
+      status: 'success',
+      proof_path: proof_path || null,
+    });
+    return res.status(201).json({ message: 'Transaction recorded', transaction: tx });
+  } catch (err) {
+    console.error('Create transaction error:', err);
+    return res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
 // Admin: get revenue summary (total and by month for last 12 months)
 app.get('/admin/revenue/summary', authenticateToken, requireAdmin, async (req, res) => {
   try {

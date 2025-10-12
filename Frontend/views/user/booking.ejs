@@ -73,26 +73,26 @@
                 <img src="../static/bg1.jpg" class="w-[90%] h-[400px] object-cover rounded-xl">
                 <div class="flex justify-start items-center gap-3 pt-3 text-gray-600">
                     <i class="fa-solid fa-location-dot fa-lg"></i>
-                    <p class="text-[1.3rem] font-medium">กรุงเทพมหานคร ลาดกระบัง</p>
+                    <p class="text-[1.3rem] font-medium"><%= (typeof sitterUser !== 'undefined' && sitterUser) ? ((sitterUser.province || '-') + (sitterUser.district ? ' ' + sitterUser.district : '')) : '-' %></p>
                 </div>
                 <div class="w-[90%] h-[1px] bg-gray-300  my-3"></div>
                 <div class="flex flex-col justify-start items-start gap-5">
                     <h1 class="text-[1.7rem] font-medium">ข้อมูลติดต่อ</h1>
                     <div class="flex justify-start items-center gap-2 ml-5">
                         <i class="fa-solid fa-building fa-xl"></i>
-                        <p>—</p>
+                        <p><%= (typeof sitterUser !== 'undefined' && sitterUser && sitterUser.full_name) ? sitterUser.full_name : '-' %></p>
                     </div>
                     <div class="flex justify-start items-center gap-2 ml-5">
                         <i class="fa-solid fa-phone fa-xl"></i>
-                        <p>—</p>
+                        <p><%= (typeof sitterUser !== 'undefined' && sitterUser && sitterUser.phone) ? sitterUser.phone : '-' %></p>
                     </div>
                     <div class="flex justify-start items-center gap-2 ml-5">
                         <img src="../static/line.png" class="w-6 h-6">
-                        <p>—</p>
+                        <p>-</p>
                     </div>
                     <div class="flex justify-start items-center gap-2 ml-5">
                         <i class="fa-solid fa-envelope fa-xl"></i>
-                        <p>—</p>
+                        <p><%= (typeof sitterUser !== 'undefined' && sitterUser && sitterUser.email) ? sitterUser.email : '-' %></p>
                     </div>
                     <div class="flex justify-start items-center gap-2 ml-5">
                         <i class="fa-solid fa-clock fa-xl"></i>
@@ -155,28 +155,28 @@
         <div class="px-10 flex flex-col bg-gray-100 border border-gray-200 rounded-xl shadow-sm my-10 w-full gap-3">
             <h1 class="flex items-center justify-center text-[1.7rem] text-[#3b5bdb] font-bold mt-5">สรุปรายการเช่าซื้อ</h1>
             <div class="flex justify-between">
-                <p>ราคาต่อวัน:</p>
-                <p>1,500 บาท</p>
+                <p>ราคาต่อชั่วโมง:</p>
+                <p id="rateText"><%= svc && svc.price_per_hour ? svc.price_per_hour : 50 %> บาท</p>
             </div>
             <hr class="h-[1px] bg-gray-300 border-0" />
             <div class="flex justify-between">
-                <p>จำนวนวัน:</p>
-                <p>2 วัน</p>
+                <p>จำนวนชั่วโมง (ประมาณ):</p>
+                <p id="hoursText">0 ชั่วโมง</p>
             </div>
             <hr class="h-[1px] bg-gray-300 border-0" />
             <div class="flex justify-between">
                 <p>จำนวนสัตว์:</p>
-                <p>3 ตัว</p>
+                <p id="petsText">0 ตัว</p>
             </div>
             <hr class="h-[1px] bg-gray-300 border-0" />
             <div class="flex justify-between">
                 <p>Vat 7%:</p>
-                <p>210 บาท</p>
+                <p id="vatText">0 บาท</p>
             </div>
             <hr class="h-[1px] bg-gray-300 border-0" />
             <div class="flex justify-between mb-5 text-[1.3rem] font-semibold">
                 <p>รวมทั้งหมด:</p>
-                <p>3,210 บาท</p>
+                <p id="totalText">0 บาท</p>
             </div>
         </div>
         <div class="flex flex-col justify-center items-center gap-3 border border-gray-200 rounded-xl shadow-sm my-10 py-5">
@@ -189,7 +189,7 @@
             <p class="text-gray-600 text-[1.1rem]">ใช้แอปพลิเคชันธนาคารบนมือถือสแกน QR Code เพื่อชำระเงิน</p>
             <div class="flex justify-center items-center gap-2">
                 <p class="text-[1.2rem]">ส่งหลักฐานการชำระเงิน:</p>
-                <input type="file" id="File" class="hidden">
+                <input type="file" id="File" accept="image/*" class="hidden">
                 <label for="File" class="flex justify-center items-center gap-2 px-7 py-2 rounded-xl shadow-sm text-white text-[1.2rem] bg-blue-600 cursor-pointer transition duration-200 ease-in-out hover:bg-blue-800">
                     <i class="fa-solid fa-file"></i>
                     ส่งหลักฐานที่นี่
@@ -251,8 +251,8 @@
                 });
             }
 
-            function addPet(petName) {
-                const option = Array.from(petSelect.options).find(opt => opt.value === petName);
+            function addPet(petId) {
+                const option = Array.from(petSelect.options).find(opt => opt.value === petId);
                 if (option) {
                     const text = option.textContent;
                     const match = text.match(/(.+)\s+\((.+)\)/);
@@ -260,8 +260,7 @@
                     if (match) {
                         const name = match[1];
                         const type = match[2];
-                        
-                        selectedPets.push({ name, type });
+                        selectedPets.push({ id: petId, name, type });
                         renderSelectedPets();
                         updatePetSelect();
                     }
@@ -277,8 +276,8 @@
             function updatePetSelect() {
                 Array.from(petSelect.options).forEach((option, index) => {
                     if (index > 0) {
-                        const petName = option.value;
-                        option.disabled = selectedPets.some(pet => pet.name === petName);
+                        const pid = option.value;
+                        option.disabled = selectedPets.some(pet => String(pet.id) === String(pid));
                     }
                 });
                 
@@ -293,9 +292,36 @@
             
             renderSelectedPets();
 
+            function recalc() {
+                const d1 = document.getElementById('startDate').value;
+                const d2 = document.getElementById('endDate').value;
+                const t1 = document.getElementById('startTime').value || '00:00';
+                if (!d1 || !d2) return;
+                const rate = (serviceData && serviceData.price_per_hour) ? parseFloat(serviceData.price_per_hour) : 50;
+                const start = new Date(`${d1}T${t1}:00`);
+                const end = new Date(`${d2}T${t1}:00`);
+                const hours = Math.max(0, Math.ceil((end - start) / (1000*60*60)));
+                const petsCount = Math.max(1, selectedPets.length || 0);
+                const base = hours * rate; // could multiply by petsCount if pricing per pet
+                const vat = Math.round(base * 0.07);
+                const total = base + vat;
+                document.getElementById('hoursText').textContent = hours + ' ชั่วโมง';
+                document.getElementById('petsText').textContent = petsCount + ' ตัว';
+                document.getElementById('vatText').textContent = vat.toLocaleString('th-TH') + ' บาท';
+                document.getElementById('totalText').textContent = total.toLocaleString('th-TH') + ' บาท';
+            }
+
+            ['startDate','endDate','startTime'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.addEventListener('change', recalc);
+            });
+            petSelect.addEventListener('change', recalc);
+            recalc();
+
             document.getElementById('bookSubmit').addEventListener('click', async () => {
-                const petId = petSelect.value ? parseInt(petSelect.value) : null;
-                if (!petId) { alert('กรุณาเลือกสัตว์เลี้ยง'); return; }
+                const chosen = selectedPets.length ? selectedPets[0] : null;
+                const petId = chosen ? parseInt(chosen.id) : (petSelect.value ? parseInt(petSelect.value) : null);
+                if (!petId) { alert('กรุณาเพิ่มสัตว์เลี้ยงอย่างน้อย 1 ตัว'); return; }
                 const d1 = document.getElementById('startDate').value;
                 const d2 = document.getElementById('endDate').value;
                 const t1 = document.getElementById('startTime').value || '00:00';
@@ -315,6 +341,29 @@
                         body: JSON.stringify(payload)
                     });
                     if (resp.ok) {
+                        const data = await resp.json();
+                        const booking = data.booking;
+                        // Optional: upload proof and record transaction
+                        let proofPath = null;
+                        if (File.files && File.files.length > 0) {
+                            const form = new FormData();
+                            form.append('proof', File.files[0]);
+                            const up = await fetch('/user/api/payments/upload-proof', { method: 'POST', body: form });
+                            if (up.ok) {
+                                const upData = await up.json();
+                                proofPath = upData.path;
+                            }
+                        }
+                        const rate = (serviceData && serviceData.price_per_hour) ? parseFloat(serviceData.price_per_hour) : 50;
+                        const hours = Math.max(0, Math.ceil((end_date - start_date) / (1000*60*60)));
+                        const base = hours * rate;
+                        const vat = Math.round(base * 0.07);
+                        const total = base + vat;
+                        await fetch('/user/api/transactions', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ booking_id: booking.booking_id, amount: total, payment_method: 'qr', proof_path: proofPath })
+                        });
                         alert('จองสำเร็จ');
                         window.location.href = '/user/history';
                     } else {
