@@ -1,2 +1,4 @@
 # PetEz
-1
+--Admin User--
+Admin email:panavat@gmail.com
+password: 
